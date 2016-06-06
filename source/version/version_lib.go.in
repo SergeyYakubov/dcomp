@@ -1,0 +1,10 @@
+package dcompversion
+
+// Default build-time variable for library-import.
+// This file is overridden on build with build-time informations.
+const (
+	GitCommit string = "@VERSION_SHA1@"
+	Version   string = "@VERSION@"
+	ShortVersion   string = "@VERSION_SHORT@"
+	BuildTime string = "@TIMESTAMP@"
+)

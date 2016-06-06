@@ -1,4 +1,7 @@
 .project
 dcomp
-coverage.html
+CMakeCache.txt
+cmake_install.cmake
+CMakeFiles
+source/version/version_lib.go
 
