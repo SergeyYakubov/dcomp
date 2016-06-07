@@ -1,14 +1,16 @@
 package main
 
 import (
+	"../cli"
+	"../daemon"
 	dcompversion "../version"
+	"flag"
 	"fmt"
-	flag "github.com/docker/docker/pkg/mflag"
 )
 
 var (
-	flHelp    = flag.Bool([]string{"h", "-help"}, false, "Print usage")
-	flVersion = flag.Bool([]string{"v", "-version"}, false, "Print version information and quit")
+	flHelp    = flag.Bool("help", false, "Print usage")
+	flVersion = flag.Bool("version", false, "Print version information")
 )
 
 func main() {
@@ -20,16 +22,19 @@ func main() {
 		return
 	}
 
-	if *flHelp {
+	if *flHelp || flag.NArg() == 0 {
 		flag.Usage()
 		return
 	}
-}
 
-func Dummy() int {
-	return 2
+	if flag.Arg(0) == "daemon" {
+		daemon.StartDaemon(flag.Args()[1:])
+	} else {
+		cli.Command(flag.Arg(0), flag.Args()[1:])
+	}
+
 }
 
 func showVersion() {
-	fmt.Printf("dComp version %s, build at %s\n", dcompversion.Version, dcompversion.BuildTime)
+	fmt.Printf("dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
 }
