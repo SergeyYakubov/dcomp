@@ -6,6 +6,7 @@ import (
 	dcompversion "../version"
 	"flag"
 	"fmt"
+	"os"
 )
 
 var (
@@ -24,17 +25,21 @@ func main() {
 
 	if *flHelp || flag.NArg() == 0 {
 		flag.Usage()
+		fmt.Fprintln(os.Stdout, "\nCommands:")
+		cli.PrintAllCliCommands()
 		return
 	}
 
 	if flag.Arg(0) == "daemon" {
 		daemon.StartDaemon(flag.Args()[1:])
 	} else {
-		cli.Command(flag.Arg(0), flag.Args()[1:])
+		if err := cli.Command(flag.Arg(0), flag.Args()[1:]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
-
 }
 
 func showVersion() {
-	fmt.Printf("dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
+	fmt.Fprintf(os.Stdout, "dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
 }
