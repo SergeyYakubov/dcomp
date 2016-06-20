@@ -9,15 +9,16 @@ import (
 	"strings"
 )
 
-type Cli struct {
-	//Usage func()
+type Cmd struct {
+	name string
+	args []string
 }
 
 var flHelp bool
 
-func ShowDescription(args []string, name, description string) bool {
-	if len(args) == 1 && args[0] == "description" {
-		fmt.Fprintf(os.Stdout, "   %.20s \t\t%s\n", name, description)
+func (cmd *Cmd) ShowDescription(description string) bool {
+	if len(cmd.args) == 1 && cmd.args[0] == "description" {
+		fmt.Fprintf(os.Stdout, "   %.20s \t\t%s\n", cmd.name, description)
 		return true
 	}
 	return false
@@ -32,39 +33,47 @@ func ShowHelp(flags *flag.FlagSet) bool {
 	}
 }
 
+func (cmd *Cmd) BadCommandOptions(err string) error {
+	return errors.New("dcomp " + cmd.name + ": " + err + "\nType 'dcomp " + cmd.name + " --help'")
+}
+
 func Command(name string, args []string) error {
 	commandName := "Command" + strings.ToUpper(name[:1]) + strings.ToLower(name[1:])
-	dcompcli := new(Cli)
+	cmd := new(Cmd)
 
-	methodVal := reflect.ValueOf(dcompcli).MethodByName(commandName)
+	methodVal := reflect.ValueOf(cmd).MethodByName(commandName)
 	if !methodVal.IsValid() {
-		return errors.New("Wrong dcomp option: " + name)
+		return errors.New("Wrong dcomp command: " + name + "\nType 'dcomp --help'")
 	}
+	cmd.name = name
+	cmd.args = args
 
-	method := methodVal.Interface().(func([]string) error)
+	method := methodVal.Interface().(func() error)
 
-	return method(args)
+	return method()
 }
 
 func PrintAllCliCommands() {
-	dcompcli := new(Cli)
-	CliType := reflect.TypeOf(dcompcli)
-	for i := 0; i < CliType.NumMethod(); i++ {
-		methodVal := CliType.Method(i)
-		method := methodVal.Func.Interface().(func(*Cli, []string) error)
-		method(dcompcli, []string{"description"})
+	cmd := new(Cmd)
+	CmdType := reflect.TypeOf(cmd)
+	for i := 0; i < CmdType.NumMethod(); i++ {
+		methodVal := CmdType.Method(i)
+		method := methodVal.Func.Interface().(func(*Cmd) error)
+		cmd.name = strings.ToLower(methodVal.Name)[7:]
+		cmd.args = []string{"description"}
+		method(cmd)
 	}
 }
 
 // Subcmd is a subcommand of the main "dcomp" command.
 // To see all available subcommands, run "dcomp --help"
 
-func Subcmd(name string, description string) *flag.FlagSet {
+func (cmd *Cmd) Subcmd(description, args string) *flag.FlagSet {
 
-	flags := flag.NewFlagSet(name, flag.ExitOnError)
+	flags := flag.NewFlagSet(cmd.name, flag.ExitOnError)
 	flags.BoolVar(&flHelp, "help", false, "Print usage")
 	flags.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage:\t\ndcomp %s [OPTIONS]", name)
+		fmt.Fprintf(os.Stdout, "Usage:\t\ndcomp %s [OPTIONS] "+args, cmd.name)
 		fmt.Fprintf(os.Stdout, "\n\n%s\n", description)
 		flags.PrintDefaults()
 	}

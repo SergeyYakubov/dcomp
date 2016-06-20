@@ -1,34 +1,55 @@
 package cli
 
 import (
-//	"errors"
-//	"fmt"
+	"flag"
+	"fmt"
+	"os"
 )
 
-func (cli *Cli) CommandSubmit(args []string) error {
+type submitFlags struct {
+	ImageName string
+	Script    string
+	Mode      string
+}
+
+func createSubmitFlags(flagset *flag.FlagSet, flags *submitFlags) {
+	flagset.StringVar(&flags.Mode, "mode", "", "Docker image")
+}
+
+func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *submitFlags) error {
+
+	flagset.Parse(cmd.args)
+
+	if ShowHelp(flagset) {
+		os.Exit(0)
+	}
+
+	if flagset.NArg() < 1 {
+		return cmd.BadCommandOptions("image name not defined")
+	}
+
+	flags.ImageName = flagset.Args()[0]
+
+	fmt.Println(flags.ImageName)
+
+	return nil
+}
+
+func (cmd *Cmd) CommandSubmit() error {
 
 	description := "Submit job for distributed computing"
-	name := "submit"
 
-	if ShowDescription(args, name, description) {
+	if cmd.ShowDescription(description) {
 		return nil
 	}
 
-	flags := Subcmd(name, description)
+	var flags submitFlags
+	flagset := cmd.Subcmd(description, "IMAGE [COMMAND] [ARG...]")
 
-	var (
-		flName = flags.String("image", "", "Docker image")
-	)
+	createSubmitFlags(flagset, &flags)
 
-	flags.Parse(args)
-
-	if ShowHelp(flags) {
-		return nil
-	}
-
-	if *flName == "" {
-		flags.Usage()
-		return nil
+	if err := cmd.parseSubmitFlags(flagset, &flags); err != nil {
+		return err
 	}
 
 	return nil
