@@ -1,22 +1,17 @@
 package cli
 
 import (
+	"../common_structs"
 	"flag"
-	"fmt"
 	"os"
 )
 
-type submitFlags struct {
-	ImageName string
-	Script    string
-	Mode      string
+func createSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.JobDescription) {
+	flagset.StringVar(&flags.Script, "script", "", "Job script")
+	flagset.IntVar(&flags.NCPUs, "ncpus", 1, "Number of CPUs")
 }
 
-func createSubmitFlags(flagset *flag.FlagSet, flags *submitFlags) {
-	flagset.StringVar(&flags.Mode, "mode", "", "Docker image")
-}
-
-func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *submitFlags) error {
+func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.JobDescription) error {
 
 	flagset.Parse(cmd.args)
 
@@ -30,9 +25,7 @@ func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *submitFlags) erro
 
 	flags.ImageName = flagset.Args()[0]
 
-	fmt.Println(flags.ImageName)
-
-	return nil
+	return flags.Check()
 }
 
 func (cmd *Cmd) CommandSubmit() error {
@@ -43,7 +36,7 @@ func (cmd *Cmd) CommandSubmit() error {
 		return nil
 	}
 
-	var flags submitFlags
+	var flags commonStructs.JobDescription
 	flagset := cmd.Subcmd(description, "IMAGE [COMMAND] [ARG...]")
 
 	createSubmitFlags(flagset, &flags)
