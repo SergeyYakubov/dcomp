@@ -24,10 +24,9 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	var t commonStructs.JobDescription
-	err := decoder.Decode(&t)
-	if err != nil {
-		fmt.Fprintf(w, "%q\n", err)
-		fmt.Fprintf(w, "%v\n", r)
-
+	if decoder.Decode(&t) == nil && t.Check() == nil {
+		fmt.Fprintf(w, "Job submitted\n")
+	} else {
+		http.Error(w, "Bad request", http.StatusBadRequest)
 	}
 }

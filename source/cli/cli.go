@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"reflect"
 	"strings"
@@ -16,9 +17,11 @@ type Cmd struct {
 
 var flHelp bool
 
+var OutBuf io.Writer = os.Stdout
+
 func (cmd *Cmd) ShowDescription(description string) bool {
 	if len(cmd.args) == 1 && cmd.args[0] == "description" {
-		fmt.Fprintf(os.Stdout, "   %.20s \t\t%s\n", cmd.name, description)
+		fmt.Fprintf(OutBuf, "   %.20s \t\t%s\n", cmd.name, description)
 		return true
 	}
 	return false
@@ -73,8 +76,8 @@ func (cmd *Cmd) Subcmd(description, args string) *flag.FlagSet {
 	flags := flag.NewFlagSet(cmd.name, flag.ExitOnError)
 	flags.BoolVar(&flHelp, "help", false, "Print usage")
 	flags.Usage = func() {
-		fmt.Fprintf(os.Stdout, "Usage:\t\ndcomp %s [OPTIONS] "+args, cmd.name)
-		fmt.Fprintf(os.Stdout, "\n\n%s\n", description)
+		fmt.Fprintf(OutBuf, "Usage:\t\ndcomp %s [OPTIONS] "+args, cmd.name)
+		fmt.Fprintf(OutBuf, "\n\n%s\n", description)
 		flags.PrintDefaults()
 	}
 

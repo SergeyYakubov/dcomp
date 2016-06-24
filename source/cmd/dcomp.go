@@ -25,7 +25,7 @@ func main() {
 
 	if *flHelp || flag.NArg() == 0 {
 		flag.Usage()
-		fmt.Fprintln(os.Stdout, "\nCommands:")
+		fmt.Fprintln(cli.OutBuf, "\nCommands:")
 		cli.PrintAllCliCommands()
 		return
 	}
@@ -33,6 +33,10 @@ func main() {
 	if flag.Arg(0) == "daemon" {
 		daemon.StartDaemon(flag.Args()[1:])
 	} else {
+		if err := cli.SetServerConfiguration(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := cli.Command(flag.Arg(0), flag.Args()[1:]); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -41,5 +45,5 @@ func main() {
 }
 
 func showVersion() {
-	fmt.Fprintf(os.Stdout, "dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
+	fmt.Fprintf(cli.OutBuf, "dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
 }

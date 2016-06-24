@@ -11,7 +11,7 @@ type JobDescription struct {
 }
 
 func (desc *JobDescription) Check() error {
-	if desc.NCPUs < 0 {
+	if desc.NCPUs <= 0 {
 		return errors.New("Number of cpus should be > 0")
 	}
 

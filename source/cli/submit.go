@@ -45,5 +45,5 @@ func (cmd *Cmd) CommandSubmit() error {
 		return err
 	}
 
-	return nil
+	return Server.PostCommand("jobs", &flags)
 }
