@@ -26,7 +26,7 @@ func main() {
 	if *flHelp || flag.NArg() == 0 {
 		flag.Usage()
 		fmt.Fprintln(cli.OutBuf, "\nCommands:")
-		cli.PrintAllCliCommands()
+		cli.PrintAllCommands()
 		return
 	}
 

@@ -1,9 +1,13 @@
 package cli
 
-import ()
+import (
+	"../server"
+)
+
+var Server server.Srv
 
 func SetServerConfiguration() error {
-	Server.host = "localhost"
-	Server.port = 8000
+	Server.Host = "localhost"
+	Server.Port = 8000
 	return nil
 }

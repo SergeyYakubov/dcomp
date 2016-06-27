@@ -3,6 +3,7 @@ package cli
 import (
 	"../common_structs"
 	"flag"
+	"fmt"
 	"os"
 )
 
@@ -45,5 +46,7 @@ func (cmd *Cmd) CommandSubmit() error {
 		return err
 	}
 
-	return Server.PostCommand("jobs", &flags)
+	str, err := Server.PostCommand("jobs", &flags)
+	fmt.Fprint(OutBuf, str)
+	return err
 }

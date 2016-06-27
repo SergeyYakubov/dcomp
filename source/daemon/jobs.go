@@ -27,6 +27,6 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 	if decoder.Decode(&t) == nil && t.Check() == nil {
 		fmt.Fprintf(w, "Job submitted\n")
 	} else {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		http.Error(w, "bad request", http.StatusBadRequest)
 	}
 }

@@ -16,7 +16,7 @@ type Route struct {
 
 func NewRouter() *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range routes {
+	for _, route := range ListRoutes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
@@ -26,7 +26,7 @@ func NewRouter() *mux.Router {
 	return router
 }
 
-var routes = Routes{
+var ListRoutes = Routes{
 	Route{
 		"GetAllJobs",
 		"GET",

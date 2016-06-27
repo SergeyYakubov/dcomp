@@ -12,15 +12,15 @@ type JobDescription struct {
 
 func (desc *JobDescription) Check() error {
 	if desc.NCPUs <= 0 {
-		return errors.New("Number of cpus should be > 0")
+		return errors.New("number of cpus should be > 0")
 	}
 
 	if desc.ImageName == "" {
-		return errors.New("Image name should be set")
+		return errors.New("image name should be set")
 	}
 
 	if desc.Script == "" {
-		return errors.New("Job script should be set")
+		return errors.New("job script should be set")
 	}
 	return nil
 }

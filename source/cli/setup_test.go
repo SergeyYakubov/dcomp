@@ -7,6 +7,6 @@ import (
 
 func TestSetServerConfiguration(t *testing.T) {
 	SetServerConfiguration()
-	assert.Equal(t, "localhost", Server.host, "")
-	assert.Equal(t, 8000, Server.port, "")
+	assert.Equal(t, "localhost", Server.Host, "")
+	assert.Equal(t, 8000, Server.Port, "")
 }

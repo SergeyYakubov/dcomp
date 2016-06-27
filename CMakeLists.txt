@@ -12,7 +12,7 @@ add_custom_target(make_version ALL
   VERBATIM)
 
 add_custom_target(dcomp ALL
-				  COMMAND go build -o dcomp ./source/cmd
+				  COMMAND go build -o dcomp ./source/main
 				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
 				  VERBATIM)
 					
