@@ -4,4 +4,6 @@ CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
 source/version/version_lib.go
+coverage.html
+dcompdbd
 

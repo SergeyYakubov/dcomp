@@ -6,22 +6,20 @@ import (
 	"os"
 	"stash.desy.de/scm/dc/cli"
 	"stash.desy.de/scm/dc/daemon"
-	dcompversion "stash.desy.de/scm/dc/version"
+	"stash.desy.de/scm/dc/version"
 )
 
 var (
-	flHelp    = flag.Bool("help", false, "Print usage")
-	flVersion = flag.Bool("version", false, "Print version information")
+	flHelp = flag.Bool("help", false, "Print usage")
 )
 
 func main() {
 
-	flag.Parse()
-
-	if *flVersion {
-		showVersion()
+	if ret := version.ShowVersion(cli.OutBuf, "dComp"); ret {
 		return
 	}
+
+	flag.Parse()
 
 	if *flHelp || flag.NArg() == 0 {
 		flag.Usage()
@@ -42,8 +40,4 @@ func main() {
 			os.Exit(1)
 		}
 	}
-}
-
-func showVersion() {
-	fmt.Fprintf(cli.OutBuf, "dComp version %s, build time %s\n", dcompversion.Version, dcompversion.BuildTime)
 }
