@@ -1,9 +1,9 @@
 package cli
 
 import (
-	"../server"
 	"bytes"
 	"github.com/stretchr/testify/assert"
+	"stash.desy.de/scm/dc/server"
 	"testing"
 )
 

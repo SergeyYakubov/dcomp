@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"../server"
+	"stash.desy.de/scm/dc/server"
 )
 
 var Server server.Srv

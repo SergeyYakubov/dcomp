@@ -1,12 +1,12 @@
 package main
 
 import (
-	"../cli"
-	"../daemon"
-	dcompversion "../version"
 	"flag"
 	"fmt"
 	"os"
+	"stash.desy.de/scm/dc/cli"
+	"stash.desy.de/scm/dc/daemon"
+	dcompversion "stash.desy.de/scm/dc/version"
 )
 
 var (

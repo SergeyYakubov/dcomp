@@ -1,10 +1,10 @@
 package cli
 
 import (
-	"../common_structs"
 	"flag"
 	"fmt"
 	"os"
+	"stash.desy.de/scm/dc/common_structs"
 )
 
 func createSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.JobDescription) {

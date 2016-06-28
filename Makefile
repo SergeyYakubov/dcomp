@@ -115,6 +115,19 @@ dcomp/fast:
 .PHONY : dcomp/fast
 
 #=============================================================================
+# Target rules for targets named dcompdbd
+
+# Build rule for target.
+dcompdbd: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 dcompdbd
+.PHONY : dcompdbd
+
+# fast build rule for target.
+dcompdbd/fast:
+	$(MAKE) -f CMakeFiles/dcompdbd.dir/build.make CMakeFiles/dcompdbd.dir/build
+.PHONY : dcompdbd/fast
+
+#=============================================================================
 # Target rules for targets named make_version
 
 # Build rule for target.
@@ -134,6 +147,7 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... dcomp"
+	@echo "... dcompdbd"
 	@echo "... edit_cache"
 	@echo "... make_version"
 	@echo "... rebuild_cache"

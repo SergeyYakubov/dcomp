@@ -1,11 +1,11 @@
 package server
 
 import (
-	"../daemon"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
+	"stash.desy.de/scm/dc/daemon"
 )
 
 func MockFunc(w http.ResponseWriter, r *http.Request) {

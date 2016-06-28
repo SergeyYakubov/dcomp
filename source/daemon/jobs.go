@@ -1,11 +1,11 @@
 package daemon
 
 import (
-	"../common_structs"
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"stash.desy.de/scm/dc/common_structs"
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
