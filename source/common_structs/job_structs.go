@@ -24,3 +24,9 @@ func (desc *JobDescription) Check() error {
 	}
 	return nil
 }
+
+type JobInfo struct {
+	JobDescription
+	Id     int
+	Status int
+}

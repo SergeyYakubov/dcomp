@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
@@ -46,7 +47,14 @@ func (cmd *Cmd) CommandSubmit() error {
 		return err
 	}
 
-	str, err := Server.PostCommand("jobs", &flags)
-	fmt.Fprint(OutBuf, str)
+	b, err := Server.PostCommand("jobs", &flags)
+
+	decoder := json.NewDecoder(b)
+	var t commonStructs.JobInfo
+	if err := decoder.Decode(&t); err != nil {
+		return err
+	}
+
+	fmt.Fprintf(OutBuf, "%d\n", t.Id)
 	return err
 }

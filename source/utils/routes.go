@@ -1,4 +1,4 @@
-package daemon
+package utils
 
 import (
 	"github.com/gorilla/mux"
@@ -14,9 +14,9 @@ type Route struct {
 	HandlerFunc http.HandlerFunc
 }
 
-func NewRouter() *mux.Router {
+func NewRouter(listRoutes Routes) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range ListRoutes {
+	for _, route := range listRoutes {
 		router.
 			Methods(route.Method).
 			Path(route.Pattern).
@@ -24,25 +24,4 @@ func NewRouter() *mux.Router {
 			Handler(route.HandlerFunc)
 	}
 	return router
-}
-
-var ListRoutes = Routes{
-	Route{
-		"GetAllJobs",
-		"GET",
-		"/jobs/",
-		GetAllJobs,
-	},
-	Route{
-		"GetJob",
-		"GET",
-		"/jobs/{jobID}",
-		GetJob,
-	},
-	Route{
-		"SubmitJob",
-		"POST",
-		"/jobs/",
-		SubmitJob,
-	},
 }

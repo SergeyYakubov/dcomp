@@ -32,17 +32,17 @@ func (srv *Srv) Url(s string) string {
 	return fmt.Sprintf("http://%s:%d/%s/", srv.Host, srv.Port, s)
 }
 
-func (srv *Srv) PostCommand(path string, data interface{}) (string, error) {
-	b := new(bytes.Buffer)
+func (srv *Srv) PostCommand(path string, data interface{}) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(data); err != nil {
-		return "", err
+		return nil, err
 	}
 	res, err := http.Post(srv.Url(path), "application/json; charset=utf-8", b)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	io.Copy(b, res.Body)
-	return b.String(), nil
+	return b, nil
 }

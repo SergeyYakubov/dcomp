@@ -1,3 +1,5 @@
 {
-	"imagename":"test"
+	"imagename":"test",
+		"script":"aaa",
+		"ncpus":1
 }

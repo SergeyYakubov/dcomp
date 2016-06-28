@@ -25,22 +25,29 @@ func TestUrl(t *testing.T) {
 
 func TestPostcommand(t *testing.T) {
 
-	var server Srv
+	var srv Srv
 
-	server.Port = -4
-	str, err := server.PostCommand("jobs", nil)
+	srv.Port = -4
+	b, err := srv.PostCommand("", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
 
-	ts := CreateMockServer(&server, "daemon")
+	ts := CreateMockServer(&srv)
 	defer ts.Close()
 
-	str, err = server.PostCommand("jobs", ts)
+	b, err = srv.PostCommand("", ts)
 	assert.NotNil(t, err, "Should be error in json encoder")
 
 	// nil is actually a bad option but since we use mock server we cannot check it
-	str, err = server.PostCommand("jobs", nil)
-	assert.Equal(t, "OK\n", str, "")
+	b, err = srv.PostCommand("", nil)
+	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":1,\"Status\":1}\n",
+		b.String(), "")
 
-	str, err = server.PostCommand("job", nil)
-	assert.Equal(t, "404 page not found\n", str, "")
+	srv.Port = 10000
+	b, err = srv.PostCommand("", nil)
+	assert.Contains(t, err.Error(), "connection refused", "")
+
+	srv.Host = "aaa"
+	b, err = srv.PostCommand("", nil)
+	assert.Contains(t, err.Error(), "no such host", "")
+
 }

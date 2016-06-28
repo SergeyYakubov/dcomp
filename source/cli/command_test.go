@@ -12,7 +12,7 @@ var CommandTests = []struct {
 	answer string
 }{
 	{Cmd{"submit", []string{"description"}}, "   submit \t\tSubmit job for distributed computing\n"},
-	{Cmd{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "OK\n"},
+	{Cmd{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "1\n"},
 }
 
 var CommandFailingTests = []struct {
@@ -24,7 +24,7 @@ var CommandFailingTests = []struct {
 
 func TestCommand(t *testing.T) {
 	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server, "daemon")
+	ts := server.CreateMockServer(&Server)
 	defer ts.Close()
 
 	for _, test := range CommandFailingTests {

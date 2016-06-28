@@ -4,36 +4,38 @@ package server
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
-	"stash.desy.de/scm/dc/daemon"
+	"stash.desy.de/scm/dc/utils"
 )
 
 func MockFunc(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "OK")
+	fmt.Fprintln(w, `{"ImageName":"ddd","Script":"aaa","NCPUs":1,"Id":1,"Status":1}`)
 }
 
-func MockDaemonRouter() *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
-	for _, route := range daemon.ListRoutes {
-		router.
-			Methods(route.Method).
-			Path(route.Pattern).
-			Name(route.Name).
-			Handler(http.HandlerFunc(MockFunc))
-	}
-	return router
+var listRoutes = utils.Routes{
+	utils.Route{
+		"GetAllJobs",
+		"GET",
+		"/jobs/",
+		nil,
+	},
+	utils.Route{
+		"GetJob",
+		"GET",
+		"/jobs/{jobID}",
+		nil,
+	},
+	utils.Route{
+		"SubmitJob",
+		"POST",
+		"/jobs/",
+		nil,
+	},
 }
 
-func CreateMockServer(server *Srv, mode string) *httptest.Server {
-	var mux *mux.Router
-	switch mode {
-	case "daemon":
-		mux = MockDaemonRouter()
-	}
-
-	ts := httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
-	server.ParseUrl(ts.URL)
+func CreateMockServer(srv *Srv) *httptest.Server {
+	ts := httptest.NewServer(http.HandlerFunc(MockFunc))
+	srv.ParseUrl(ts.URL)
 	return ts
 }
