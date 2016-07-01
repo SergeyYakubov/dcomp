@@ -23,7 +23,13 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 	r.Header.Set("Content-type", "application/json")
 	decoder := json.NewDecoder(r.Body)
 
+	if r.Body == nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
 	var t commonStructs.JobDescription
+
 	if decoder.Decode(&t) == nil && t.Check() == nil {
 		b, err := DBServer.PostCommand("jobs", &t)
 		if err != nil {

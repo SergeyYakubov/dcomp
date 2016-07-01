@@ -23,7 +23,7 @@ var listRoutes = utils.Routes{
 	utils.Route{
 		"GetJob",
 		"GET",
-		"/jobs/{jobID}",
+		"/jobs/{jobID}/",
 		nil,
 	},
 	utils.Route{
