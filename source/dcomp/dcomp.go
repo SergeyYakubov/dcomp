@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
 	"stash.desy.de/scm/dc/cli"
 	"stash.desy.de/scm/dc/daemon"
 	"stash.desy.de/scm/dc/version"
