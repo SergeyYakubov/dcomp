@@ -1,4 +1,6 @@
 .project
+.idea
+dcomp.iml
 /dcomp
 CMakeCache.txt
 cmake_install.cmake

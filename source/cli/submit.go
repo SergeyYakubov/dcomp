@@ -49,6 +49,10 @@ func (cmd *Cmd) CommandSubmit() error {
 
 	b, err := Server.PostCommand("jobs", &flags)
 
+	if err!= nil {
+		return err
+	}
+	
 	decoder := json.NewDecoder(b)
 	var t commonStructs.JobInfo
 	if err := decoder.Decode(&t); err != nil {
