@@ -4,7 +4,7 @@ dcomp.iml
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
-dcomp/version/version_lib.go
+#dcomp/version/version_lib.go
 coverage.html
 /bin
 Makefile
