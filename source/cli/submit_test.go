@@ -48,7 +48,7 @@ func TestSubmitCommand(t *testing.T) {
 		OutBuf.(*bytes.Buffer).Reset()
 	}
 
-	Server.Port=-1
+	Server.Port = -1
 	err := submitTests[0].CommandSubmit()
 	assert.NotNil(t, err, "Should be error")
 }
