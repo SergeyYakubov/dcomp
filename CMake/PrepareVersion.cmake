@@ -12,5 +12,5 @@ set(VERSION_SHORT "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 
 string(TIMESTAMP TIMESTAMP "%H:%M:%S %d.%m.%Y UTC" UTC)
 
-configure_file(source/version/version_lib.go.in source/version/version_lib.go)
+configure_file(${CMAKE_SOURCE_DIR}/dcomp/version/version_lib.go.in ${CMAKE_SOURCE_DIR}/dcomp/version/version_lib.go)
 

@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"stash.desy.de/scm/dc/common_structs"
-	"stash.desy.de/scm/dc/server"
-	"stash.desy.de/scm/dc/utils"
+	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 	"testing"
 )
 

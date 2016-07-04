@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
-	"stash.desy.de/scm/dc/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {

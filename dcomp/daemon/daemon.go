@@ -3,7 +3,7 @@ package daemon
 import (
 	"log"
 	"net/http"
-	"stash.desy.de/scm/dc/utils"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 func StartDaemon(args []string) {

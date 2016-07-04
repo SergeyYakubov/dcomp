@@ -1,7 +1,7 @@
 package daemon
 
 import (
-	"stash.desy.de/scm/dc/utils"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 var ListRoutes = utils.Routes{

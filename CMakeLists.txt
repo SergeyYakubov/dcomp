@@ -12,12 +12,12 @@ add_custom_target(make_version ALL
   VERBATIM)
 
 add_custom_target(dcomp ALL
-				  COMMAND go build -o dcomp -tags release ./source/dcomp
+				  COMMAND go build -o bin/dcomp -tags release ./dcomp/dcomp
 				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
 				  VERBATIM)
 
 add_custom_target(dcompdbd ALL
-				  COMMAND go build -o dcompdbd ./source/db/dcompdbd
+				  COMMAND go build -o bin/dcompdbd ./dcomp/db/dcompdbd
 				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
 				  VERBATIM)
 

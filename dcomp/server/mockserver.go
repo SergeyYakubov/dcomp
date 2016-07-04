@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"stash.desy.de/scm/dc/utils"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 func MockFunc(w http.ResponseWriter, r *http.Request) {

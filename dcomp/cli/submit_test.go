@@ -3,7 +3,7 @@ package cli
 import (
 	"bytes"
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/server"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"testing"
 )
 

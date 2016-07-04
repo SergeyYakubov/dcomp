@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"stash.desy.de/scm/dc/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
 )
 
 func decodeJob(r io.Reader) (commonStructs.JobDescription, bool) {

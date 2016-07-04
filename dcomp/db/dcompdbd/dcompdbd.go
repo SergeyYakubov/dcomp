@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"stash.desy.de/scm/dc/db/daemon"
-	"stash.desy.de/scm/dc/utils"
-	"stash.desy.de/scm/dc/version"
+	"stash.desy.de/scm/dc/main.git/dcomp/db/daemon"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"stash.desy.de/scm/dc/main.git/dcomp/version"
 )
 
 func main() {

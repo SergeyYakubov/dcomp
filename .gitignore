@@ -1,12 +1,11 @@
 .project
 .idea
 dcomp.iml
-/dcomp
 CMakeCache.txt
 cmake_install.cmake
 CMakeFiles
-source/version/version_lib.go
+dcomp/version/version_lib.go
 coverage.html
-/dcompdbd
+/bin
 Makefile
 

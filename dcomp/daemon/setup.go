@@ -1,7 +1,7 @@
 package daemon
 
 import (
-	"stash.desy.de/scm/dc/server"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
 var DBServer server.Srv
