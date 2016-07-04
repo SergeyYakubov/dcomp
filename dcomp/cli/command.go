@@ -19,14 +19,14 @@ func (cmd *Cmd) ShowDescription(description string) bool {
 	return false
 }
 
-func (cmd *Cmd) BadCommandOptions(err string) error {
+func (cmd *Cmd) ErrBadCommandOptions(err string) error {
 	return errors.New("dcomp " + cmd.name + ": " + err + "\nType 'dcomp " + cmd.name + " --help'")
 }
 
 // Subcmd is a subcommand of the main "dcomp" command.
 // To see all available subcommands, run "dcomp --help"
 
-func (cmd *Cmd) Subcmd(description, args string) *flag.FlagSet {
+func (cmd *Cmd) CreateFlagset(description, args string) *flag.FlagSet {
 
 	flags := flag.NewFlagSet(cmd.name, flag.ExitOnError)
 	flags.BoolVar(&flHelp, "help", false, "Print usage")

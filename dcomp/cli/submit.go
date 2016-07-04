@@ -22,7 +22,7 @@ func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.Job
 	}
 
 	if flagset.NArg() < 1 {
-		return cmd.BadCommandOptions("image name not defined")
+		return cmd.ErrBadCommandOptions("image name not defined")
 	}
 
 	flags.ImageName = flagset.Args()[0]
@@ -39,7 +39,8 @@ func (cmd *Cmd) CommandSubmit() error {
 	}
 
 	var flags commonStructs.JobDescription
-	flagset := cmd.Subcmd(description, "IMAGE [COMMAND] [ARG...]")
+
+	flagset := cmd.CreateFlagset(description, "IMAGE [COMMAND] [ARG...]")
 
 	createSubmitFlags(flagset, &flags)
 
@@ -59,6 +60,6 @@ func (cmd *Cmd) CommandSubmit() error {
 		return err
 	}
 
-	fmt.Fprintf(OutBuf, "%d\n", t.Id)
+	fmt.Fprintf(OutBuf, "%s\n", t.Id)
 	return err
 }

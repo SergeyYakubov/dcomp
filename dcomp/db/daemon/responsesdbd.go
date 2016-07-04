@@ -26,10 +26,11 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	var t commonStructs.JobInfo
 	if decoder.Decode(&t) == nil && t.Check() == nil {
-		t.Id = 1
+		t.Id = "1"
 		t.Status = 1
 		b := new(bytes.Buffer)
 		json.NewEncoder(b).Encode(t)
+		w.WriteHeader(http.StatusCreated)
 		w.Write(b.Bytes())
 	} else {
 		http.Error(w, "bad request", http.StatusBadRequest)

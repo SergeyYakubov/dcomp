@@ -3,6 +3,7 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -38,11 +39,17 @@ func (srv *Srv) PostCommand(path string, data interface{}) (b *bytes.Buffer, err
 		return nil, err
 	}
 	res, err := http.Post(srv.Url(path), "application/json; charset=utf-8", b)
+
 	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
-
 	io.Copy(b, res.Body)
+
+	if res.StatusCode != http.StatusCreated {
+		err = errors.New("Resource not created " + b.String())
+		return nil, err
+	}
+
 	return b, nil
 }

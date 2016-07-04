@@ -3,41 +3,42 @@ package daemon
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
-	"testing"
 )
 
 var submitTests = []struct {
-	job    commonStructs.JobDescription
-	path   string
-	cmd    string
-	answer int
+	job        commonStructs.JobDescription
+	path       string
+	cmd        string
+	serverresp string
+	answer     int
 }{
-	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", 200},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", 400},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", 200},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", 200},
-	{commonStructs.JobDescription{}, "jobs", "POST", 400},
-	{commonStructs.JobDescription{}, "jobs", "GET", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "GET", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "POST", 404},
-	{commonStructs.JobDescription{}, "job", "GET", 404},
+	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "ok", 201},
+	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "badreq", 400},
+	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "empty", 201},
+	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "ok", 400},
+	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "ok", 200},
+	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "ok", 200},
+	{commonStructs.JobDescription{}, "jobs", "POST", "ok", 400},
+	{commonStructs.JobDescription{}, "jobs", "GET", "ok", 200},
+	{commonStructs.JobDescription{}, "jobs/1", "GET", "ok", 200},
+	{commonStructs.JobDescription{}, "jobs/1", "POST", "ok", 404},
+	{commonStructs.JobDescription{}, "job", "GET", "ok", 404},
 }
 
 func TestSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(ListRoutes)
 
-	ts := server.CreateMockServer(&DBServer)
-	defer ts.Close()
-
 	for _, test := range submitTests {
-
+		ts := server.CreateMockServer(&DBServer, test.serverresp)
 		b := new(bytes.Buffer)
 		if err := json.NewEncoder(b).Encode(test.job); err != nil {
 			t.Fail()
@@ -55,6 +56,6 @@ func TestSubmitJob(t *testing.T) {
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
 		assert.Equal(t, test.answer, w.Code)
+		ts.Close()
 	}
-
 }

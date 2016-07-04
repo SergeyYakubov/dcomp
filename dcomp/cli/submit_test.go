@@ -28,7 +28,7 @@ var submitFailingTests = []Cmd{
 
 func TestSubmitCommand(t *testing.T) {
 	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server)
+	ts := server.CreateMockServer(&Server, "")
 	defer ts.Close()
 
 	for _, test := range submitTests {
@@ -50,5 +50,10 @@ func TestSubmitCommand(t *testing.T) {
 
 	Server.Port = -1
 	err := submitTests[0].CommandSubmit()
+	assert.NotNil(t, err, "Should be error")
+
+	tsbad := server.CreateMockServer(&Server, "string")
+	defer tsbad.Close()
+	err = submitTests[0].CommandSubmit()
 	assert.NotNil(t, err, "Should be error")
 }

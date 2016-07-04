@@ -27,6 +27,6 @@ func (desc *JobDescription) Check() error {
 
 type JobInfo struct {
 	JobDescription
-	Id     int
+	Id     string
 	Status int
 }

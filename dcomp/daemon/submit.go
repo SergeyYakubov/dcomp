@@ -41,6 +41,7 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
 		go findResourceAndSubmitJob(t, b.String())
+		w.WriteHeader(http.StatusCreated)
 		w.Write(b.Bytes())
 	}
 }

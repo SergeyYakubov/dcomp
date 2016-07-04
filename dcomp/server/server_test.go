@@ -31,7 +31,7 @@ func TestPostcommand(t *testing.T) {
 	b, err := srv.PostCommand("", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
 
-	ts := CreateMockServer(&srv)
+	ts := CreateMockServer(&srv, "")
 	defer ts.Close()
 
 	b, err = srv.PostCommand("", ts)
@@ -39,7 +39,7 @@ func TestPostcommand(t *testing.T) {
 
 	// nil is actually a bad option but since we use mock server we cannot check it
 	b, err = srv.PostCommand("", nil)
-	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":1,\"Status\":1}\n",
+	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"1\",\"Status\":1}\n",
 		b.String(), "")
 
 	srv.Port = 10000
@@ -49,5 +49,10 @@ func TestPostcommand(t *testing.T) {
 	srv.Host = "aaa"
 	b, err = srv.PostCommand("", nil)
 	assert.Contains(t, err.Error(), "no such host", "")
+
+	tsbadreq := CreateMockServer(&srv, "badreq")
+	b, err = srv.PostCommand("", nil)
+	assert.NotNil(t, err, "Should be error in responce")
+	defer tsbadreq.Close()
 
 }

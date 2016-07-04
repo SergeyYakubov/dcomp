@@ -24,7 +24,7 @@ var CommandFailingTests = []struct {
 
 func TestCommand(t *testing.T) {
 	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server)
+	ts := server.CreateMockServer(&Server, "")
 	defer ts.Close()
 
 	for _, test := range CommandFailingTests {

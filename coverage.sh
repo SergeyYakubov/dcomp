@@ -1,8 +1,9 @@
+#!/bin/bash
 
-mapfile -t PACKAGES < <( find ./source -type d -not -path '*/\.*' )
+source /home/yakubov/.bashrc
+
+mapfile -t PACKAGES < <( find ./$1 -type d -not -path '*/\.*' )
 #PACKAGES=./utils
-
-echo $PACKAGES
 
 
 echo "mode: count" > coverage-all.out
@@ -14,3 +15,5 @@ do
 done
 go tool cover -html=coverage-all.out -o coverage.html
 rm -rf coverage-all.out coverage.out
+firefox ./coverage.html &
+
