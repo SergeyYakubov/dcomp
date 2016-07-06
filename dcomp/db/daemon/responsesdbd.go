@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
@@ -26,8 +27,13 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	var t commonStructs.JobInfo
 	if decoder.Decode(&t) == nil && t.Check() == nil {
-		t.Id = "1"
 		t.Status = 1
+		id, err := database.CreateRecord(t)
+		if err != nil {
+			http.Error(w, "bad request "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		t.Id = id
 		b := new(bytes.Buffer)
 		json.NewEncoder(b).Encode(t)
 		w.WriteHeader(http.StatusCreated)

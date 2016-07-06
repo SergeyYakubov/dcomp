@@ -26,11 +26,16 @@ func (srv *Srv) ParseUrl(s string) {
 
 }
 
+func (srv *Srv) HostPort() string {
+	return fmt.Sprintf("%s:%d", srv.Host, srv.Port)
+}
+
 func (srv *Srv) Url(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.TrimLeft(s, "/")
 	s = strings.TrimRight(s, "/")
-	return fmt.Sprintf("http://%s:%d/%s/", srv.Host, srv.Port, s)
+	s = "/" + s + "/"
+	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
 }
 
 func (srv *Srv) PostCommand(path string, data interface{}) (b *bytes.Buffer, err error) {
@@ -47,7 +52,7 @@ func (srv *Srv) PostCommand(path string, data interface{}) (b *bytes.Buffer, err
 	io.Copy(b, res.Body)
 
 	if res.StatusCode != http.StatusCreated {
-		err = errors.New("Resource not created " + b.String())
+		err = errors.New("dcompd: resource not created " + b.String())
 		return nil, err
 	}
 
