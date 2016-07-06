@@ -7,4 +7,6 @@ CMakeFiles
 coverage.html
 /bin
 Makefile
+version_lib.go
+
 
