@@ -26,7 +26,6 @@ func Create(name string) error {
 	if db != nil {
 		return errors.New("database already created")
 	}
-
 	switch name {
 	case "mongodb":
 		db = new(mongodb)

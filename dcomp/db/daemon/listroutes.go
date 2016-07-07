@@ -14,7 +14,7 @@ var ListRoutes = utils.Routes{
 	utils.Route{
 		"GetJob",
 		"GET",
-		"/jobs/{jobID}",
+		"/jobs/{jobID}/",
 		GetJob,
 	},
 	utils.Route{

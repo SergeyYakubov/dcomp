@@ -11,14 +11,22 @@ func (db *mockdatabase) CreateRecord(s interface{}) (string, error) {
 	return "1", nil
 }
 func (db *mockdatabase) Connect(url string) error {
-	if url == "localhost:27017" {
-		return nil
-	}
-	return errors.New("mockdb: Server not found")
+	return nil
 }
 
 func (db *mockdatabase) Close() {
 
 }
 func (db *mockdatabase) SetDefaults() {
+}
+
+func CreateMock() error {
+	if db != nil {
+		return errors.New("database already created")
+	}
+
+	db = new(mockdatabase)
+
+	db.SetDefaults()
+	return nil
 }

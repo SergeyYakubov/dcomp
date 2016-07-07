@@ -1,13 +1,25 @@
 package commonStructs
 
 import (
+	"encoding/json"
 	"errors"
+	"io"
 )
+
+type jobStruct interface {
+	Check() error
+}
 
 type JobDescription struct {
 	ImageName string
 	Script    string
 	NCPUs     int
+}
+
+type JobInfo struct {
+	JobDescription
+	Id     string
+	Status int
 }
 
 func (desc *JobDescription) Check() error {
@@ -25,8 +37,17 @@ func (desc *JobDescription) Check() error {
 	return nil
 }
 
-type JobInfo struct {
-	JobDescription
-	Id     string
-	Status int
+func DecodeStruct(r io.Reader, t jobStruct) bool {
+
+	if r == nil {
+		return false
+	}
+
+	decoder := json.NewDecoder(r)
+
+	if decoder.Decode(&t) != nil || t.Check() != nil {
+		return false
+	}
+
+	return true
 }

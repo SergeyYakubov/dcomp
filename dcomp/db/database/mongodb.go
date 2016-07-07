@@ -3,6 +3,7 @@ package database
 import (
 	"time"
 
+	"errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -21,6 +22,9 @@ type Person struct {
 
 func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 
+	if db.session == nil {
+		return "", errors.New("database session not created")
+	}
 	c := db.session.DB(db.name).C(db.col)
 	id := bson.NewObjectId()
 	_, err := c.UpsertId(id, s)
@@ -39,6 +43,7 @@ func (db *mongodb) Connect(url string) error {
 
 func (db *mongodb) Close() {
 	db.session.Close()
+	db.session = nil
 }
 
 func (db *mongodb) SetDefaults() {

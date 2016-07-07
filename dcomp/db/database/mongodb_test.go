@@ -43,15 +43,18 @@ func TestMdbCreateRecord(t *testing.T) {
 	}{"hello", 1}
 
 	err = Connect()
-	assert.Nil(t, err)
+	assert.Nil(t, err, "connected to database")
 
 	id, err := db.CreateRecord(&s)
 	assert.Nil(t, err)
-	assert.NotEmpty(t, id)
+	assert.NotEmpty(t, id, "normal record")
 
-	_, err = db.CreateRecord("aaa")
-	assert.NotNil(t, err)
-
+	id, err = db.CreateRecord(nil)
+	assert.NotNil(t, err, "nil record")
 	db.Close()
+
+	_, err = db.CreateRecord(&s)
+	assert.NotNil(t, err, "closed database")
+
 	db = nil
 }

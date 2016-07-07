@@ -11,7 +11,6 @@ import (
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func GetJob(w http.ResponseWriter, r *http.Request) {
@@ -23,22 +22,24 @@ func GetJob(w http.ResponseWriter, r *http.Request) {
 func SubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("Content-type", "application/json")
-	decoder := json.NewDecoder(r.Body)
 
 	var t commonStructs.JobInfo
-	if decoder.Decode(&t) == nil && t.Check() == nil {
-		t.Status = 1
-		id, err := database.CreateRecord(t)
-		if err != nil {
-			http.Error(w, "bad request "+err.Error(), http.StatusBadRequest)
-			return
-		}
-		t.Id = id
-		b := new(bytes.Buffer)
-		json.NewEncoder(b).Encode(t)
-		w.WriteHeader(http.StatusCreated)
-		w.Write(b.Bytes())
-	} else {
+
+	if ok := commonStructs.DecodeStruct(r.Body, &t); !ok {
 		http.Error(w, "bad request", http.StatusBadRequest)
+		return
 	}
+
+	t.Status = 1
+	id, err := database.CreateRecord(t)
+	if err != nil {
+		http.Error(w, "bad request "+err.Error(), http.StatusBadRequest)
+		return
+	}
+	t.Id = id
+	w.WriteHeader(http.StatusCreated)
+
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(t)
+	w.Write(b.Bytes())
 }
