@@ -9,29 +9,29 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 var submitTests = []struct {
-	job        commonStructs.JobDescription
+	job        structs.JobDescription
 	path       string
 	cmd        string
 	serverresp string
 	answer     int
 }{
-	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "ok", 201},
-	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "badreq", 400},
-	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "empty", 201},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "ok", 400},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "ok", 200},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "ok", 200},
-	{commonStructs.JobDescription{}, "jobs", "POST", "ok", 400},
-	{commonStructs.JobDescription{}, "jobs", "GET", "ok", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "GET", "ok", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "POST", "ok", 404},
-	{commonStructs.JobDescription{}, "job", "GET", "ok", 404},
+	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "ok", 201},
+	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "badreq", 400},
+	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "empty", 201},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "ok", 400},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "ok", 200},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "ok", 200},
+	{structs.JobDescription{}, "jobs", "POST", "ok", 400},
+	{structs.JobDescription{}, "jobs", "GET", "ok", 200},
+	{structs.JobDescription{}, "jobs/1", "GET", "ok", 200},
+	{structs.JobDescription{}, "jobs/1", "POST", "ok", 404},
+	{structs.JobDescription{}, "job", "GET", "ok", 404},
 }
 
 func TestSubmitJob(t *testing.T) {

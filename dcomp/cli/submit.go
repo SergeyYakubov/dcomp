@@ -5,24 +5,24 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-func createSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.JobDescription) {
+func createSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) {
 	flagset.StringVar(&flags.Script, "script", "", "Job script")
 	flagset.IntVar(&flags.NCPUs, "ncpus", 1, "Number of CPUs")
 }
 
-func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.JobDescription) error {
+func (cmd *command) parseSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) error {
 
 	flagset.Parse(cmd.args)
 
-	if ShowHelp(flagset) {
+	if printHelp(flagset) {
 		os.Exit(0)
 	}
 
 	if flagset.NArg() < 1 {
-		return cmd.ErrBadCommandOptions("image name not defined")
+		return cmd.errBadOptions("image name not defined")
 	}
 
 	flags.ImageName = flagset.Args()[0]
@@ -30,17 +30,17 @@ func (cmd *Cmd) parseSubmitFlags(flagset *flag.FlagSet, flags *commonStructs.Job
 	return flags.Check()
 }
 
-func (cmd *Cmd) CommandSubmit() error {
+func (cmd *command) CommandSubmit() error {
 
 	description := "Submit job for distributed computing"
 
-	if cmd.ShowDescription(description) {
+	if cmd.description(description) {
 		return nil
 	}
 
-	var flags commonStructs.JobDescription
+	var flags structs.JobDescription
 
-	flagset := cmd.CreateFlagset(description, "IMAGE [COMMAND] [ARG...]")
+	flagset := cmd.createFlagset(description, "IMAGE [COMMAND] [ARG...]")
 
 	createSubmitFlags(flagset, &flags)
 
@@ -55,7 +55,7 @@ func (cmd *Cmd) CommandSubmit() error {
 	}
 
 	decoder := json.NewDecoder(b)
-	var t commonStructs.JobInfo
+	var t structs.JobInfo
 	if err := decoder.Decode(&t); err != nil {
 		return err
 	}

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 func MockFuncOk(w http.ResponseWriter, r *http.Request) {
@@ -23,28 +22,7 @@ func MockFuncBadRequest(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "MockFuncBadRequest: bad request", http.StatusBadRequest)
 }
 
-var listRoutes = utils.Routes{
-	utils.Route{
-		"GetAllJobs",
-		"GET",
-		"/jobs/",
-		nil,
-	},
-	utils.Route{
-		"GetJob",
-		"GET",
-		"/jobs/{jobID}/",
-		nil,
-	},
-	utils.Route{
-		"SubmitJob",
-		"POST",
-		"/jobs/",
-		nil,
-	},
-}
-
-func CreateMockServer(srv *Srv, mode string) *httptest.Server {
+func CreateMockServer(srv *Server, mode string) *httptest.Server {
 	var ts *httptest.Server
 	switch mode {
 	case "badreq":

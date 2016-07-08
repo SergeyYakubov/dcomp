@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
-	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
 )
 
@@ -23,9 +23,9 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("Content-type", "application/json")
 
-	var t commonStructs.JobInfo
+	var t structs.JobInfo
 
-	if ok := commonStructs.DecodeStruct(r.Body, &t); !ok {
+	if ok := structs.Decode(r.Body, &t); !ok {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}

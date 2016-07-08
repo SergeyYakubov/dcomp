@@ -29,13 +29,13 @@ func main() {
 	}
 
 	if flag.Arg(0) == "daemon" {
-		daemon.StartDaemon(flag.Args()[1:])
+		daemon.Start(flag.Args()[1:])
 	} else {
 		if err := cli.SetServerConfiguration(); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		if err := cli.Command(flag.Arg(0), flag.Args()[1:]); err != nil {
+		if err := cli.DoCommand(flag.Arg(0), flag.Args()[1:]); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}

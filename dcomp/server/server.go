@@ -13,12 +13,12 @@ import (
 	"strings"
 )
 
-type Srv struct {
+type Server struct {
 	Host string
 	Port int
 }
 
-func (srv *Srv) ParseUrl(s string) {
+func (srv *Server) ParseUrl(s string) {
 	u, _ := url.Parse(s)
 	host, port, _ := net.SplitHostPort(u.Host)
 	srv.Host = host
@@ -26,11 +26,11 @@ func (srv *Srv) ParseUrl(s string) {
 
 }
 
-func (srv *Srv) HostPort() string {
+func (srv *Server) HostPort() string {
 	return fmt.Sprintf("%s:%d", srv.Host, srv.Port)
 }
 
-func (srv *Srv) Url(s string) string {
+func (srv *Server) Url(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.TrimLeft(s, "/")
 	s = strings.TrimRight(s, "/")
@@ -38,7 +38,7 @@ func (srv *Srv) Url(s string) string {
 	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
 }
 
-func (srv *Srv) PostCommand(path string, data interface{}) (b *bytes.Buffer, err error) {
+func (srv *Server) PostCommand(path string, data interface{}) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(data); err != nil {
 		return nil, err

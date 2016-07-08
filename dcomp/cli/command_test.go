@@ -8,18 +8,18 @@ import (
 )
 
 var CommandTests = []struct {
-	cmd    Cmd
+	cmd    command
 	answer string
 }{
-	{Cmd{"submit", []string{"description"}}, "   submit \t\tSubmit job for distributed computing\n"},
-	{Cmd{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "1\n"},
+	{command{"submit", []string{"description"}}, "   submit \t\tSubmit job for distributed computing\n"},
+	{command{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "1\n"},
 }
 
 var CommandFailingTests = []struct {
-	cmd    Cmd
+	cmd    command
 	answer string
 }{
-	{Cmd{"dummy", []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
+	{command{"dummy", []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
 }
 
 func TestCommand(t *testing.T) {
@@ -29,13 +29,13 @@ func TestCommand(t *testing.T) {
 
 	for _, test := range CommandFailingTests {
 		OutBuf.(*bytes.Buffer).Reset()
-		err := Command(test.cmd.name, test.cmd.args)
+		err := DoCommand(test.cmd.name, test.cmd.args)
 		assert.NotNil(t, err, "Should be error")
 
 	}
 	for _, test := range CommandTests {
 		OutBuf.(*bytes.Buffer).Reset()
-		err := Command(test.cmd.name, test.cmd.args)
+		err := DoCommand(test.cmd.name, test.cmd.args)
 		assert.Nil(t, err, "Should not be error")
 		assert.Equal(t, test.answer, OutBuf.(*bytes.Buffer).String(), "")
 

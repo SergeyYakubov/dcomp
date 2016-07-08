@@ -4,7 +4,7 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-var DBServer server.Srv
+var DBServer server.Server
 
 func SetServerConfiguration() error {
 	DBServer.Host = "localhost"

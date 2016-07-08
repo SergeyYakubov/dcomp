@@ -1,4 +1,4 @@
-package commonStructs
+package structs
 
 import (
 	"encoding/json"
@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-type jobStruct interface {
+type jobs interface {
 	Check() error
 }
 
@@ -22,30 +22,30 @@ type JobInfo struct {
 	Status int
 }
 
-func (desc *JobDescription) Check() error {
-	if desc.NCPUs <= 0 {
+func (d *JobDescription) Check() error {
+	if d.NCPUs <= 0 {
 		return errors.New("number of cpus should be > 0")
 	}
 
-	if desc.ImageName == "" {
+	if d.ImageName == "" {
 		return errors.New("image name should be set")
 	}
 
-	if desc.Script == "" {
+	if d.Script == "" {
 		return errors.New("job script should be set")
 	}
 	return nil
 }
 
-func DecodeStruct(r io.Reader, t jobStruct) bool {
+func Decode(r io.Reader, t jobs) bool {
 
 	if r == nil {
 		return false
 	}
 
-	decoder := json.NewDecoder(r)
+	d := json.NewDecoder(r)
 
-	if decoder.Decode(&t) != nil || t.Check() != nil {
+	if d.Decode(t) != nil || t.Check() != nil {
 		return false
 	}
 

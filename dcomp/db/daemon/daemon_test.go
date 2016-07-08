@@ -9,13 +9,13 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/common_structs"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 type request struct {
-	job    commonStructs.JobDescription
+	job    structs.JobDescription
 	path   string
 	cmd    string
 	msg    string
@@ -23,15 +23,15 @@ type request struct {
 }
 
 var submitTests = []request{
-	{commonStructs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "post normal job", 201},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "post with nil body", 400},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "get all jobs, nil body", 200},
-	{commonStructs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "get job 1", 200},
-	{commonStructs.JobDescription{}, "jobs", "POST", "post empty structure", 400},
-	{commonStructs.JobDescription{}, "jobs", "GET", "get all jobs, empty structure", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "GET", "get job 1", 200},
-	{commonStructs.JobDescription{}, "jobs/1", "POST", "post job 1", 404},
-	{commonStructs.JobDescription{}, "job", "GET", "wrong path", 404},
+	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "post normal job", 201},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "post with nil body", 400},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "get all jobs, nil body", 200},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "get job 1", 200},
+	{structs.JobDescription{}, "jobs", "POST", "post empty structure", 400},
+	{structs.JobDescription{}, "jobs", "GET", "get all jobs, empty structure", 200},
+	{structs.JobDescription{}, "jobs/1", "GET", "get job 1", 200},
+	{structs.JobDescription{}, "jobs/1", "POST", "post job 1", 404},
+	{structs.JobDescription{}, "job", "GET", "wrong path", 404},
 }
 
 func TestSubmitJob(t *testing.T) {

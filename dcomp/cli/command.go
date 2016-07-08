@@ -6,12 +6,12 @@ import (
 	"fmt"
 )
 
-type Cmd struct {
+type command struct {
 	name string
 	args []string
 }
 
-func (cmd *Cmd) ShowDescription(description string) bool {
+func (cmd *command) description(description string) bool {
 	if len(cmd.args) == 1 && cmd.args[0] == "description" {
 		fmt.Fprintf(OutBuf, "   %.20s \t\t%s\n", cmd.name, description)
 		return true
@@ -19,14 +19,14 @@ func (cmd *Cmd) ShowDescription(description string) bool {
 	return false
 }
 
-func (cmd *Cmd) ErrBadCommandOptions(err string) error {
+func (cmd *command) errBadOptions(err string) error {
 	return errors.New("dcomp " + cmd.name + ": " + err + "\nType 'dcomp " + cmd.name + " --help'")
 }
 
 // Subcmd is a subcommand of the main "dcomp" command.
 // To see all available subcommands, run "dcomp --help"
 
-func (cmd *Cmd) CreateFlagset(description, args string) *flag.FlagSet {
+func (cmd *command) createFlagset(description, args string) *flag.FlagSet {
 
 	flags := flag.NewFlagSet(cmd.name, flag.ExitOnError)
 	flags.BoolVar(&flHelp, "help", false, "Print usage")

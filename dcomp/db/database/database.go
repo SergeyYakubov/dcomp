@@ -5,16 +5,16 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-type database interface {
+type agent interface {
 	CreateRecord(s interface{}) (string, error)
 	Connect(string) error
 	SetDefaults()
 	Close()
 }
 
-var db database
+var db agent
 
-var dbServer server.Srv
+var dbServer server.Server
 
 func SetServerConfiguration() error {
 	dbServer.Host = "172.17.0.2"

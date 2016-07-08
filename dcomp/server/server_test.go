@@ -6,13 +6,13 @@ import (
 )
 
 var urltests = []struct {
-	Server Srv
+	Server Server
 	Path   string
 	Url    string
 }{
-	{Srv{"localhost", 8000}, "test", "http://localhost:8000/test/"},
-	{Srv{"localhost", 8000}, "/test/", "http://localhost:8000/test/"},
-	{Srv{"localhost", 8000}, " test ", "http://localhost:8000/test/"},
+	{Server{"localhost", 8000}, "test", "http://localhost:8000/test/"},
+	{Server{"localhost", 8000}, "/test/", "http://localhost:8000/test/"},
+	{Server{"localhost", 8000}, " test ", "http://localhost:8000/test/"},
 }
 
 func TestUrl(t *testing.T) {
@@ -25,7 +25,7 @@ func TestUrl(t *testing.T) {
 
 func TestPostcommand(t *testing.T) {
 
-	var srv Srv
+	var srv Server
 
 	srv.Port = -4
 	b, err := srv.PostCommand("", nil)

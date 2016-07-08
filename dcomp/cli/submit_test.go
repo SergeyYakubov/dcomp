@@ -8,18 +8,18 @@ import (
 )
 
 var submitOtherTests = []struct {
-	cmd    Cmd
+	cmd    command
 	answer string
 }{
-	{Cmd{args: []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
+	{command{args: []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
 }
 
-var submitTests = []Cmd{
+var submitTests = []command{
 	{args: []string{"-script", "aaa", "imagename"}},
 	{args: []string{"-script", "-ncpus", "10", "aaa", "imagename"}},
 }
 
-var submitFailingTests = []Cmd{
+var submitFailingTests = []command{
 	{args: []string{"imagename"}},
 	{args: []string{}},
 	{args: []string{"-script", "aaa"}},

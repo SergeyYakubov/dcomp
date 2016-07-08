@@ -15,11 +15,6 @@ type mongodb struct {
 	timeout time.Duration
 }
 
-type Person struct {
-	Name  string
-	Phone string
-}
-
 func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 
 	if db.session == nil {
