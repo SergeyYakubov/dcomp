@@ -4,19 +4,45 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+
+	"github.com/gorilla/mux"
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
+	var jobs []structs.JobInfo
+	if err := database.GetAllRecords(&jobs); err != nil {
+		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
+		return
+	}
+	if len(jobs) == 0 {
+		fmt.Fprint(w, "No jobs found")
+		return
+	}
+
+	for _, v := range jobs {
+		fmt.Fprintf(w, "Job: %s Image: %s NCPUs %d\n", v.Id, v.ImageName, v.NCPUs)
+	}
 }
 
 func GetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	fmt.Fprintln(w, "jobID show:", jobID)
+	var jobs []structs.JobInfo
+
+	if err := database.GetRecordById(jobID, &jobs); err != nil {
+		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
+		return
+	}
+	if len(jobs) == 0 {
+		http.Error(w, "Job not found", http.StatusNotFound)
+		return
+	}
+
+	fmt.Fprintf(w, "Job: %s Image: %s NCPUs %d\n", jobs[0].Id, jobs[0].ImageName, jobs[0].NCPUs)
+
 }
 
 func SubmitJob(w http.ResponseWriter, r *http.Request) {

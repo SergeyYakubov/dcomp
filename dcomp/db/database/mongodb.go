@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"errors"
+
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -27,6 +28,11 @@ func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	err = c.UpdateId(id, bson.M{"$set": bson.M{"_hex_id": id.Hex()}})
+	if err != nil {
+		return "", err
+	}
+
 	return id.Hex(), nil
 }
 
@@ -45,4 +51,30 @@ func (db *mongodb) SetDefaults() {
 	db.name = "daemondbd"
 	db.col = "jobs"
 	db.timeout = 10 * time.Second
+}
+
+func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
+
+	c := db.session.DB(db.name).C(db.col)
+	query := c.Find(q)
+
+	n, err := query.Count()
+
+	if err != nil {
+		return err
+	}
+
+	if n == 0 {
+		return nil
+	}
+	err = query.All(res)
+	return err
+}
+
+func (db *mongodb) GetRecordByID(id string, res interface{}) (err error) {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("wrong id")
+	}
+	q := bson.M{"_id": bson.ObjectIdHex(id)}
+	return db.GetRecords(q, res)
 }

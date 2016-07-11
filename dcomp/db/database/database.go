@@ -6,7 +6,9 @@ import (
 )
 
 type agent interface {
-	CreateRecord(s interface{}) (string, error)
+	CreateRecord(interface{}) (string, error)
+	GetRecords(interface{}, interface{}) error
+	GetRecordByID(string, interface{}) error
 	Connect(string) error
 	SetDefaults()
 	Close()
@@ -43,6 +45,7 @@ func Connect() error {
 
 func Close() {
 	db.Close()
+	db = nil
 }
 
 func CreateRecord(s interface{}) (string, error) {
@@ -51,4 +54,22 @@ func CreateRecord(s interface{}) (string, error) {
 	}
 
 	return db.CreateRecord(s)
+}
+
+func GetRecords(q interface{}, res interface{}) (err error) {
+	if db == nil {
+		return errors.New("database not set")
+	}
+	return db.GetRecords(q, res)
+}
+
+func GetAllRecords(res interface{}) (err error) {
+	return GetRecords(nil, res)
+}
+
+func GetRecordById(id string, res interface{}) (err error) {
+	if db == nil {
+		return errors.New("database not set")
+	}
+	return db.GetRecordByID(id, res)
 }
