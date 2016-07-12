@@ -3,6 +3,7 @@ package structs
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -50,4 +51,16 @@ func Decode(r io.Reader, t jobs) bool {
 	}
 
 	return true
+}
+
+func (d *JobInfo) PrintFull(w io.Writer) {
+	fmt.Fprintf(w, "Job %s\n", d.Id)
+	fmt.Fprintf(w, "Image name: \t\t %s\n", d.ImageName)
+	fmt.Fprintf(w, "Script: \t\t %s\n", d.Script)
+	fmt.Fprintf(w, "Number of CPUs: \t %d\n", d.NCPUs)
+	fmt.Fprintf(w, "Job status: \t\t %d\n", d.Status)
+}
+
+func (d *JobInfo) PrintShort(w io.Writer) {
+	fmt.Fprintf(w, "%20s  %20d\n", d.Id, d.Status)
 }

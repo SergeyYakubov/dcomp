@@ -1,18 +1,29 @@
 package daemon
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
+	b, err := DBServer.GetCommand("jobs")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	} else {
+		w.Write(b.Bytes())
+	}
 
 }
 
 func GetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	fmt.Fprintln(w, "jobID show:", jobID)
+	b, err := DBServer.GetCommand("jobs" + "/" + jobID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+	} else {
+		w.Write(b.Bytes())
+	}
+
 }

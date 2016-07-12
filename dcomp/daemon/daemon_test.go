@@ -9,36 +9,43 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
+	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-var submitTests = []struct {
-	job        structs.JobDescription
-	path       string
-	cmd        string
-	serverresp string
-	answer     int
-}{
-	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "ok", 201},
-	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "badreq", 400},
-	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "empty", 201},
-	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "ok", 400},
-	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "GET", "ok", 200},
-	{structs.JobDescription{"nil", "bbb", -1}, "jobs/1", "GET", "ok", 200},
-	{structs.JobDescription{}, "jobs", "POST", "ok", 400},
-	{structs.JobDescription{}, "jobs", "GET", "ok", 200},
-	{structs.JobDescription{}, "jobs/1", "GET", "ok", 200},
-	{structs.JobDescription{}, "jobs/1", "POST", "ok", 404},
-	{structs.JobDescription{}, "job", "GET", "ok", 404},
+type request struct {
+	job     structs.JobDescription
+	path    string
+	cmd     string
+	answer  int
+	message string
+}
+
+var submitTests = []request{
+	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", 201, "Create job"},
+	{structs.JobDescription{"aaa", "nil", 1}, "jobs", "POST", 400, "create job - no server"},
+	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", 400, "create job - nil struct"},
+	{structs.JobDescription{}, "jobs", "POST", 400, "create job - empty struct"},
+	{structs.JobDescription{}, "jobs/1", "POST", 404, "create job - wrong path"},
+}
+
+var getTests = []request{
+	{structs.JobDescription{}, "jobs", "GET", 200, "Get all jobs"},
+	{structs.JobDescription{}, "jobs/578359205e935a20adb39a18", "GET", 200, "Get existing job"},
+	{structs.JobDescription{}, "jobs/1", "GET", 404, "Get non-existing job"},
+	{structs.JobDescription{}, "job", "GET", 404, "get job - wrong path"},
 }
 
 func TestSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(ListRoutes)
 
 	for _, test := range submitTests {
-		ts := server.CreateMockServer(&DBServer, test.serverresp)
+
+		ts := server.CreateMockServer(&DBServer)
+		if test.job.Script == "nil" {
+			ts.Close()
+		}
 		b := new(bytes.Buffer)
 		if err := json.NewEncoder(b).Encode(test.job); err != nil {
 			t.Fail()
@@ -55,7 +62,25 @@ func TestSubmitJob(t *testing.T) {
 
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
-		assert.Equal(t, test.answer, w.Code)
+		assert.Equal(t, test.answer, w.Code, test.message)
+		ts.Close()
+	}
+}
+
+func TestGetJob(t *testing.T) {
+	mux := utils.NewRouter(ListRoutes)
+
+	for _, test := range getTests {
+
+		ts := server.CreateMockServer(&DBServer)
+
+		req, err := http.NewRequest(test.cmd, "http://localhost:8000/"+test.path+"/", nil)
+
+		assert.Nil(t, err, "Should not be error")
+
+		w := httptest.NewRecorder()
+		mux.ServeHTTP(w, req)
+		assert.Equal(t, test.answer, w.Code, test.message)
 		ts.Close()
 	}
 }

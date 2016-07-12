@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var urltests = []struct {
@@ -28,31 +29,56 @@ func TestPostcommand(t *testing.T) {
 	var srv Server
 
 	srv.Port = -4
-	b, err := srv.PostCommand("", nil)
+	b, err := srv.PostCommand("jobs", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
 
-	ts := CreateMockServer(&srv, "")
+	ts := CreateMockServer(&srv)
 	defer ts.Close()
 
-	b, err = srv.PostCommand("", ts)
+	b, err = srv.PostCommand("jobs", ts)
 	assert.NotNil(t, err, "Should be error in json encoder")
 
 	// nil is actually a bad option but since we use mock server we cannot check it
-	b, err = srv.PostCommand("", nil)
+	b, err = srv.PostCommand("jobs", nil)
 	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"1\",\"Status\":1}\n",
 		b.String(), "")
 
 	srv.Port = 10000
-	b, err = srv.PostCommand("", nil)
+	b, err = srv.PostCommand("jobs", nil)
 	assert.Contains(t, err.Error(), "connection refused", "")
 
 	srv.Host = "aaa"
-	b, err = srv.PostCommand("", nil)
+	b, err = srv.PostCommand("jobs", nil)
 	assert.Contains(t, err.Error(), "no such host", "")
 
-	tsbadreq := CreateMockServer(&srv, "badreq")
-	b, err = srv.PostCommand("", nil)
+	b, err = srv.PostCommand("jobs", nil)
 	assert.NotNil(t, err, "Should be error in responce")
-	defer tsbadreq.Close()
 
+}
+
+type getrequest struct {
+	path   string
+	body   string
+	errmsg string
+}
+
+var getTests = []getrequest{
+	{"jobs/578359205e935a20adb39a18", "578359205e935a20adb39a18", "get job 1"},
+	{"jobs/2", "not found", "wrong format"},
+	{"job", "not found", "wrong path"},
+}
+
+func TestGetcommand(t *testing.T) {
+	var srv Server
+	ts := CreateMockServer(&srv)
+	defer ts.Close()
+	for _, test := range getTests {
+		b, err := srv.GetCommand(test.path)
+		if err != nil {
+			assert.Contains(t, err.Error(), test.body, test.errmsg)
+		} else {
+			assert.Contains(t, b.String(), test.body, test.errmsg)
+		}
+
+	}
 }

@@ -6,32 +6,57 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/gorilla/mux"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-func MockFuncOk(w http.ResponseWriter, r *http.Request) {
+var ListRoutes = utils.Routes{
+	utils.Route{
+		"GetAllJobs",
+		"GET",
+		"/jobs/",
+		MockFuncGetAll,
+	},
+	utils.Route{
+		"GetJob",
+		"GET",
+		"/jobs/{jobID}/",
+		MockFuncGet,
+	},
+	utils.Route{
+		"SubmitJob",
+		"POST",
+		"/jobs/",
+		MockFuncSubmit,
+	},
+}
+
+func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprintln(w, `{"ImageName":"ddd","Script":"aaa","NCPUs":1,"Id":"1","Status":1}`)
 }
 
-func MockFuncSimpleString(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, "Hello")
+func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
 }
 
-func MockFuncBadRequest(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "MockFuncBadRequest: bad request", http.StatusBadRequest)
-}
-
-func CreateMockServer(srv *Server, mode string) *httptest.Server {
-	var ts *httptest.Server
-	switch mode {
-	case "badreq":
-		ts = httptest.NewServer(http.HandlerFunc(MockFuncBadRequest))
-	case "string":
-		ts = httptest.NewServer(http.HandlerFunc(MockFuncSimpleString))
-	default:
-		ts = httptest.NewServer(http.HandlerFunc(MockFuncOk))
+func MockFuncGet(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	jobID := vars["jobID"]
+	if jobID != "578359205e935a20adb39a18" {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
 	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+}
+
+func CreateMockServer(srv *Server) *httptest.Server {
+	var ts *httptest.Server
+	mux := utils.NewRouter(ListRoutes)
+	ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
 	srv.ParseUrl(ts.URL)
 	return ts
 }

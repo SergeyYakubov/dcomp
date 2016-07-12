@@ -52,7 +52,25 @@ func (srv *Server) PostCommand(path string, data interface{}) (b *bytes.Buffer, 
 	io.Copy(b, res.Body)
 
 	if res.StatusCode != http.StatusCreated {
-		err = errors.New("dcompd: resource not created " + b.String())
+		err = errors.New(b.String())
+		return nil, err
+	}
+
+	return b, nil
+}
+
+func (srv *Server) GetCommand(path string) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
+
+	res, err := http.Get(srv.Url(path))
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	io.Copy(b, res.Body)
+
+	if res.StatusCode != http.StatusOK {
+		err = errors.New(b.String())
 		return nil, err
 	}
 

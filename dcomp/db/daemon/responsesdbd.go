@@ -3,7 +3,6 @@ package daemon
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -11,20 +10,33 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
+func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
+	if len(jobs) == 0 && allowempty {
+		return
+	}
+
+	if len(jobs) == 0 {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
+	}
+
+	b := new(bytes.Buffer)
+	if err := json.NewEncoder(b).Encode(jobs); err != nil {
+		http.Error(w, "cannot retrieve database job info", http.StatusInternalServerError)
+		return
+	}
+	w.Write(b.Bytes())
+
+}
+
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
 	var jobs []structs.JobInfo
 	if err := database.GetAllRecords(&jobs); err != nil {
 		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
 		return
 	}
-	if len(jobs) == 0 {
-		fmt.Fprint(w, "No jobs found")
-		return
-	}
 
-	for _, v := range jobs {
-		fmt.Fprintf(w, "Job: %s Image: %s NCPUs %d\n", v.Id, v.ImageName, v.NCPUs)
-	}
+	sendJobs(w, jobs, true)
 }
 
 func GetJob(w http.ResponseWriter, r *http.Request) {
@@ -36,12 +48,8 @@ func GetJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
 		return
 	}
-	if len(jobs) == 0 {
-		http.Error(w, "Job not found", http.StatusNotFound)
-		return
-	}
 
-	fmt.Fprintf(w, "Job: %s Image: %s NCPUs %d\n", jobs[0].Id, jobs[0].ImageName, jobs[0].NCPUs)
+	sendJobs(w, jobs, false)
 
 }
 
