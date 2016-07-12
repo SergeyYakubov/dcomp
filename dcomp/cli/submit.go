@@ -48,7 +48,7 @@ func (cmd *command) CommandSubmit() error {
 		return err
 	}
 
-	b, err := Server.PostCommand("jobs", &flags)
+	b, err := Server.CommandPost("jobs", &flags)
 
 	if err != nil {
 		return err

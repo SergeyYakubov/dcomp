@@ -17,7 +17,7 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	b, err := DBServer.PostCommand("jobs", &t)
+	b, err := DBServer.CommandPost("jobs", &t)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {

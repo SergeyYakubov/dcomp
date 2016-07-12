@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"encoding/json"
+	"io"
+
+	"bytes"
 	"gopkg.in/mgo.v2/bson"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -15,7 +18,11 @@ func createJobinfoFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
 	flagset.StringVar(&flags.Id, "id", "", "Job Id")
 }
 
-func (cmd *command) parseJobinfoFlags(flagset *flag.FlagSet, flags *structs.JobInfo) error {
+func (cmd *command) parseJobinfoFlags(d string) (structs.JobInfo, error) {
+
+	var flags structs.JobInfo
+	flagset := cmd.createFlagset(d, "")
+	createJobinfoFlags(flagset, &flags)
 
 	flagset.Parse(cmd.args)
 
@@ -23,55 +30,69 @@ func (cmd *command) parseJobinfoFlags(flagset *flag.FlagSet, flags *structs.JobI
 		os.Exit(0)
 	}
 
-	if flags.Id == "" || bson.IsObjectIdHex(flags.Id) {
-		return nil
-	} else {
-		return errors.New("wrong job id format")
+	if flags.Id != "" && !bson.IsObjectIdHex(flags.Id) {
+		return flags, errors.New("wrong job id format")
 	}
+
+	return flags, nil
+
 }
 
 func (cmd *command) CommandJobinfo() error {
 
-	description := "Show job information"
+	d := "Show job information"
 
-	if cmd.description(description) {
+	if cmd.description(d) {
 		return nil
 	}
 
-	var flags structs.JobInfo
-	flagset := cmd.createFlagset(description, "")
-	createJobinfoFlags(flagset, &flags)
-
-	if err := cmd.parseJobinfoFlags(flagset, &flags); err != nil {
-		return err
-	}
-
-	b, err := Server.GetCommand("jobs" + "/" + flags.Id)
-
+	flags, err := cmd.parseJobinfoFlags(d)
 	if err != nil {
 		return err
 	}
 
-	if b.Len() == 0 {
-		fmt.Fprintln(OutBuf, "no jobs found")
-		return nil
-	}
-
-	decoder := json.NewDecoder(b)
-	var jobs []structs.JobInfo
-	if err := decoder.Decode(&jobs); err != nil {
+	b, err := Server.CommandGet("jobs" + "/" + flags.Id)
+	if err != nil {
 		return err
 	}
 
-	for i, job := range jobs {
-		if flags.Id == "" {
-			if i == 0 {
-				fmt.Fprintf(OutBuf, "%20s  %20s\n", "Id", "Status")
-			}
+	jobs, err := decodeJobs(b)
+	if err != nil {
+		return err
+	}
+
+	printJobs(OutBuf, jobs, flags.Id == "")
+
+	return nil
+}
+
+func decodeJobs(b *bytes.Buffer) ([]structs.JobInfo, error) {
+	decoder := json.NewDecoder(b)
+	var jobs []structs.JobInfo
+	if b.Len() > 0 {
+		if err := decoder.Decode(&jobs); err != nil {
+			return jobs, err
+		}
+	}
+	return jobs, nil
+}
+
+func printJobs(OutBuf io.Writer, jobs []structs.JobInfo, short bool) {
+	if len(jobs) == 0 {
+		fmt.Fprintln(OutBuf, "no jobs found")
+		return
+	}
+
+	if short {
+		fmt.Fprintf(OutBuf, "%20s  %20s\n", "Id", "Status")
+	}
+
+	for _, job := range jobs {
+		if short {
 			job.PrintShort(OutBuf)
 		} else {
 			job.PrintFull(OutBuf)
 		}
 	}
-	return err
+
 }

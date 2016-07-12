@@ -29,29 +29,29 @@ func TestPostcommand(t *testing.T) {
 	var srv Server
 
 	srv.Port = -4
-	b, err := srv.PostCommand("jobs", nil)
+	b, err := srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
 
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 
-	b, err = srv.PostCommand("jobs", ts)
+	b, err = srv.CommandPost("jobs", ts)
 	assert.NotNil(t, err, "Should be error in json encoder")
 
 	// nil is actually a bad option but since we use mock server we cannot check it
-	b, err = srv.PostCommand("jobs", nil)
+	b, err = srv.CommandPost("jobs", nil)
 	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"1\",\"Status\":1}\n",
 		b.String(), "")
 
 	srv.Port = 10000
-	b, err = srv.PostCommand("jobs", nil)
+	b, err = srv.CommandPost("jobs", nil)
 	assert.Contains(t, err.Error(), "connection refused", "")
 
 	srv.Host = "aaa"
-	b, err = srv.PostCommand("jobs", nil)
+	b, err = srv.CommandPost("jobs", nil)
 	assert.Contains(t, err.Error(), "no such host", "")
 
-	b, err = srv.PostCommand("jobs", nil)
+	b, err = srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "Should be error in responce")
 
 }
@@ -73,7 +73,7 @@ func TestGetcommand(t *testing.T) {
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 	for _, test := range getTests {
-		b, err := srv.GetCommand(test.path)
+		b, err := srv.CommandGet(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.errmsg)
 		} else {

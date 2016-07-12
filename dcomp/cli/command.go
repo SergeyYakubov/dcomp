@@ -11,9 +11,9 @@ type command struct {
 	args []string
 }
 
-func (cmd *command) description(description string) bool {
+func (cmd *command) description(d string) bool {
 	if len(cmd.args) == 1 && cmd.args[0] == "description" {
-		fmt.Fprintf(OutBuf, "   %.20s \t\t%s\n", cmd.name, description)
+		fmt.Fprintf(OutBuf, "   %.20s \t\t%s\n", cmd.name, d)
 		return true
 	}
 	return false

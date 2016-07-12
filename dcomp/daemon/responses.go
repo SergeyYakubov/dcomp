@@ -7,7 +7,7 @@ import (
 )
 
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
-	b, err := DBServer.GetCommand("jobs")
+	b, err := DBServer.CommandGet("jobs")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
@@ -19,7 +19,7 @@ func GetAllJobs(w http.ResponseWriter, r *http.Request) {
 func GetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	b, err := DBServer.GetCommand("jobs" + "/" + jobID)
+	b, err := DBServer.CommandGet("jobs" + "/" + jobID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 	} else {
