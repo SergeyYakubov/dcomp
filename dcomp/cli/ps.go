@@ -21,7 +21,7 @@ func createJobinfoFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
 func (cmd *command) parseJobinfoFlags(d string) (structs.JobInfo, error) {
 
 	var flags structs.JobInfo
-	flagset := cmd.createFlagset(d, "")
+	flagset := cmd.createFlagset(d, "[OPTIONS]")
 	createJobinfoFlags(flagset, &flags)
 
 	flagset.Parse(cmd.args)
@@ -38,7 +38,7 @@ func (cmd *command) parseJobinfoFlags(d string) (structs.JobInfo, error) {
 
 }
 
-func (cmd *command) CommandJobinfo() error {
+func (cmd *command) CommandPs() error {
 
 	d := "Show job information"
 

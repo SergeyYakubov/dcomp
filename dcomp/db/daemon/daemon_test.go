@@ -45,6 +45,11 @@ var getTests = []getrequest{
 	{"jobs/578359205e935a20adb39a19", "GET", "not found", "job not exist", 404},
 	{"jobs/2", "GET", "cannot", "wrong format", 400},
 	{"job", "GET", "not found", "wrong path", 404},
+	{"jobs/578359205e935a20adb39a18", "DELETE", "", "delete job", 200},
+	{"jobs/578359205e935a20adb39a19", "DELETE", "not found", "job not exist", 400},
+	{"jobs", "DELETE", "not found", "delete all jobs", 404},
+	{"jobs/2", "DELETE", "cannot", "wrong format", 400},
+	{"job", "DELETE", "not found", "wrong path", 404},
 }
 
 func preparedatabase() error {
@@ -92,7 +97,7 @@ func TestSubmitJob(t *testing.T) {
 	}
 }
 
-func TestGetJob(t *testing.T) {
+func TestGetDeleteJob(t *testing.T) {
 	mux := utils.NewRouter(ListRoutes)
 
 	if err := preparedatabase(); err != nil {

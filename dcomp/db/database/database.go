@@ -9,6 +9,7 @@ type agent interface {
 	CreateRecord(interface{}) (string, error)
 	GetRecords(interface{}, interface{}) error
 	GetRecordByID(string, interface{}) error
+	DeleteRecordByID(string) error
 	Connect(string) error
 	SetDefaults()
 	Close()
@@ -72,4 +73,11 @@ func GetRecordById(id string, res interface{}) (err error) {
 		return errors.New("database not set")
 	}
 	return db.GetRecordByID(id, res)
+}
+
+func DeleteRecordById(id string) (err error) {
+	if db == nil {
+		return errors.New("database not set")
+	}
+	return db.DeleteRecordByID(id)
 }

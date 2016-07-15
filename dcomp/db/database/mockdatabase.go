@@ -5,8 +5,9 @@ package database
 import (
 	"errors"
 
-	"gopkg.in/mgo.v2/bson"
 	"reflect"
+
+	"gopkg.in/mgo.v2/bson"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
@@ -49,6 +50,20 @@ func (db *mockdatabase) GetRecordByID(id string, records interface{}) error {
 	q := querryM{bson.ObjectIdHex(id)}
 
 	return db.GetRecords(&q, records)
+}
+
+func (db *mockdatabase) DeleteRecordByID(id string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("wrong id")
+	}
+
+	if id == "578359205e935a20adb39a18" {
+		return nil
+	} else {
+		return errors.New("job not found")
+	}
+
+	return nil
 }
 
 func (db *mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {

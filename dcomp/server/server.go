@@ -76,3 +76,25 @@ func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
 
 	return b, nil
 }
+
+func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
+
+	req, err := http.NewRequest(http.MethodDelete, srv.Url(path), nil)
+	if err != nil {
+		return nil, err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	io.Copy(b, res.Body)
+
+	if res.StatusCode != http.StatusOK {
+		err = errors.New(b.String())
+		return nil, err
+	}
+
+	return b, nil
+}

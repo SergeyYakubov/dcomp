@@ -23,4 +23,10 @@ var ListRoutes = utils.Routes{
 		"/jobs/",
 		SubmitJob,
 	},
+	utils.Route{
+		"DeleteJob",
+		"DELETE",
+		"/jobs/{jobID}/",
+		DeleteJob,
+	},
 }

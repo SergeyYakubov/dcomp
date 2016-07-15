@@ -11,7 +11,7 @@ var CommandTests = []struct {
 	cmd    command
 	answer string
 }{
-	{command{"submit", []string{"description"}}, "   submit \t\tSubmit job for distributed computing\n"},
+	{command{"submit", []string{"description"}}, "Submit"},
 	{command{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "1\n"},
 }
 
@@ -19,7 +19,7 @@ var CommandFailingTests = []struct {
 	cmd    command
 	answer string
 }{
-	{command{"dummy", []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
+	{command{"dummy", []string{"description"}}, "Submit"},
 }
 
 func TestCommand(t *testing.T) {
@@ -37,7 +37,7 @@ func TestCommand(t *testing.T) {
 		OutBuf.(*bytes.Buffer).Reset()
 		err := DoCommand(test.cmd.name, test.cmd.args)
 		assert.Nil(t, err, "Should not be error")
-		assert.Equal(t, test.answer, OutBuf.(*bytes.Buffer).String(), "")
+		assert.Contains(t, OutBuf.(*bytes.Buffer).String(), test.answer, "")
 
 	}
 }

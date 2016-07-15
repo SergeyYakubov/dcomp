@@ -22,7 +22,7 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 
 	b := new(bytes.Buffer)
 	if err := json.NewEncoder(b).Encode(jobs); err != nil {
-		http.Error(w, "cannot retrieve database job info", http.StatusInternalServerError)
+		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	w.Write(b.Bytes())
@@ -32,7 +32,7 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 func GetAllJobs(w http.ResponseWriter, r *http.Request) {
 	var jobs []structs.JobInfo
 	if err := database.GetAllRecords(&jobs); err != nil {
-		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
+		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -45,12 +45,24 @@ func GetJob(w http.ResponseWriter, r *http.Request) {
 	var jobs []structs.JobInfo
 
 	if err := database.GetRecordById(jobID, &jobs); err != nil {
-		http.Error(w, "cannot retrieve database job info", http.StatusBadRequest)
+		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	sendJobs(w, jobs, false)
 
+}
+
+func DeleteJob(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	jobID := vars["jobID"]
+
+	if err := database.DeleteRecordById(jobID); err != nil {
+		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	return
 }
 
 func SubmitJob(w http.ResponseWriter, r *http.Request) {

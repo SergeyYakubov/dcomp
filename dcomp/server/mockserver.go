@@ -25,6 +25,12 @@ var ListRoutes = utils.Routes{
 		MockFuncGet,
 	},
 	utils.Route{
+		"DeleteJob",
+		"DELETE",
+		"/jobs/{jobID}/",
+		MockFuncDelete,
+	},
+	utils.Route{
 		"SubmitJob",
 		"POST",
 		"/jobs/",
@@ -51,6 +57,16 @@ func MockFuncGet(w http.ResponseWriter, r *http.Request) {
 	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+}
+
+func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	jobID := vars["jobID"]
+	if jobID != "578359205e935a20adb39a18" {
+		http.Error(w, "job not found", http.StatusNotFound)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func CreateMockServer(srv *Server) *httptest.Server {

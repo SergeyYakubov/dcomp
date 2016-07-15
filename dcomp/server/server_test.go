@@ -64,9 +64,16 @@ type getrequest struct {
 
 var getTests = []getrequest{
 	{"jobs/578359205e935a20adb39a18", "578359205e935a20adb39a18", "get job 1"},
-	{"jobs/2", "not found", "wrong format"},
+	{"jobs/2", "not found", "wrong job id"},
 	{"job", "not found", "wrong path"},
 }
+
+var rmTests = []getrequest{
+	{"jobs/578359205e935a20adb39a18", "", "get job 1"},
+	{"jobs/2", "not found", "wrong job id"},
+	{"job", "not found", "wrong path"},
+}
+
 
 func TestGetcommand(t *testing.T) {
 	var srv Server
@@ -74,6 +81,20 @@ func TestGetcommand(t *testing.T) {
 	defer ts.Close()
 	for _, test := range getTests {
 		b, err := srv.CommandGet(test.path)
+		if err != nil {
+			assert.Contains(t, err.Error(), test.body, test.errmsg)
+		} else {
+			assert.Contains(t, b.String(), test.body, test.errmsg)
+		}
+
+	}
+}
+func TestDeletecommand(t *testing.T) {
+	var srv Server
+	ts := CreateMockServer(&srv)
+	defer ts.Close()
+	for _, test := range rmTests {
+		b, err := srv.CommandDelete(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.errmsg)
 		} else {

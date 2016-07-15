@@ -40,7 +40,7 @@ func (cmd *command) CommandSubmit() error {
 
 	var flags structs.JobDescription
 
-	flagset := cmd.createFlagset(description, "IMAGE [COMMAND] [ARG...]")
+	flagset := cmd.createFlagset(description, "[OPTIONS] IMAGE")
 
 	createSubmitFlags(flagset, &flags)
 

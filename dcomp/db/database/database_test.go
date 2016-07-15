@@ -65,3 +65,14 @@ func TestGetAllRecords(t *testing.T) {
 	assert.Equal(t, 1, records[0].Status, "TestGetRecords should return 1")
 	assert.Equal(t, 1, records[1].Status, "TestGetRecords should return 2")
 }
+
+func TestDeleteRecord(t *testing.T) {
+	db = new(mockdatabase)
+	defer func() { db = nil }()
+
+	err := DeleteRecordById("578359205e935a20adb39a18")
+	assert.Nil(t, err, "Delete record")
+
+	err = DeleteRecordById("578359205e935a20adb39a19")
+	assert.NotNil(t, err, "Not found record")
+}

@@ -71,10 +71,21 @@ func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 	return err
 }
 
-func (db *mongodb) GetRecordByID(id string, res interface{}) (err error) {
+func (db *mongodb) GetRecordByID(id string, res interface{}) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("wrong id")
 	}
 	q := bson.M{"_id": bson.ObjectIdHex(id)}
 	return db.GetRecords(q, res)
+}
+
+func (db *mongodb) DeleteRecordByID(id string) error {
+	if !bson.IsObjectIdHex(id) {
+		return errors.New("wrong id")
+	}
+	q := bson.M{"_id": bson.ObjectIdHex(id)}
+
+	c := db.session.DB(db.name).C(db.col)
+	_, err := c.RemoveAll(q)
+	return err
 }

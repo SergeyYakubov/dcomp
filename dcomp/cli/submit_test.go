@@ -11,7 +11,7 @@ var submitOtherTests = []struct {
 	cmd    command
 	answer string
 }{
-	{command{args: []string{"description"}}, "    \t\tSubmit job for distributed computing\n"},
+	{command{args: []string{"description"}}, "Submit"},
 }
 
 var submitTests = []command{
@@ -44,7 +44,7 @@ func TestSubmitCommand(t *testing.T) {
 	for _, test := range submitOtherTests {
 		err := test.cmd.CommandSubmit()
 		assert.Nil(t, err, "Should not be error")
-		assert.Equal(t, test.answer, OutBuf.(*bytes.Buffer).String(), "")
+		assert.Contains(t, OutBuf.(*bytes.Buffer).String(), test.answer, "")
 		OutBuf.(*bytes.Buffer).Reset()
 	}
 

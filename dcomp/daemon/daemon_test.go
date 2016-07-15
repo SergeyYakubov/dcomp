@@ -30,11 +30,15 @@ var submitTests = []request{
 	{structs.JobDescription{}, "jobs/1", "POST", 404, "create job - wrong path"},
 }
 
-var getTests = []request{
+var getdeleteTests = []request{
 	{structs.JobDescription{}, "jobs", "GET", 200, "Get all jobs"},
 	{structs.JobDescription{}, "jobs/578359205e935a20adb39a18", "GET", 200, "Get existing job"},
 	{structs.JobDescription{}, "jobs/1", "GET", 404, "Get non-existing job"},
 	{structs.JobDescription{}, "job", "GET", 404, "get job - wrong path"},
+	{structs.JobDescription{}, "jobs/578359205e935a20adb39a18", "DELETE", 200, "delete existing job"},
+	{structs.JobDescription{}, "jobs/1", "DELETE", 404, "delete non-existing job"},
+	{structs.JobDescription{}, "jobs", "DELETE", 404, "delete all jobs"},
+	{structs.JobDescription{}, "job", "DELETE", 404, "delete job - wrong path"},
 }
 
 func TestSubmitJob(t *testing.T) {
@@ -70,7 +74,7 @@ func TestSubmitJob(t *testing.T) {
 func TestGetJob(t *testing.T) {
 	mux := utils.NewRouter(ListRoutes)
 
-	for _, test := range getTests {
+	for _, test := range getdeleteTests {
 
 		ts := server.CreateMockServer(&DBServer)
 
