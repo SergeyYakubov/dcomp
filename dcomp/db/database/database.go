@@ -41,11 +41,17 @@ func Create(name string) error {
 }
 
 func Connect() error {
+	if db == nil {
+		return errors.New("database not set")
+	}
+
 	return db.Connect(dbServer.HostPort())
 }
 
 func Close() {
-	db.Close()
+	if db != nil {
+		db.Close()
+	}
 	db = nil
 }
 

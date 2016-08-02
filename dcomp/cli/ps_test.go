@@ -19,22 +19,22 @@ var showJobsTests = []struct {
 }
 
 func TestCommandPs(t *testing.T) {
-	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server)
+	outBuf = new(bytes.Buffer)
+	ts := server.CreateMockServer(&daemon)
 	defer ts.Close()
 
 	for _, test := range showJobsTests {
 		err := test.cmd.CommandPs()
 		if err == nil {
-			assert.Contains(t, OutBuf.(*bytes.Buffer).String(), test.answer, "")
+			assert.Contains(t, outBuf.(*bytes.Buffer).String(), test.answer, "")
 		} else {
 			assert.Contains(t, err.Error(), test.answer, "")
 		}
 
-		OutBuf.(*bytes.Buffer).Reset()
+		outBuf.(*bytes.Buffer).Reset()
 	}
 
-	Server.Port = -1
+	daemon.Port = -1
 	err := showJobsTests[1].cmd.CommandPs()
 	assert.NotNil(t, err, "Should be error")
 

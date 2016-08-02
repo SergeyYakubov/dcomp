@@ -1,8 +1,11 @@
+// Package contains dComp commands that can be executed from command line.
+// Every CommandXxxx function that is a member of a cmd struct processes dcomp xxxx command
 package cli
 
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"reflect"
@@ -11,7 +14,7 @@ import (
 
 var flHelp bool
 
-var OutBuf io.Writer = os.Stdout
+var outBuf io.Writer = os.Stdout
 
 func printHelp(f *flag.FlagSet) bool {
 	if flHelp {
@@ -22,6 +25,7 @@ func printHelp(f *flag.FlagSet) bool {
 	}
 }
 
+// DoCommand takes command name as a parameter and executes corresponding to this name cmd method
 func DoCommand(name string, args []string) error {
 	commandName := "Command" + strings.ToUpper(name[:1]) + strings.ToLower(name[1:])
 	cmd := new(command)
@@ -38,7 +42,9 @@ func DoCommand(name string, args []string) error {
 	return method()
 }
 
+// PrintAllCommands prints all available commands (found wihtin methods of cmd)
 func PrintAllCommands() {
+	fmt.Fprintln(outBuf, "\nCommands:")
 	cmd := new(command)
 	CmdType := reflect.TypeOf(cmd)
 	for i := 0; i < CmdType.NumMethod(); i++ {

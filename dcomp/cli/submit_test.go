@@ -27,15 +27,15 @@ var submitFailingTests = []command{
 }
 
 func TestSubmitCommand(t *testing.T) {
-	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server)
+	outBuf = new(bytes.Buffer)
+	ts := server.CreateMockServer(&daemon)
 	defer ts.Close()
 
 	for _, test := range submitTests {
 		err := test.CommandSubmit()
 		assert.Nil(t, err, "Should not be error")
-		assert.Equal(t, "1\n", OutBuf.(*bytes.Buffer).String(), "")
-		OutBuf.(*bytes.Buffer).Reset()
+		assert.Equal(t, "1\n", outBuf.(*bytes.Buffer).String(), "")
+		outBuf.(*bytes.Buffer).Reset()
 	}
 	for _, test := range submitFailingTests {
 		err := test.CommandSubmit()
@@ -44,11 +44,11 @@ func TestSubmitCommand(t *testing.T) {
 	for _, test := range submitOtherTests {
 		err := test.cmd.CommandSubmit()
 		assert.Nil(t, err, "Should not be error")
-		assert.Contains(t, OutBuf.(*bytes.Buffer).String(), test.answer, "")
-		OutBuf.(*bytes.Buffer).Reset()
+		assert.Contains(t, outBuf.(*bytes.Buffer).String(), test.answer, "")
+		outBuf.(*bytes.Buffer).Reset()
 	}
 
-	Server.Port = -1
+	daemon.Port = -1
 	err := submitTests[0].CommandSubmit()
 	assert.NotNil(t, err, "Should be error")
 

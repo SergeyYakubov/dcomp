@@ -14,15 +14,46 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-func createJobinfoFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
+// CommandPs retrieves jobs info from daemon and prints info
+func (cmd *command) CommandPs() error {
+
+	d := "Show job information"
+
+	if cmd.description(d) {
+		return nil
+	}
+
+	flags, err := cmd.parsePsFlags(d)
+	if err != nil {
+		return err
+	}
+
+	b, err := daemon.CommandGet("jobs" + "/" + flags.Id)
+	if err != nil {
+		return err
+	}
+
+	// jobs are returned as json string containing []structs.JobInfo
+	jobs, err := decodeJobs(b)
+	if err != nil {
+		return err
+	}
+
+	printJobs(outBuf, jobs, flags.Id == "")
+
+	return nil
+}
+
+func createPsFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
 	flagset.StringVar(&flags.Id, "id", "", "Job Id")
 }
 
-func (cmd *command) parseJobinfoFlags(d string) (structs.JobInfo, error) {
+func (cmd *command) parsePsFlags(d string) (structs.JobInfo, error) {
 
 	var flags structs.JobInfo
-	flagset := cmd.createFlagset(d, "[OPTIONS]")
-	createJobinfoFlags(flagset, &flags)
+	flagset := cmd.createDefaultFlagset(d, "[OPTIONS]")
+
+	createPsFlags(flagset, &flags)
 
 	flagset.Parse(cmd.args)
 
@@ -36,34 +67,6 @@ func (cmd *command) parseJobinfoFlags(d string) (structs.JobInfo, error) {
 
 	return flags, nil
 
-}
-
-func (cmd *command) CommandPs() error {
-
-	d := "Show job information"
-
-	if cmd.description(d) {
-		return nil
-	}
-
-	flags, err := cmd.parseJobinfoFlags(d)
-	if err != nil {
-		return err
-	}
-
-	b, err := Server.CommandGet("jobs" + "/" + flags.Id)
-	if err != nil {
-		return err
-	}
-
-	jobs, err := decodeJobs(b)
-	if err != nil {
-		return err
-	}
-
-	printJobs(OutBuf, jobs, flags.Id == "")
-
-	return nil
 }
 
 func decodeJobs(b *bytes.Buffer) ([]structs.JobInfo, error) {

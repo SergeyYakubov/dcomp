@@ -79,7 +79,7 @@ func SubmitJob(w http.ResponseWriter, r *http.Request) {
 	t.Status = 1
 	id, err := database.CreateRecord(t)
 	if err != nil {
-		http.Error(w, "bad request "+err.Error(), http.StatusBadRequest)
+		http.Error(w, "cannot create record "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	t.Id = id

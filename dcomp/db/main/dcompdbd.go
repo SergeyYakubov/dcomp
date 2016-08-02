@@ -29,7 +29,7 @@ func initdb(name string) error {
 
 func main() {
 
-	if ret := version.ShowVersion(os.Stdout, "dCompdbd"); ret {
+	if ret := version.ShowVersion(os.Stdout, "dcompdbd"); ret {
 		return
 	}
 

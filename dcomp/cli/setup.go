@@ -4,10 +4,11 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-var Server server.Server
+var daemon server.Server
 
-func SetServerConfiguration() error {
-	Server.Host = "localhost"
-	Server.Port = 8000
+// SetDaemonConfiguration reads configuration file with daemon location
+func SetDaemonConfiguration() error {
+	daemon.Host = "localhost"
+	daemon.Port = 8000
 	return nil
 }

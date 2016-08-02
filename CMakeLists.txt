@@ -17,10 +17,15 @@ add_custom_target(dcomp ALL
 				  VERBATIM)
 
 add_custom_target(dcompdbd ALL
-				  COMMAND go build -o bin/dcompdbd ./dcomp/db/dcompdbd
+				  COMMAND go build -o bin/dcompdbd ./dcomp/db/main
 				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
 				  VERBATIM)
 
-					
+add_custom_target(dcompestd ALL
+        				  COMMAND go build -o bin/dcompestd ./dcomp/estimator/main
+        				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
+        				  VERBATIM)
+
 add_dependencies (dcomp make_version)
 add_dependencies (dcompdbd make_version)
+add_dependencies (dcompestd make_version)

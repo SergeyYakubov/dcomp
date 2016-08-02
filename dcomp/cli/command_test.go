@@ -23,27 +23,27 @@ var CommandFailingTests = []struct {
 }
 
 func TestCommand(t *testing.T) {
-	OutBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&Server)
+	outBuf = new(bytes.Buffer)
+	ts := server.CreateMockServer(&daemon)
 	defer ts.Close()
 
 	for _, test := range CommandFailingTests {
-		OutBuf.(*bytes.Buffer).Reset()
+		outBuf.(*bytes.Buffer).Reset()
 		err := DoCommand(test.cmd.name, test.cmd.args)
 		assert.NotNil(t, err, "Should be error")
 
 	}
 	for _, test := range CommandTests {
-		OutBuf.(*bytes.Buffer).Reset()
+		outBuf.(*bytes.Buffer).Reset()
 		err := DoCommand(test.cmd.name, test.cmd.args)
 		assert.Nil(t, err, "Should not be error")
-		assert.Contains(t, OutBuf.(*bytes.Buffer).String(), test.answer, "")
+		assert.Contains(t, outBuf.(*bytes.Buffer).String(), test.answer, "")
 
 	}
 }
 
 func TestPrintAllCommands(t *testing.T) {
-	OutBuf = new(bytes.Buffer)
+	outBuf = new(bytes.Buffer)
 	PrintAllCommands()
-	assert.Contains(t, OutBuf.(*bytes.Buffer).String(), "submit", "all commands mus have submit")
+	assert.Contains(t, outBuf.(*bytes.Buffer).String(), "submit", "all commands mus have submit")
 }

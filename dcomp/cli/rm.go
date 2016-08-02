@@ -10,6 +10,30 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
+// CommandRm removes job with given id from all places (computationsl queue, database, etc.)
+func (cmd *command) CommandRm() error {
+
+	d := "Cancel job"
+
+	if cmd.description(d) {
+		return nil
+	}
+
+	flags, err := cmd.parseRmFlags(d)
+	if err != nil {
+		return err
+	}
+
+	_, err = daemon.CommandDelete("jobs" + "/" + flags.Id)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(outBuf, "Job deleted: %s\n", flags.Id)
+
+	return nil
+}
+
 func createRmFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
 	flagset.StringVar(&flags.Id, "id", "", "Job Id")
 }
@@ -17,7 +41,7 @@ func createRmFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
 func (cmd *command) parseRmFlags(d string) (structs.JobInfo, error) {
 
 	var flags structs.JobInfo
-	flagset := cmd.createFlagset(d, "[OPTIONS]")
+	flagset := cmd.createDefaultFlagset(d, "[OPTIONS]")
 
 	createRmFlags(flagset, &flags)
 
@@ -37,27 +61,4 @@ func (cmd *command) parseRmFlags(d string) (structs.JobInfo, error) {
 
 	return flags, nil
 
-}
-
-func (cmd *command) CommandRm() error {
-
-	d := "Cancel job"
-
-	if cmd.description(d) {
-		return nil
-	}
-
-	flags, err := cmd.parseRmFlags(d)
-	if err != nil {
-		return err
-	}
-
-	_, err = Server.CommandDelete("jobs" + "/" + flags.Id)
-	if err != nil {
-		return err
-	}
-
-	fmt.Fprintf(OutBuf, "Job deleted: %s\n", flags.Id)
-
-	return nil
 }
