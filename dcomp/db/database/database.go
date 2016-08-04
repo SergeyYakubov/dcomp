@@ -1,3 +1,5 @@
+// Package containes a database objects and functions to work with it.
+// db is an interface to a specific implementation (currently implemented mongodb and mockdatabase used for tests)
 package database
 
 import (
@@ -19,7 +21,7 @@ var db agent
 
 var dbServer server.Server
 
-func SetServerConfiguration() error {
+func setServerConfiguration() error {
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
 	return nil
@@ -37,7 +39,8 @@ func Create(name string) error {
 	}
 
 	db.SetDefaults()
-	return nil
+
+	return setServerConfiguration()
 }
 
 func Connect() error {

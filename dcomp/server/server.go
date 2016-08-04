@@ -51,7 +51,7 @@ func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, 
 	defer res.Body.Close()
 	io.Copy(b, res.Body)
 
-	if res.StatusCode != http.StatusCreated {
+	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
 		err = errors.New(b.String())
 		return nil, err
 	}

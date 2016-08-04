@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func GetAllJobs(w http.ResponseWriter, r *http.Request) {
-	b, err := DBServer.CommandGet("jobs")
+func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
+	b, err := dbServer.CommandGet("jobs")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	} else {
@@ -16,10 +16,10 @@ func GetAllJobs(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func GetJob(w http.ResponseWriter, r *http.Request) {
+func routeGetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	b, err := DBServer.CommandGet("jobs" + "/" + jobID)
+	b, err := dbServer.CommandGet("jobs" + "/" + jobID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 	} else {

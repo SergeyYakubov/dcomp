@@ -36,11 +36,22 @@ var ListRoutes = utils.Routes{
 		"/jobs/",
 		MockFuncSubmit,
 	},
+	utils.Route{
+		"EstimateJob",
+		"POST",
+		"/estimations/",
+		MockFuncEstimate,
+	},
 }
 
 func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, `{"ImageName":"ddd","Script":"aaa","NCPUs":1,"Id":"1","Status":1}`)
+	fmt.Fprintln(w, `{"ImageName":"submittedimage","Script":"aaa","NCPUs":1,"Id":"1","Status":1}`)
+}
+
+func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, `{"HPC":0,"Cloud":10,"Batch":0}`)
 }
 
 func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {

@@ -19,8 +19,9 @@ type JobDescription struct {
 
 type JobInfo struct {
 	JobDescription
-	Id     string `bson:"_hex_id"`
-	Status int
+	Id       string `bson:"_hex_id"`
+	Status   int
+	Resource string
 }
 
 func (d *JobDescription) Check() error {

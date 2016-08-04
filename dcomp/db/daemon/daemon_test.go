@@ -57,10 +57,6 @@ func preparedatabase() error {
 		return errors.New("Create database" + err.Error())
 	}
 
-	if err := database.SetServerConfiguration(); err != nil {
-		return errors.New("Set server config" + err.Error())
-	}
-
 	if err := database.Connect(); err != nil {
 		return errors.New("Connect to the database " + err.Error())
 	}
@@ -68,7 +64,7 @@ func preparedatabase() error {
 }
 
 func TestSubmitJob(t *testing.T) {
-	mux := utils.NewRouter(ListRoutes)
+	mux := utils.NewRouter(listRoutes)
 
 	if err := preparedatabase(); err != nil {
 		t.Error("Create database" + err.Error())
@@ -98,7 +94,7 @@ func TestSubmitJob(t *testing.T) {
 }
 
 func TestGetDeleteJob(t *testing.T) {
-	mux := utils.NewRouter(ListRoutes)
+	mux := utils.NewRouter(listRoutes)
 
 	if err := preparedatabase(); err != nil {
 		t.Error("Create database" + err.Error())
@@ -106,7 +102,7 @@ func TestGetDeleteJob(t *testing.T) {
 	}
 	defer database.Close()
 
-	s := structs.JobInfo{structs.JobDescription{}, "dummyid", 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
 	database.CreateRecord(&s)
 
 	for _, test := range getTests {

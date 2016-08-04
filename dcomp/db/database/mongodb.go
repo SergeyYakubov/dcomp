@@ -16,18 +16,25 @@ type mongodb struct {
 	timeout time.Duration
 }
 
+// CreateRecord creates a database record with new unique id. s should be is an object that
+// mgo understands (go struct is OK)
 func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 
 	if db.session == nil {
 		return "", errors.New("database session not created")
 	}
 	c := db.session.DB(db.name).C(db.col)
+
+	// create new unique id
 	id := bson.NewObjectId()
+
 	_, err := c.UpsertId(id, s)
 
 	if err != nil {
 		return "", err
 	}
+	// we keep both object id for faster search and its hex representation which can be passed to clients
+	// within JSON struct
 	err = c.UpdateId(id, bson.M{"$set": bson.M{"_hex_id": id.Hex()}})
 	if err != nil {
 		return "", err
@@ -53,6 +60,8 @@ func (db *mongodb) SetDefaults() {
 	db.timeout = 10 * time.Second
 }
 
+// GetRecords issues a request to mongodb. q should be a bson.M object or go struct with fields to match
+// returns
 func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 
 	c := db.session.DB(db.name).C(db.col)
@@ -71,17 +80,24 @@ func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 	return err
 }
 
-func (db *mongodb) GetRecordByID(id string, res interface{}) error {
+func checkID(id string) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("wrong id")
+	}
+	return nil
+}
+
+func (db *mongodb) GetRecordByID(id string, res interface{}) error {
+	if err := checkID(id); err != nil {
+		return err
 	}
 	q := bson.M{"_id": bson.ObjectIdHex(id)}
 	return db.GetRecords(q, res)
 }
 
 func (db *mongodb) DeleteRecordByID(id string) error {
-	if !bson.IsObjectIdHex(id) {
-		return errors.New("wrong id")
+	if err := checkID(id); err != nil {
+		return err
 	}
 	q := bson.M{"_id": bson.ObjectIdHex(id)}
 

@@ -4,29 +4,29 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-var ListRoutes = utils.Routes{
+var listRoutes = utils.Routes{
 	utils.Route{
 		"GetAllJobs",
 		"GET",
 		"/jobs/",
-		GetAllJobs,
+		getAllJobs,
 	},
 	utils.Route{
 		"GetJob",
 		"GET",
 		"/jobs/{jobID}/",
-		GetJob,
+		getJob,
 	},
 	utils.Route{
 		"SubmitJob",
 		"POST",
 		"/jobs/",
-		SubmitJob,
+		submitJob,
 	},
 	utils.Route{
 		"DeleteJob",
 		"DELETE",
 		"/jobs/{jobID}/",
-		DeleteJob,
+		deleteJob,
 	},
 }

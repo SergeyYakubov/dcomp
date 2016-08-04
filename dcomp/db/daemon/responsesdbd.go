@@ -29,7 +29,7 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 
 }
 
-func GetAllJobs(w http.ResponseWriter, r *http.Request) {
+func getAllJobs(w http.ResponseWriter, r *http.Request) {
 	var jobs []structs.JobInfo
 	if err := database.GetAllRecords(&jobs); err != nil {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
@@ -39,7 +39,7 @@ func GetAllJobs(w http.ResponseWriter, r *http.Request) {
 	sendJobs(w, jobs, true)
 }
 
-func GetJob(w http.ResponseWriter, r *http.Request) {
+func getJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 	var jobs []structs.JobInfo
@@ -53,7 +53,7 @@ func GetJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func DeleteJob(w http.ResponseWriter, r *http.Request) {
+func deleteJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 
@@ -65,7 +65,7 @@ func DeleteJob(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func SubmitJob(w http.ResponseWriter, r *http.Request) {
+func submitJob(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("Content-type", "application/json")
 

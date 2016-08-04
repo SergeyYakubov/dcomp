@@ -39,7 +39,7 @@ func TestMdbCreateRecord(t *testing.T) {
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
 
-	s := structs.JobInfo{structs.JobDescription{}, "dummyid", 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
 
 	err = Connect()
 	assert.Nil(t, err, "connected to database")
@@ -68,7 +68,7 @@ func TestMdbGetRecords(t *testing.T) {
 	err = Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{structs.JobDescription{"name", "script", 20}, "dummyid", 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{"name", "script", 20}, Id: "dummyid", Status: 1}
 	id, err := db.CreateRecord(&s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
@@ -82,6 +82,10 @@ func TestMdbGetRecords(t *testing.T) {
 
 	assert.Equal(t, 1, len(records), "TestMdbGetRecords should return 1")
 	assert.Equal(t, id, records[0].Id, "TestMdbGetRecords should return same id")
+
+	err = db.GetRecords("aaa", &records)
+	assert.NotNil(t, err, "wrong querry")
+
 	db = nil
 
 }
@@ -96,7 +100,7 @@ func TestMdbGetRecordByID(t *testing.T) {
 	err = Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{structs.JobDescription{}, "dummyid", 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
 	id, err := db.CreateRecord(&s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")

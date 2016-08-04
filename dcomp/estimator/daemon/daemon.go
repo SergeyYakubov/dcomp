@@ -1,14 +1,15 @@
-// Package for central dComp daemon
+// Package for estimator daemon
 package daemon
 
 import (
 	"log"
 	"net/http"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-func Start(args []string) {
+func Start() {
 	mux := utils.NewRouter(listRoutes)
-	setServers()
-	log.Fatal(http.ListenAndServe(":8000", mux))
+	log.Fatal(http.ListenAndServe(":8002", mux))
+
 }

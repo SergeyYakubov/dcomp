@@ -40,7 +40,7 @@ func TestPostcommand(t *testing.T) {
 
 	// nil is actually a bad option but since we use mock server we cannot check it
 	b, err = srv.CommandPost("jobs", nil)
-	assert.Equal(t, "{\"ImageName\":\"ddd\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"1\",\"Status\":1}\n",
+	assert.Equal(t, "{\"ImageName\":\"submittedimage\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"1\",\"Status\":1}\n",
 		b.String(), "")
 
 	srv.Port = 10000
@@ -73,7 +73,6 @@ var rmTests = []getrequest{
 	{"jobs/2", "not found", "wrong job id"},
 	{"job", "not found", "wrong path"},
 }
-
 
 func TestGetcommand(t *testing.T) {
 	var srv Server

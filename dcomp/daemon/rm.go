@@ -6,10 +6,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func DeleteJob(w http.ResponseWriter, r *http.Request) {
+func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	b, err := DBServer.CommandDelete("jobs" + "/" + jobID)
+	b, err := dbServer.CommandDelete("jobs" + "/" + jobID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 	} else {

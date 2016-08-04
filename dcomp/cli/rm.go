@@ -10,7 +10,7 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-// CommandRm removes job with given id from all places (computationsl queue, database, etc.)
+// CommandRm removes job with given id from all places (computation queue, database, etc.)
 func (cmd *command) CommandRm() error {
 
 	d := "Cancel job"

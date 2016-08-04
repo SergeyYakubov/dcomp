@@ -4,11 +4,11 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-var ListRoutes = utils.Routes{
+var listRoutes = utils.Routes{
 	utils.Route{
 		"EstimateJob",
 		"POST",
 		"/estimations/",
-		EstimateJob,
+		routeEstimateJob,
 	},
 }

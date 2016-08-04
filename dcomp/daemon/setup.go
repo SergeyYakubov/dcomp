@@ -4,10 +4,13 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-var DBServer server.Server
+var dbServer server.Server
+var estimatorServer server.Server
 
-func SetServerConfiguration() error {
-	DBServer.Host = "localhost"
-	DBServer.Port = 8001
+func setServers() error {
+	dbServer.Host = "localhost"
+	dbServer.Port = 8001
+	estimatorServer.Host = "localhost"
+	estimatorServer.Port = 8002
 	return nil
 }

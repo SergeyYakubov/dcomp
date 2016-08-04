@@ -67,8 +67,9 @@ func (db *mockdatabase) DeleteRecordByID(id string) error {
 }
 
 func (db *mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
-	data := [...]structs.JobInfo{structs.JobInfo{structs.JobDescription{}, "578359205e935a20adb39a18", 1},
-		structs.JobInfo{structs.JobDescription{}, "578359235e935a21510a2243", 1}}
+	data := [...]structs.JobInfo{
+		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18", Status: 1},
+		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243", Status: 1}}
 
 	resultv := reflect.ValueOf(res)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {

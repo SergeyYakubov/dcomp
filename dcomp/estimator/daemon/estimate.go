@@ -3,10 +3,12 @@ package daemon
 import (
 	"net/http"
 
+	"bytes"
+	"encoding/json"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-func EstimateJob(w http.ResponseWriter, r *http.Request) {
+func routeEstimateJob(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("Content-type", "application/json")
 
@@ -19,7 +21,28 @@ func EstimateJob(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	//	b := new(bytes.Buffer)
-	//	json.NewEncoder(b).Encode(t)
-	//	w.Write(b.Bytes())
+	prio := estimate(t)
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(prio)
+	w.Write(b.Bytes())
+}
+
+// estimate uses very simple algorithm to assign priorities based on CPU number required for the job
+func estimate(job structs.JobDescription) (prio structs.ResourcePrio) {
+	prio = make(structs.ResourcePrio)
+	switch {
+	case job.NCPUs == 1:
+		prio["HPC"] = 1
+		prio["Batch"] = 10
+		prio["Cloud"] = 0
+	case job.NCPUs <= 8:
+		prio["HPC"] = 5
+		prio["Batch"] = 5
+		prio["Cloud"] = 0
+	default:
+		prio["HPC"] = 10
+		prio["Batch"] = 0
+		prio["Cloud"] = 0
+	}
+	return prio
 }
