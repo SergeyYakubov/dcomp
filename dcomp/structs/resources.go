@@ -2,6 +2,7 @@ package structs
 
 import "sort"
 
+// Keeps resources and their priorities
 type ResourcePrio map[string]int
 
 type pair struct {

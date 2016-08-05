@@ -48,7 +48,7 @@ func Connect() error {
 		return errors.New("database not set")
 	}
 
-	return db.Connect(dbServer.HostPort())
+	return db.Connect(dbServer.FullName())
 }
 
 func Close() {

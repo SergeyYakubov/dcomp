@@ -1,3 +1,4 @@
+// Package containes structures common between various services. Usually these structures used for HTTP requests
 package structs
 
 import (
@@ -11,12 +12,14 @@ type jobs interface {
 	Check() error
 }
 
+// Initial structure filled by user during job submittion
 type JobDescription struct {
 	ImageName string
 	Script    string
 	NCPUs     int
 }
 
+// Structure withi complete job information
 type JobInfo struct {
 	JobDescription
 	Id       string `bson:"_hex_id"`

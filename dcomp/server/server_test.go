@@ -19,7 +19,7 @@ var urltests = []struct {
 func TestUrl(t *testing.T) {
 	for _, test := range urltests {
 		srv := test.Server
-		assert.Equal(t, srv.Url(test.Path), test.Url, "")
+		assert.Equal(t, srv.url(test.Path), test.Url, "")
 	}
 
 }

@@ -11,7 +11,7 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-var ListRoutes = utils.Routes{
+var listRoutes = utils.Routes{
 	utils.Route{
 		"GetAllJobs",
 		"GET",
@@ -82,8 +82,8 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 
 func CreateMockServer(srv *Server) *httptest.Server {
 	var ts *httptest.Server
-	mux := utils.NewRouter(ListRoutes)
+	mux := utils.NewRouter(listRoutes)
 	ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
-	srv.ParseUrl(ts.URL)
+	srv.parseUrl(ts.URL)
 	return ts
 }
