@@ -15,7 +15,10 @@ import (
 type Mockdatabase struct {
 }
 
-func (db *Mockdatabase) CreateRecord(s interface{}) (string, error) {
+func (db *Mockdatabase) CreateRecord(given_id string, s interface{}) (string, error) {
+	if given_id == "give error" {
+		return "", errors.New("error create record")
+	}
 	return "578359205e935a20adb39a18", nil
 }
 
@@ -30,9 +33,8 @@ func (db *Mockdatabase) Connect() error {
 func (db *Mockdatabase) Close() {
 
 }
-func (db *Mockdatabase) SetDefaults() {
+func (db *Mockdatabase) SetDefaults(...interface{}) {
 }
-
 
 type querryM struct {
 	Id bson.ObjectId `bson:"_id"`

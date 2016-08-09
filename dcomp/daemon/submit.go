@@ -42,6 +42,7 @@ func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error)
 }
 
 func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
+
 	job, err = addJobToDatabase(t)
 	if err != nil {
 		return

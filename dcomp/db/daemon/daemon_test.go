@@ -82,7 +82,7 @@ func TestGetDeleteJob(t *testing.T) {
 	db = new(database.Mockdatabase)
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
-	db.CreateRecord(&s)
+	db.CreateRecord("", &s)
 
 	for _, test := range getTests {
 

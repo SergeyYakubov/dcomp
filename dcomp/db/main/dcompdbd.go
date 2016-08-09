@@ -6,14 +6,27 @@ import (
 
 	"stash.desy.de/scm/dc/main.git/dcomp/db/daemon"
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 
 	"stash.desy.de/scm/dc/main.git/dcomp/version"
 )
 
+func setServerConfiguration(srv *server.Server) error {
+	srv.Host = "172.17.0.2"
+	srv.Port = 27017
+	return nil
+}
+
 func initdb(name string) (db database.Agent, err error) {
-	if db, err = database.Create(name); err != nil {
+
+	db = new(database.Mongodb)
+	var srv server.Server
+	if err := setServerConfiguration(&srv); err != nil {
 		return nil, err
 	}
+
+	db.SetServer(&srv)
+	db.SetDefaults("daemondbd")
 
 	if err = db.Connect(); err != nil {
 		return nil, err

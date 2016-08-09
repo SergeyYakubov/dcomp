@@ -13,71 +13,66 @@ import (
 
 //these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)
 
-func TestMdbConnect(t *testing.T) {
-	db, err := Create("mongodb")
-	assert.Nil(t, err, "Pointer to mongodb should be set")
+func initdb() *Mongodb {
+	db := new(Mongodb)
 
 	var dbServer server.Server
 
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
 
-	err = db.Connect()
 	db.SetServer(&dbServer)
+	db.SetDefaults("daemondbd")
+
+	return db
+}
+
+func TestMdbConnect(t *testing.T) {
+
+	db := initdb()
+	err := db.Connect()
+
 	assert.Nil(t, err)
 	db.Close()
 
-	db.(*mongodb).timeout = time.Second / 10
-	dbServer.Host = ""
-	dbServer.Port = 27017
-	db.SetServer(&dbServer)
+	db.timeout = time.Second / 10
+	db.srv.Host = ""
+	db.srv.Port = 27017
 	err = db.Connect()
 	assert.NotNil(t, err)
 }
 
 func TestMdbCreateRecord(t *testing.T) {
 
-	db, err := Create("mongodb")
-	assert.Nil(t, err, "Pointer to mongodb shoud be set")
-
-	var dbServer server.Server
-
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
-	db.SetServer(&dbServer)
+	db := initdb()
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
 
-	err = db.Connect()
+	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
-	id, err := db.CreateRecord(&s)
+	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
 
-	id, err = db.CreateRecord(nil)
+	id, err = db.CreateRecord("", nil)
 	assert.NotNil(t, err, "nil record")
 	db.Close()
 
-	_, err = db.CreateRecord(&s)
+	_, err = db.CreateRecord("", &s)
 	assert.NotNil(t, err, "closed database")
 
 }
 
 func TestMdbGetRecords(t *testing.T) {
-	db, err := Create("mongodb")
-	assert.Nil(t, err, "Pointer to mongodb shoud be set")
-	var dbServer server.Server
 
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
-	db.SetServer(&dbServer)
+	db := initdb()
 
-	err = db.Connect()
+	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{"name", "script", 20}, Id: "dummyid", Status: 1}
-	id, err := db.CreateRecord(&s)
+	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
 
@@ -98,19 +93,13 @@ func TestMdbGetRecords(t *testing.T) {
 }
 
 func TestMdbGetRecordByID(t *testing.T) {
-	db, err := Create("mongodb")
-	assert.Nil(t, err, "Pointer to mongodb shoud be set")
 
-	var dbServer server.Server
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
-	db.SetServer(&dbServer)
-
-	err = db.Connect()
+	db := initdb()
+	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
-	id, err := db.CreateRecord(&s)
+	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
 

@@ -8,19 +8,13 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-func TestCreate(t *testing.T) {
-
-	_, err := Create("notexist")
-	assert.NotNil(t, err)
-}
-
 func TestCreateRecord(t *testing.T) {
 	db := new(Mockdatabase)
 	assert.NotNil(t, db, "should not be nil")
 
 	s := struct{}{}
 
-	id, err := db.CreateRecord(s)
+	id, err := db.CreateRecord("", s)
 	assert.Nil(t, err)
 	assert.Equal(t, "578359205e935a20adb39a18", id, "record created")
 

@@ -10,7 +10,7 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-type mongodb struct {
+type Mongodb struct {
 	session *mgo.Session
 	name    string
 	col     string
@@ -20,7 +20,7 @@ type mongodb struct {
 
 // CreateRecord creates a database record with new unique id. s should be is an object that
 // mgo understands (go struct is OK)
-func (db *mongodb) CreateRecord(s interface{}) (string, error) {
+func (db *Mongodb) CreateRecord(given_id string, s interface{}) (string, error) {
 
 	if db.session == nil {
 		return "", errors.New("database session not created")
@@ -45,30 +45,30 @@ func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 	return id.Hex(), nil
 }
 
-func (db *mongodb) SetServer(srv *server.Server) {
+func (db *Mongodb) SetServer(srv *server.Server) {
 	db.srv = srv
 }
 
-func (db *mongodb) Connect() error {
+func (db *Mongodb) Connect() error {
 	var err error
 	db.session, err = mgo.DialWithTimeout(db.srv.FullName(), db.timeout)
 	return err
 }
 
-func (db *mongodb) Close() {
+func (db *Mongodb) Close() {
 	db.session.Close()
 	db.session = nil
 }
 
-func (db *mongodb) SetDefaults() {
-	db.name = "daemondbd"
+func (db *Mongodb) SetDefaults(name ...interface{}) {
+	db.name = name[0].(string)
 	db.col = "jobs"
 	db.timeout = 10 * time.Second
 }
 
 // GetRecords issues a request to mongodb. q should be a bson.M object or go struct with fields to match
 // returns
-func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
+func (db *Mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 
 	c := db.session.DB(db.name).C(db.col)
 	query := c.Find(q)
@@ -87,7 +87,7 @@ func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 }
 
 // GetAllRecords returns all records
-func (db *mongodb) GetAllRecords(res interface{}) (err error) {
+func (db *Mongodb) GetAllRecords(res interface{}) (err error) {
 	return db.GetRecords(nil, res)
 }
 
@@ -98,7 +98,7 @@ func checkID(id string) error {
 	return nil
 }
 
-func (db *mongodb) GetRecordByID(id string, res interface{}) error {
+func (db *Mongodb) GetRecordByID(id string, res interface{}) error {
 	if err := checkID(id); err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (db *mongodb) GetRecordByID(id string, res interface{}) error {
 	return db.GetRecords(q, res)
 }
 
-func (db *mongodb) DeleteRecordByID(id string) error {
+func (db *Mongodb) DeleteRecordByID(id string) error {
 	if err := checkID(id); err != nil {
 		return err
 	}
