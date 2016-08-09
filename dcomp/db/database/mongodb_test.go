@@ -3,6 +3,7 @@ package database
 import (
 	"testing"
 
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -13,35 +14,41 @@ import (
 //these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)
 
 func TestMdbConnect(t *testing.T) {
-	err := Create("mongodb")
+	db, err := Create("mongodb")
 	assert.Nil(t, err, "Pointer to mongodb should be set")
+
+	var dbServer server.Server
 
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
 
-	err = Connect()
+	err = db.Connect()
+	db.SetServer(&dbServer)
 	assert.Nil(t, err)
 	db.Close()
 
 	db.(*mongodb).timeout = time.Second / 10
 	dbServer.Host = ""
 	dbServer.Port = 27017
-	err = Connect()
+	db.SetServer(&dbServer)
+	err = db.Connect()
 	assert.NotNil(t, err)
-	db = nil
 }
 
 func TestMdbCreateRecord(t *testing.T) {
 
-	err := Create("mongodb")
+	db, err := Create("mongodb")
 	assert.Nil(t, err, "Pointer to mongodb shoud be set")
+
+	var dbServer server.Server
 
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
+	db.SetServer(&dbServer)
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
 
-	err = Connect()
+	err = db.Connect()
 	assert.Nil(t, err, "connected to database")
 
 	id, err := db.CreateRecord(&s)
@@ -55,17 +62,18 @@ func TestMdbCreateRecord(t *testing.T) {
 	_, err = db.CreateRecord(&s)
 	assert.NotNil(t, err, "closed database")
 
-	db = nil
 }
 
 func TestMdbGetRecords(t *testing.T) {
-	err := Create("mongodb")
+	db, err := Create("mongodb")
 	assert.Nil(t, err, "Pointer to mongodb shoud be set")
+	var dbServer server.Server
 
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
+	db.SetServer(&dbServer)
 
-	err = Connect()
+	err = db.Connect()
 	assert.Nil(t, err, "connected to database")
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{"name", "script", 20}, Id: "dummyid", Status: 1}
@@ -85,19 +93,20 @@ func TestMdbGetRecords(t *testing.T) {
 
 	err = db.GetRecords("aaa", &records)
 	assert.NotNil(t, err, "wrong querry")
-
-	db = nil
+	db.Close()
 
 }
 
 func TestMdbGetRecordByID(t *testing.T) {
-	err := Create("mongodb")
+	db, err := Create("mongodb")
 	assert.Nil(t, err, "Pointer to mongodb shoud be set")
 
+	var dbServer server.Server
 	dbServer.Host = "172.17.0.2"
 	dbServer.Port = 27017
+	db.SetServer(&dbServer)
 
-	err = Connect()
+	err = db.Connect()
 	assert.Nil(t, err, "connected to database")
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
@@ -116,6 +125,5 @@ func TestMdbGetRecordByID(t *testing.T) {
 	err = db.GetRecordByID("aaa", &records)
 	assert.NotNil(t, err)
 
-	db = nil
-
+	db.Close()
 }

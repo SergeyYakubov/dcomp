@@ -8,41 +8,37 @@ import (
 	"reflect"
 
 	"gopkg.in/mgo.v2/bson"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
-type mockdatabase struct {
+type Mockdatabase struct {
 }
 
-func (db *mockdatabase) CreateRecord(s interface{}) (string, error) {
+func (db *Mockdatabase) CreateRecord(s interface{}) (string, error) {
 	return "578359205e935a20adb39a18", nil
 }
-func (db *mockdatabase) Connect(url string) error {
+
+func (db *Mockdatabase) SetServer(*server.Server) {
+	return
+}
+
+func (db *Mockdatabase) Connect() error {
 	return nil
 }
 
-func (db *mockdatabase) Close() {
+func (db *Mockdatabase) Close() {
 
 }
-func (db *mockdatabase) SetDefaults() {
+func (db *Mockdatabase) SetDefaults() {
 }
 
-func CreateMock() error {
-	if db != nil {
-		return errors.New("database already created")
-	}
-
-	db = new(mockdatabase)
-
-	db.SetDefaults()
-	return nil
-}
 
 type querryM struct {
 	Id bson.ObjectId `bson:"_id"`
 }
 
-func (db *mockdatabase) GetRecordByID(id string, records interface{}) error {
+func (db *Mockdatabase) GetRecordByID(id string, records interface{}) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("wrong id")
 	}
@@ -52,7 +48,7 @@ func (db *mockdatabase) GetRecordByID(id string, records interface{}) error {
 	return db.GetRecords(&q, records)
 }
 
-func (db *mockdatabase) DeleteRecordByID(id string) error {
+func (db *Mockdatabase) DeleteRecordByID(id string) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("wrong id")
 	}
@@ -66,7 +62,11 @@ func (db *mockdatabase) DeleteRecordByID(id string) error {
 	return nil
 }
 
-func (db *mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
+func (db *Mockdatabase) GetAllRecords(res interface{}) (err error) {
+	return db.GetRecords(nil, res)
+}
+
+func (db *Mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
 	data := [...]structs.JobInfo{
 		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18", Status: 1},
 		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243", Status: 1}}

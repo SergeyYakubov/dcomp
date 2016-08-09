@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
 type mongodb struct {
@@ -14,6 +15,7 @@ type mongodb struct {
 	name    string
 	col     string
 	timeout time.Duration
+	srv     *server.Server
 }
 
 // CreateRecord creates a database record with new unique id. s should be is an object that
@@ -43,9 +45,13 @@ func (db *mongodb) CreateRecord(s interface{}) (string, error) {
 	return id.Hex(), nil
 }
 
-func (db *mongodb) Connect(url string) error {
+func (db *mongodb) SetServer(srv *server.Server) {
+	db.srv = srv
+}
+
+func (db *mongodb) Connect() error {
 	var err error
-	db.session, err = mgo.DialWithTimeout(url, db.timeout)
+	db.session, err = mgo.DialWithTimeout(db.srv.FullName(), db.timeout)
 	return err
 }
 
@@ -78,6 +84,11 @@ func (db *mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 	}
 	err = query.All(res)
 	return err
+}
+
+// GetAllRecords returns all records
+func (db *mongodb) GetAllRecords(res interface{}) (err error) {
+	return db.GetRecords(nil, res)
 }
 
 func checkID(id string) error {

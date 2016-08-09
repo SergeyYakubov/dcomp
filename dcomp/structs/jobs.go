@@ -19,7 +19,7 @@ type JobDescription struct {
 	NCPUs     int
 }
 
-// Structure withi complete job information
+// Structure with complete job information
 type JobInfo struct {
 	JobDescription
 	Id       string `bson:"_hex_id"`

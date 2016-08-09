@@ -8,8 +8,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"errors"
-
 	"github.com/stretchr/testify/assert"
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
@@ -52,25 +50,10 @@ var getTests = []getrequest{
 	{"job", "DELETE", "not found", "wrong path", 404},
 }
 
-func preparedatabase() error {
-	if err := database.CreateMock(); err != nil {
-		return errors.New("Create database" + err.Error())
-	}
-
-	if err := database.Connect(); err != nil {
-		return errors.New("Connect to the database " + err.Error())
-	}
-	return nil
-}
-
 func TestSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
 
-	if err := preparedatabase(); err != nil {
-		t.Error("Create database" + err.Error())
-		return
-	}
-	defer database.Close()
+	db = new(database.Mockdatabase)
 
 	for _, test := range submitTests {
 		b := new(bytes.Buffer)
@@ -96,14 +79,10 @@ func TestSubmitJob(t *testing.T) {
 func TestGetDeleteJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
 
-	if err := preparedatabase(); err != nil {
-		t.Error("Create database" + err.Error())
-		return
-	}
-	defer database.Close()
+	db = new(database.Mockdatabase)
 
 	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
-	database.CreateRecord(&s)
+	db.CreateRecord(&s)
 
 	for _, test := range getTests {
 

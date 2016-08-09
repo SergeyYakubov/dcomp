@@ -4,89 +4,43 @@ package database
 
 import (
 	"errors"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
-type agent interface {
+type Agent interface {
 	CreateRecord(interface{}) (string, error)
+	GetAllRecords(interface{}) error
 	GetRecords(interface{}, interface{}) error
 	GetRecordByID(string, interface{}) error
 	DeleteRecordByID(string) error
-	Connect(string) error
+	Connect() error
 	SetDefaults()
+	SetServer(*server.Server)
 	Close()
 }
 
-var db agent
-
-var dbServer server.Server
-
-func setServerConfiguration() error {
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
+func setServerConfiguration(srv *server.Server) error {
+	srv.Host = "172.17.0.2"
+	srv.Port = 27017
 	return nil
 }
 
-func Create(name string) error {
-	if db != nil {
-		return errors.New("database already created")
-	}
+func Create(name string) (Agent, error) {
+	var db Agent
 	switch name {
 	case "mongodb":
 		db = new(mongodb)
 	default:
-		return errors.New("database " + name + " not found")
+		return nil, errors.New("database " + name + " not found")
 	}
 
+	var srv server.Server
+	if err := setServerConfiguration(&srv); err != nil {
+		return nil, err
+	}
+	db.SetServer(&srv)
 	db.SetDefaults()
+	return db, nil
 
-	return setServerConfiguration()
-}
-
-func Connect() error {
-	if db == nil {
-		return errors.New("database not set")
-	}
-
-	return db.Connect(dbServer.FullName())
-}
-
-func Close() {
-	if db != nil {
-		db.Close()
-	}
-	db = nil
-}
-
-func CreateRecord(s interface{}) (string, error) {
-	if db == nil {
-		return "", errors.New("database not set")
-	}
-
-	return db.CreateRecord(s)
-}
-
-func GetRecords(q interface{}, res interface{}) (err error) {
-	if db == nil {
-		return errors.New("database not set")
-	}
-	return db.GetRecords(q, res)
-}
-
-func GetAllRecords(res interface{}) (err error) {
-	return GetRecords(nil, res)
-}
-
-func GetRecordById(id string, res interface{}) (err error) {
-	if db == nil {
-		return errors.New("database not set")
-	}
-	return db.GetRecordByID(id, res)
-}
-
-func DeleteRecordById(id string) (err error) {
-	if db == nil {
-		return errors.New("database not set")
-	}
-	return db.DeleteRecordByID(id)
 }
