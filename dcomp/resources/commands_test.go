@@ -30,15 +30,15 @@ type request struct {
 }
 
 var submitTests = []request{
-	{structs.JobInfo{JobDescription: structs.JobDescription{"image", "script", 20},
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
 		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusCreated, "12345", "submit job"},
-	{structs.JobInfo{JobDescription: structs.JobDescription{"image", "script", 20},
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
 		Id: "578359205e935a20adb39a18"}, "job", "POST", http.StatusNotFound, "12345", "wrong path"},
-	{structs.JobInfo{JobDescription: structs.JobDescription{"nil", "script", 20},
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "nil", Script: "script", NCPUs: 20},
 		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusBadRequest, "12345", "wrong input"},
-	{structs.JobInfo{JobDescription: structs.JobDescription{"errorsubmit", "script", 20},
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "errorsubmit", Script: "script", NCPUs: 20},
 		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusInternalServerError, "error", "error from resource"},
-	{structs.JobInfo{JobDescription: structs.JobDescription{"image", "script", 20},
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
 		Id: "give error"}, "jobs", "POST", http.StatusInternalServerError, "error create", "error from database"},
 }
 

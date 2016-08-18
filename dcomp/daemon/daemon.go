@@ -9,6 +9,6 @@ import (
 
 func Start(args []string) {
 	mux := utils.NewRouter(listRoutes)
-	setServers()
+	initialize()
 	log.Fatal(http.ListenAndServe(":8000", mux))
 }

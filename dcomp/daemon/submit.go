@@ -5,6 +5,8 @@ import (
 
 	"encoding/json"
 
+	"errors"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
@@ -30,17 +32,6 @@ func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error) {
-	b, err := dbServer.CommandPost("jobs", &t)
-
-	if err != nil {
-		return
-	}
-
-	err = json.NewDecoder(b).Decode(&job)
-	return
-}
-
 func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 
 	job, err = addJobToDatabase(t)
@@ -53,8 +44,40 @@ func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 		return
 	}
 
-	job.Resource = prio.Sort()[0]
+	job.Resource, err = submitToResource(job, prio.Sort())
+	if err != nil {
+		return
+	}
 
+	job.Status = 1
+
+	return
+}
+
+func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error) {
+	b, err := dbServer.CommandPost("jobs", &t)
+
+	if err != nil {
+		return
+	}
+
+	err = json.NewDecoder(b).Decode(&job)
+	return
+}
+
+func submitToResource(job structs.JobInfo, prio []string) (res string, err error) {
+	for i := range prio {
+		r, ok := resources[prio[i]]
+		if ok {
+			_, e := r.Server.CommandPost("jobs", job)
+			if e == nil {
+				res = prio[i]
+				return
+			}
+		}
+	}
+
+	err = errors.New("no resource available")
 	return
 }
 

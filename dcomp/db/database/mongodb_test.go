@@ -71,7 +71,7 @@ func TestMdbGetRecords(t *testing.T) {
 	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{JobDescription: structs.JobDescription{"name", "script", 20}, Id: "dummyid", Status: 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "name", Script: "script", NCPUs: 20}, Id: "dummyid", Status: 1}
 	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")

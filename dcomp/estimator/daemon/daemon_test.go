@@ -24,15 +24,15 @@ type request struct {
 }
 
 var estimateTests = []request{
-	{structs.JobDescription{"aaa", "bbb", 1}, "estimations", "POST", http.StatusOK, "estimations job batch",
-		structs.ResourcePrio{"HPC": 1, "Batch": 10, "Cloud": 0}},
-	{structs.JobDescription{"aaa", "bbb", 8}, "estimations", "POST", http.StatusOK, "estimations job batch/hpc",
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "estimations", "POST", http.StatusOK, "estimations job batch",
+		structs.ResourcePrio{"Local": 100, "HPC": 1, "Batch": 10, "Cloud": 0}},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 8}, "estimations", "POST", http.StatusOK, "estimations job batch/hpc",
 		structs.ResourcePrio{"HPC": 5, "Batch": 5, "Cloud": 0}},
-	{structs.JobDescription{"aaa", "bbb", 80}, "estimations", "POST", http.StatusOK, "estimations job hpc",
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 80}, "estimations", "POST", http.StatusOK, "estimations job hpc",
 		structs.ResourcePrio{"HPC": 10, "Batch": 0, "Cloud": 0}},
 	{structs.JobDescription{}, "estimations", "POST", http.StatusBadRequest, "estimations job - empty struct",
 		structs.ResourcePrio{}},
-	{structs.JobDescription{"nil", "bbb", -1}, "estimations", "POST", http.StatusBadRequest, "create job - nil struct",
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "estimations", "POST", http.StatusBadRequest, "create job - nil struct",
 		structs.ResourcePrio{}},
 	{structs.JobDescription{}, "estimations/1", "POST", http.StatusNotFound, "estimations job - wrong path",
 		structs.ResourcePrio{}},

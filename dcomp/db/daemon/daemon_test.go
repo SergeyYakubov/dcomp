@@ -31,8 +31,8 @@ type getrequest struct {
 }
 
 var submitTests = []submitrequest{
-	{structs.JobDescription{"aaa", "bbb", 1}, "jobs", "POST", "post normal job", 201},
-	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", "post with nil body", 400},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1}, "jobs", "POST", "post normal job", 201},
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "jobs", "POST", "post with nil body", 400},
 	{structs.JobDescription{}, "jobs", "POST", "post empty structure", 400},
 	{structs.JobDescription{}, "jobs/1", "POST", "post job 1", 404},
 }

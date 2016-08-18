@@ -1,9 +1,16 @@
 package structs
 
-import "sort"
+import (
+	"sort"
+	"stash.desy.de/scm/dc/main.git/dcomp/server"
+)
 
 // Keeps resources and their priorities
 type ResourcePrio map[string]int
+
+type Resource struct {
+	Server server.Server
+}
 
 type pair struct {
 	Key   string

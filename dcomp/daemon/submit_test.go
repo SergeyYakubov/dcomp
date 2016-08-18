@@ -15,9 +15,9 @@ import (
 )
 
 var submitRouteTests = []request{
-	{structs.JobDescription{"ttt", "bbb", 1}, "jobs", "POST", http.StatusCreated, "Create job"},
-	{structs.JobDescription{"hhh", "nil", 1}, "jobs", "POST", http.StatusBadRequest, "create job - no server"},
-	{structs.JobDescription{"nil", "bbb", -1}, "jobs", "POST", http.StatusBadRequest, "create job - nil struct"},
+	{structs.JobDescription{ImageName: "ttt", Script: "bbb", NCPUs: 1, Local: true}, "jobs", "POST", http.StatusCreated, "Create job"},
+	{structs.JobDescription{ImageName: "hhh", Script: "nil", NCPUs: 1}, "jobs", "POST", http.StatusBadRequest, "create job - no server"},
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "jobs", "POST", http.StatusBadRequest, "create job - nil struct"},
 	{structs.JobDescription{}, "jobs", "POST", http.StatusBadRequest, "create job - empty struct"},
 	{structs.JobDescription{}, "jobs/1", "POST", http.StatusNotFound, "create job - wrong path"},
 }
@@ -29,22 +29,29 @@ type submitRequest struct {
 }
 
 var submitTests = []submitRequest{
-	{structs.JobDescription{"aaa", "bbb", 1}, "submittedimage", "Create job"},
-	{structs.JobDescription{"aaa", "nil", 1}, "submittedimage", "no server"},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "submittedimage", "Create job"},
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Local: true}, "available", "Create job"},
+	{structs.JobDescription{ImageName: "aaa", Script: "nil", NCPUs: 1}, "connection refused", "no server"},
 }
 
 func TestRouteSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
-
+	initialize()
 	for _, test := range submitRouteTests {
 
 		ts := server.CreateMockServer(&dbServer)
 		ts2 := server.CreateMockServer(&estimatorServer)
+
+		var srv server.Server
+		ts3 := server.CreateMockServer(&srv)
+		resources["Local"] = structs.Resource{Server: srv}
+
 		defer ts2.Close()
 
 		if test.job.Script == "nil" {
 			ts.Close()
 		}
+
 		b := new(bytes.Buffer)
 		if err := json.NewEncoder(b).Encode(test.job); err != nil {
 			t.Fail()
@@ -66,27 +73,43 @@ func TestRouteSubmitJob(t *testing.T) {
 			assert.Contains(t, w.Body.String(), "submittedimage", test.message)
 		}
 		ts.Close()
+		ts3.Close()
+
 	}
 }
 
 func TestSubmitJob(t *testing.T) {
 
+	initialize()
+
 	for _, test := range submitTests {
 
 		ts := server.CreateMockServer(&dbServer)
 		ts2 := server.CreateMockServer(&estimatorServer)
+
+		var srv server.Server
+		ts3 := server.CreateMockServer(&srv)
+		resources["Local"] = structs.Resource{Server: srv}
+
 		defer ts2.Close()
 		if test.job.Script == "nil" {
 			ts.Close()
 		}
+
+		if test.job.ImageName == "nil" {
+			ts3.Close()
+		}
+
 		b := new(bytes.Buffer)
 		if err := json.NewEncoder(b).Encode(test.job); err != nil {
 			t.Fail()
 		}
 
 		job, err := submitJob(test.job)
-		if test.job.Script == "nil" {
+		if test.job.Script == "nil" || test.job.ImageName == "nil" {
 			assert.NotNil(t, err, "Should be error")
+			assert.Contains(t, err.Error(), test.answer, test.message)
+
 			continue
 		}
 
@@ -94,6 +117,7 @@ func TestSubmitJob(t *testing.T) {
 
 		assert.Contains(t, job.ImageName, test.answer, test.message)
 		ts.Close()
+		ts3.Close()
 	}
 }
 

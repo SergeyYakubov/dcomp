@@ -24,7 +24,7 @@ func main() {
 	db := new(database.Mongodb)
 	db.SetServer(&dbsrv)
 	db.SetDefaults("localplugin")
-	port := "8004"
+	port := "8003"
 
 	var res = new(local.Resource)
 

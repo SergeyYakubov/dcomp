@@ -17,6 +17,7 @@ type JobDescription struct {
 	ImageName string
 	Script    string
 	NCPUs     int
+	Local     bool
 }
 
 // Structure with complete job information
