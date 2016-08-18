@@ -12,10 +12,10 @@ import (
 	"io"
 	"net/http/httptest"
 
+	"stash.desy.de/scm/dc/main.git/dcomp/resources/mock"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 
 	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/resources/mockresource"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
@@ -43,14 +43,15 @@ var submitTests = []request{
 }
 
 func TestSubmitJob(t *testing.T) {
-	p := NewPlugin(new(mockresource.MockResource))
-	var srv server.Server
-	srv.Host = "172.17.0.2"
-	srv.Port = 27017
+	var dbsrv server.Server
+	dbsrv.Host = "172.17.0.2"
+	dbsrv.Port = 27017
+	db := new(database.Mockdatabase)
+	db.SetServer(&dbsrv)
+	db.Connect()
+	p := NewPlugin(new(mock.MockResource), db)
 
-	p.InitializeDatabase(new(database.Mockdatabase), srv)
-
-	mux := utils.NewRouter(p.listRoutes)
+	mux := utils.NewRouter(p.ListRoutes)
 	for _, test := range submitTests {
 
 		b := new(bytes.Buffer)

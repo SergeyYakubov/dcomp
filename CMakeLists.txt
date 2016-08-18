@@ -26,6 +26,13 @@ add_custom_target(dcompestd ALL
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
+add_custom_target(dcomplocalpd ALL
+        				  COMMAND go build -o bin/dcomplocalpd ./dcomp/resources/local/main
+        				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
+        				  VERBATIM)
+
+
 add_dependencies (dcomp make_version)
 add_dependencies (dcompdbd make_version)
 add_dependencies (dcompestd make_version)
+add_dependencies (dcomplocalpd make_version)

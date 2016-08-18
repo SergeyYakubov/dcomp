@@ -1,4 +1,4 @@
-package mockresource
+package mock
 
 import (
 	"errors"

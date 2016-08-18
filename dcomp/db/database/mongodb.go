@@ -61,7 +61,9 @@ func (db *Mongodb) Close() {
 }
 
 func (db *Mongodb) SetDefaults(name ...interface{}) {
-	db.name = name[0].(string)
+	if len(name) > 0 {
+		db.name = name[0].(string)
+	}
 	db.col = "jobs"
 	db.timeout = 10 * time.Second
 }

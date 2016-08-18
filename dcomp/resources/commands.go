@@ -1,9 +1,8 @@
 package resources
 
 import (
-	"bytes"
-	"encoding/json"
 	"net/http"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
@@ -29,7 +28,7 @@ func (p *plugin) SubmitJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(res)
-	w.Write(b.Bytes())
+	//	b := new(bytes.Buffer)
+	//	json.NewEncoder(b).Encode(res)
+	//	w.Write(b.Bytes())
 }
