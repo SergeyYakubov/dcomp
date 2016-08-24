@@ -13,7 +13,8 @@ var db database.Agent
 
 func Start(args []string) {
 
-	db, err := initializedb("mongodb")
+	var err error
+	db, err = initializedb("mongodb")
 	if err != nil {
 		log.Fatal("cannot connect to mongodb: " + err.Error())
 	}

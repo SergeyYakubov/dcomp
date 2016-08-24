@@ -116,3 +116,37 @@ func TestMdbGetRecordByID(t *testing.T) {
 
 	db.Close()
 }
+
+func TestMdbPatchRecord(t *testing.T) {
+
+	db := initdb()
+	err := db.Connect()
+	assert.Nil(t, err, "connected to database")
+
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 0}
+	id, err := db.CreateRecord("", &s)
+	assert.Nil(t, err)
+	assert.NotEmpty(t, id, "normal record")
+
+	s.Status = 2
+	s.Resource = "hello"
+	err = db.PatchRecord(id, &s)
+	assert.Nil(t, err)
+
+	var records []structs.JobInfo
+
+	err = db.GetRecordByID(id, &records)
+	assert.Nil(t, err)
+
+	assert.Equal(t, 1, len(records), "TestMdbPatchRecord should return 1")
+	assert.Equal(t, 2, records[0].Status, "TestMdbPatchRecord should return status 2")
+	assert.Equal(t, "hello", records[0].Resource, "TestMdbPatchRecord should return resource hello")
+
+	err = db.PatchRecord("aaa", &s)
+	assert.NotNil(t, err)
+
+	err = db.PatchRecord(id, nil)
+	assert.NotNil(t, err)
+
+	db.Close()
+}

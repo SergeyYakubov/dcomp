@@ -18,6 +18,18 @@ type Mongodb struct {
 	srv     *server.Server
 }
 
+// CreateRecord changes a database record with given id. s should be is an object that
+// mgo understands (go struct is OK)
+func (db *Mongodb) PatchRecord(id string, s interface{}) error {
+	if err := checkID(id); err != nil {
+		return err
+	}
+
+	c := db.session.DB(db.name).C(db.col)
+	return c.UpdateId(bson.ObjectIdHex(id), s)
+
+}
+
 // CreateRecord creates a database record with new unique id. s should be is an object that
 // mgo understands (go struct is OK)
 func (db *Mongodb) CreateRecord(given_id string, s interface{}) (string, error) {

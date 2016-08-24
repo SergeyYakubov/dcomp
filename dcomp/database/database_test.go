@@ -19,6 +19,21 @@ func TestCreateRecord(t *testing.T) {
 	assert.Equal(t, "578359205e935a20adb39a18", id, "record created")
 
 }
+
+func TestPatchRecord(t *testing.T) {
+	db := new(Mockdatabase)
+	assert.NotNil(t, db, "should not be nil")
+
+	s := struct{}{}
+
+	err := db.PatchRecord("", s)
+	assert.Nil(t, err)
+
+	err = db.PatchRecord("give error", s)
+	assert.NotNil(t, err)
+
+}
+
 func TestGetRecords(t *testing.T) {
 	db := new(Mockdatabase)
 	defer func() { db = nil }()

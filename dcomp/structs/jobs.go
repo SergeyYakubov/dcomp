@@ -54,16 +54,18 @@ func Decode(r io.Reader, t jobs) bool {
 	if d.Decode(t) != nil || t.Check() != nil {
 		return false
 	}
-
 	return true
 }
 
+var jobStatusExplained = [...]string{"Submitted", "Allocated"}
+
 func (d *JobInfo) PrintFull(w io.Writer) {
-	fmt.Fprintf(w, "Job %s\n", d.Id)
-	fmt.Fprintf(w, "Image name: \t\t %s\n", d.ImageName)
-	fmt.Fprintf(w, "Script: \t\t %s\n", d.Script)
-	fmt.Fprintf(w, "Number of CPUs: \t %d\n", d.NCPUs)
-	fmt.Fprintf(w, "Job status: \t\t %d\n", d.Status)
+	fmt.Fprintf(w, "%-40s: %s\n", "Job", d.Id)
+	fmt.Fprintf(w, "%-40s: %s\n", "Image name", d.ImageName)
+	fmt.Fprintf(w, "%-40s: %s\n", "Script", d.Script)
+	fmt.Fprintf(w, "%-40s: %d\n", "Number of CPUs", d.NCPUs)
+	fmt.Fprintf(w, "%-40s: %s\n", "Allocated resource", d.Resource)
+	fmt.Fprintf(w, "%-40s: %s\n", "Status", jobStatusExplained[d.Status])
 }
 
 func (d *JobInfo) PrintShort(w io.Writer) {

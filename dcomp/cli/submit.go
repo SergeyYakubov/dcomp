@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
@@ -46,6 +47,7 @@ func (cmd *command) CommandSubmit() error {
 func createSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) {
 	flagset.StringVar(&flags.Script, "script", "", "Job script")
 	flagset.IntVar(&flags.NCPUs, "ncpus", 1, "Number of CPUs")
+	flagset.BoolVar(&flags.Local, "local", false, "Submit to local resource")
 }
 
 func (cmd *command) parseSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) error {

@@ -6,6 +6,7 @@ import "stash.desy.de/scm/dc/main.git/dcomp/server"
 
 type Agent interface {
 	CreateRecord(string, interface{}) (string, error)
+	PatchRecord(string, interface{}) error
 	GetAllRecords(interface{}) error
 	GetRecords(interface{}, interface{}) error
 	GetRecordByID(string, interface{}) error

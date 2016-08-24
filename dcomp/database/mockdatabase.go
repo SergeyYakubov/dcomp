@@ -22,6 +22,13 @@ func (db *Mockdatabase) CreateRecord(given_id string, s interface{}) (string, er
 	return "578359205e935a20adb39a18", nil
 }
 
+func (db *Mockdatabase) PatchRecord(id string, s interface{}) error {
+	if id == "give error" {
+		return errors.New("error patch record")
+	}
+	return nil
+}
+
 func (db *Mockdatabase) SetServer(*server.Server) {
 	return
 }

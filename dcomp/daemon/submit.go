@@ -55,7 +55,7 @@ func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 }
 
 func modifyJobInDatabase(id string, data interface{}) error {
-	return nil // dbServer.CommandPatch("jobs"+"/"+id, data)
+	return db.PatchRecord(id, data)
 }
 
 func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error) {
