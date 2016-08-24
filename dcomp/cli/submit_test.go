@@ -34,7 +34,7 @@ func TestSubmitCommand(t *testing.T) {
 	for _, test := range submitTests {
 		err := test.CommandSubmit()
 		assert.Nil(t, err, "Should not be error")
-		assert.Equal(t, "1\n", outBuf.(*bytes.Buffer).String(), "")
+		assert.Equal(t, "578359205e935a20adb39a18\n", outBuf.(*bytes.Buffer).String(), "")
 		outBuf.(*bytes.Buffer).Reset()
 	}
 	for _, test := range submitFailingTests {

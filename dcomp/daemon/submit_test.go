@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
@@ -16,7 +17,6 @@ import (
 
 var submitRouteTests = []request{
 	{structs.JobDescription{ImageName: "ttt", Script: "bbb", NCPUs: 1, Local: true}, "jobs", "POST", http.StatusCreated, "Create job"},
-	{structs.JobDescription{ImageName: "hhh", Script: "nil", NCPUs: 1}, "jobs", "POST", http.StatusBadRequest, "create job - no server"},
 	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "jobs", "POST", http.StatusBadRequest, "create job - nil struct"},
 	{structs.JobDescription{}, "jobs", "POST", http.StatusBadRequest, "create job - empty struct"},
 	{structs.JobDescription{}, "jobs/1", "POST", http.StatusNotFound, "create job - wrong path"},
@@ -29,17 +29,18 @@ type submitRequest struct {
 }
 
 var submitTests = []submitRequest{
-	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "submittedimage", "Create job"},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "578359205e935a20adb39a18", "Create job"},
 	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Local: true}, "available", "Create job"},
-	{structs.JobDescription{ImageName: "aaa", Script: "nil", NCPUs: 1}, "connection refused", "no server"},
 }
 
 func TestRouteSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
 	initialize()
+	db = new(database.Mockdatabase)
+	defer func() { db = nil }()
+
 	for _, test := range submitRouteTests {
 
-		ts := server.CreateMockServer(&dbServer)
 		ts2 := server.CreateMockServer(&estimatorServer)
 
 		var srv server.Server
@@ -47,10 +48,6 @@ func TestRouteSubmitJob(t *testing.T) {
 		resources["Local"] = structs.Resource{Server: srv}
 
 		defer ts2.Close()
-
-		if test.job.Script == "nil" {
-			ts.Close()
-		}
 
 		b := new(bytes.Buffer)
 		if err := json.NewEncoder(b).Encode(test.job); err != nil {
@@ -70,9 +67,8 @@ func TestRouteSubmitJob(t *testing.T) {
 		mux.ServeHTTP(w, req)
 		assert.Equal(t, test.answer, w.Code, test.message)
 		if w.Code == http.StatusCreated {
-			assert.Contains(t, w.Body.String(), "submittedimage", test.message)
+			assert.Contains(t, w.Body.String(), "578359205e935a20adb39a18", test.message)
 		}
-		ts.Close()
 		ts3.Close()
 
 	}
@@ -81,10 +77,10 @@ func TestRouteSubmitJob(t *testing.T) {
 func TestSubmitJob(t *testing.T) {
 
 	initialize()
+	db = new(database.Mockdatabase)
+	defer func() { db = nil }()
 
 	for _, test := range submitTests {
-
-		ts := server.CreateMockServer(&dbServer)
 		ts2 := server.CreateMockServer(&estimatorServer)
 
 		var srv server.Server
@@ -92,9 +88,6 @@ func TestSubmitJob(t *testing.T) {
 		resources["Local"] = structs.Resource{Server: srv}
 
 		defer ts2.Close()
-		if test.job.Script == "nil" {
-			ts.Close()
-		}
 
 		if test.job.ImageName == "nil" {
 			ts3.Close()
@@ -109,14 +102,12 @@ func TestSubmitJob(t *testing.T) {
 		if test.job.Script == "nil" || test.job.ImageName == "nil" {
 			assert.NotNil(t, err, "Should be error")
 			assert.Contains(t, err.Error(), test.answer, test.message)
-
 			continue
 		}
 
 		assert.Nil(t, err, "Should not be error")
 
-		assert.Contains(t, job.ImageName, test.answer, test.message)
-		ts.Close()
+		assert.Contains(t, job.Id, test.answer, test.message)
 		ts3.Close()
 	}
 }

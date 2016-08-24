@@ -1,7 +1,7 @@
 package resources
 
 import (
-	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 

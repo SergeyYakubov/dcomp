@@ -15,7 +15,7 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/resources/mock"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )

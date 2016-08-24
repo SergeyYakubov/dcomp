@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
@@ -32,10 +32,10 @@ var getdeleteTests = []request{
 
 func TestRouteGetJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
+	db = new(database.Mockdatabase)
+	defer func() { db = nil }()
 
 	for _, test := range getdeleteTests {
-
-		ts := server.CreateMockServer(&dbServer)
 
 		req, err := http.NewRequest(test.cmd, "http://localhost:8000/"+test.path+"/", nil)
 
@@ -44,6 +44,5 @@ func TestRouteGetJob(t *testing.T) {
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
 		assert.Equal(t, test.answer, w.Code, test.message)
-		ts.Close()
 	}
 }

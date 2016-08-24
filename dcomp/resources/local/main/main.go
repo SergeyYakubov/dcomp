@@ -5,7 +5,7 @@ import (
 
 	"os"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/resources/daemon"
 	"stash.desy.de/scm/dc/main.git/dcomp/resources/local"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"

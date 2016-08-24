@@ -65,7 +65,7 @@ func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, 
 	return b, nil
 }
 
-// CommandPost issues the GET command to srv. Returns response body or error
+// CommandGet issues the GET command to srv. Returns response body or error
 func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 
@@ -105,4 +105,31 @@ func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
 	}
 
 	return b, nil
+}
+
+// CommandPatch issues the PATCH command to srv. Returns response body or error
+func (srv *Server) CommandPatch(path string, data interface{}) (err error) {
+	b := new(bytes.Buffer)
+
+	if err := json.NewEncoder(b).Encode(data); err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPatch, srv.url(path), b)
+	if err != nil {
+		return err
+	}
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		io.Copy(b, res.Body)
+		err = errors.New(b.String())
+		return err
+	}
+
+	return nil
 }

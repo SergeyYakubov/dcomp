@@ -9,10 +9,8 @@ import (
 func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	b, err := dbServer.CommandDelete("jobs" + "/" + jobID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-	} else {
-		w.Write(b.Bytes())
+
+	if err := db.DeleteRecordByID(jobID); err != nil {
+		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
 	}
 }

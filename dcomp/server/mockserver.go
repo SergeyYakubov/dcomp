@@ -25,6 +25,13 @@ var listRoutes = utils.Routes{
 		MockFuncGet,
 	},
 	utils.Route{
+		"PatchJob",
+		"PATCH",
+		"/jobs/{jobID}/",
+		MockFuncGet,
+	},
+
+	utils.Route{
 		"DeleteJob",
 		"DELETE",
 		"/jobs/{jobID}/",
@@ -46,7 +53,7 @@ var listRoutes = utils.Routes{
 
 func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, `{"ImageName":"submittedimage","Script":"aaa","NCPUs":1,"Id":"1","Status":1}`)
+	fmt.Fprintln(w, `{"ImageName":"submittedimage","Script":"aaa","NCPUs":1,"Id":"578359205e935a20adb39a18","Status":1}`)
 }
 
 func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {

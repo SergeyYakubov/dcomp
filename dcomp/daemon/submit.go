@@ -50,18 +50,23 @@ func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 	}
 
 	job.Status = 1
-
+	err = modifyJobInDatabase(job.Id, &job)
 	return
 }
 
-func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error) {
-	b, err := dbServer.CommandPost("jobs", &t)
+func modifyJobInDatabase(id string, data interface{}) error {
+	return nil // dbServer.CommandPatch("jobs"+"/"+id, data)
+}
 
+func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error) {
+
+	job.JobDescription = t
+
+	job.Id, err = db.CreateRecord("", &job)
 	if err != nil {
 		return
 	}
 
-	err = json.NewDecoder(b).Decode(&job)
 	return
 }
 

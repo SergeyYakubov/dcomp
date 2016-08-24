@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/db/database"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/resources"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
