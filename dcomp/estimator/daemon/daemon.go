@@ -11,5 +11,4 @@ import (
 func Start() {
 	mux := utils.NewRouter(listRoutes)
 	log.Fatal(http.ListenAndServe(":8002", mux))
-
 }

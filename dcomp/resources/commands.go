@@ -15,7 +15,7 @@ func (p *plugin) SubmitJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res, err := p.resource.SubmitJob(t.JobDescription)
+	res, err := p.resource.SubmitJob(t)
 	if err != nil {
 		http.Error(w, "cannot submit job: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -31,4 +31,8 @@ func (p *plugin) SubmitJob(w http.ResponseWriter, r *http.Request) {
 	//	b := new(bytes.Buffer)
 	//	json.NewEncoder(b).Encode(res)
 	//	w.Write(b.Bytes())
+}
+
+func (p *plugin) UpdateJobStatus(interface{}) {
+
 }

@@ -13,6 +13,7 @@ type plugin struct {
 
 func NewPlugin(r Resource, db database.Agent) *plugin {
 	p := new(plugin)
+	r.SetUpdateStatusCmd(p.UpdateJobStatus)
 	p.resource = r
 	p.database = db
 	p.setRoutes()
