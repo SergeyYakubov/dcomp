@@ -1,12 +1,14 @@
 package local
 
 import (
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"time"
 )
 
 type Resource struct {
 	updateStatusCmd func(interface{})
+	db              database.Agent
 }
 
 type Job struct {
@@ -15,14 +17,18 @@ type Job struct {
 	status      int
 }
 
-func (res *Resource) SubmitJob(job structs.JobInfo) (interface{}, error) {
+func (res *Resource) SubmitJob(job structs.JobInfo) error {
 	var localJob Job
 	localJob.docker_name = job.Id
 	go runScript(job.JobDescription, time.Hour*48)
 	res.updateStatusCmd(localJob)
-	return localJob, nil
+	return nil
 }
 
 func (res *Resource) SetUpdateStatusCmd(f func(interface{})) {
 	res.updateStatusCmd = f
+}
+
+func (res *Resource) SetDb(db database.Agent) {
+	res.db = db
 }

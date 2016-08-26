@@ -9,14 +9,17 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
-func Start(res resources.Resource, db database.Agent, port string) error {
+var resource resources.Resource
 
-	p := resources.NewPlugin(res, db)
+func Start(res resources.Resource, db database.Agent, port string) error {
+	resource = res
 	if err := db.Connect(); err != nil {
 		return err
 	}
 	defer db.Close()
-	mux := utils.NewRouter(p.ListRoutes)
+
+	resource.SetDb(db)
+	mux := utils.NewRouter(listRoutes)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 	return nil
 }

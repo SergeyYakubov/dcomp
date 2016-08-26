@@ -70,7 +70,6 @@ func TestRouteSubmitJob(t *testing.T) {
 			assert.Contains(t, w.Body.String(), "578359205e935a20adb39a18", test.message)
 		}
 		ts3.Close()
-
 	}
 }
 

@@ -1,4 +1,4 @@
-package resources
+package daemon
 
 import (
 	"testing"
@@ -38,8 +38,6 @@ var submitTests = []request{
 		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusBadRequest, "12345", "wrong input"},
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "errorsubmit", Script: "script", NCPUs: 20},
 		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusInternalServerError, "error", "error from resource"},
-	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
-		Id: "give error"}, "jobs", "POST", http.StatusInternalServerError, "error create", "error from database"},
 }
 
 func TestSubmitJob(t *testing.T) {
@@ -49,9 +47,10 @@ func TestSubmitJob(t *testing.T) {
 	db := new(database.Mockdatabase)
 	db.SetServer(&dbsrv)
 	db.Connect()
-	p := NewPlugin(new(mock.MockResource), db)
+	resource = new(mock.MockResource)
+	resource.SetDb(db)
 
-	mux := utils.NewRouter(p.ListRoutes)
+	mux := utils.NewRouter(listRoutes)
 	for _, test := range submitTests {
 
 		b := new(bytes.Buffer)
