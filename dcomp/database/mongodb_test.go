@@ -55,6 +55,14 @@ func TestMdbCreateRecord(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
 
+	givenId := "578359205e935a20adb39a18"
+	id, err = db.CreateRecord(givenId, &s)
+	assert.Nil(t, err)
+	assert.Equal(t, givenId, id, "normal record")
+
+	id, err = db.CreateRecord("aaa", nil)
+	assert.NotNil(t, err, "bad id")
+
 	id, err = db.CreateRecord("", nil)
 	assert.NotNil(t, err, "nil record")
 	db.Close()

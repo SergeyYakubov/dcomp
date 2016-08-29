@@ -18,6 +18,7 @@ type JobDescription struct {
 	Script    string
 	NCPUs     int
 	Local     bool
+	WorkDir   string
 }
 
 // Structure with complete job information

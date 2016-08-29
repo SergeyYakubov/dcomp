@@ -121,7 +121,7 @@ func TestPrintLogs(t *testing.T) {
 
 	// echo command, logs are written
 
-	err = bReadLogs(buf_out, buf_err, id, 5*time.Second)
+	err = waitFinished(buf_out, buf_err, id, 5*time.Second)
 	assert.Equal(t, "hi\n", buf_out.String(), "Ouput should be hi")
 	assert.Nil(t, err, "Print logs: should not be error")
 
@@ -133,7 +133,7 @@ func TestPrintLogs(t *testing.T) {
 
 	startContainer(id)
 
-	err = bReadLogs(buf_out, buf_err, id, 10*time.Millisecond)
+	err = waitFinished(buf_out, buf_err, id, 10*time.Millisecond)
 	assert.NotNil(t, err, "Print logs: should be error")
 
 	deleteContainer(id)

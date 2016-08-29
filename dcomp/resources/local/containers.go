@@ -26,27 +26,6 @@ func init() {
 	}
 }
 
-func runScript(job structs.JobDescription, d time.Duration) {
-
-	var wout io.Writer
-	var werr io.Writer
-	id, err := createContainer(job)
-	if err != nil {
-		return
-	}
-
-	if err := startContainer(id); err != nil {
-		return
-	}
-
-	if err := bReadLogs(wout, werr, id, d); err != nil {
-		return
-	}
-
-	deleteContainer(id)
-
-}
-
 func createContainer(job structs.JobDescription) (string, error) {
 
 	cmd := strings.Fields(job.Script)
@@ -75,8 +54,8 @@ func waitContainer(id string, d time.Duration) (int, error) {
 	return cli.ContainerWait(ctx, id)
 }
 
-// bReadLogs read log files in follow mode, blocking execution until container stops or timeout
-func bReadLogs(wout io.Writer, werr io.Writer, id string, d time.Duration) error {
+// waitFinished read log files in follow mode, blocking execution until container stops or timeout
+func waitFinished(wout io.Writer, werr io.Writer, id string, d time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), d)
 	defer cancel()
 

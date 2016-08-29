@@ -26,8 +26,7 @@ func (db *Mongodb) PatchRecord(id string, s interface{}) error {
 	}
 
 	c := db.session.DB(db.name).C(db.col)
-	return c.UpdateId(bson.ObjectIdHex(id), s)
-
+	return c.UpdateId(bson.ObjectIdHex(id), bson.M{"$set": s})
 }
 
 // CreateRecord creates a database record with new unique id. s should be is an object that
@@ -39,8 +38,17 @@ func (db *Mongodb) CreateRecord(given_id string, s interface{}) (string, error) 
 	}
 	c := db.session.DB(db.name).C(db.col)
 
-	// create new unique id
-	id := bson.NewObjectId()
+	var id bson.ObjectId
+	if given_id == "" {
+		// create new unique id
+		id = bson.NewObjectId()
+	} else {
+		if bson.IsObjectIdHex(given_id) {
+			id = bson.ObjectIdHex(given_id)
+		} else {
+			return "", errors.New("Bad id format")
+		}
+	}
 
 	_, err := c.UpsertId(id, s)
 
