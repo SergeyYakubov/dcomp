@@ -46,7 +46,8 @@ func TestMdbCreateRecord(t *testing.T) {
 
 	db := initdb()
 
-	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid",
+		JobStatus: structs.JobStatus{Status: 1}}
 
 	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
@@ -79,7 +80,8 @@ func TestMdbGetRecords(t *testing.T) {
 	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "name", Script: "script", NCPUs: 20}, Id: "dummyid", Status: 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "name", Script: "script", NCPUs: 20},
+		Id: "dummyid", JobStatus: structs.JobStatus{Status: 1}}
 	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
@@ -106,7 +108,8 @@ func TestMdbGetRecordByID(t *testing.T) {
 	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 1}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid",
+		JobStatus: structs.JobStatus{Status: 1}}
 	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")
@@ -131,7 +134,8 @@ func TestMdbPatchRecord(t *testing.T) {
 	err := db.Connect()
 	assert.Nil(t, err, "connected to database")
 
-	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid", Status: 0}
+	s := structs.JobInfo{JobDescription: structs.JobDescription{}, Id: "dummyid",
+		JobStatus: structs.JobStatus{Status: 0}}
 	id, err := db.CreateRecord("", &s)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, id, "normal record")

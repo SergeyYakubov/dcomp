@@ -8,4 +8,5 @@ import (
 type Resource interface {
 	SubmitJob(structs.JobInfo) error
 	SetDb(database.Agent)
+	GetJob(string) (structs.JobStatus, error)
 }

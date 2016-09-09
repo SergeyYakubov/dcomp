@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 
 	"github.com/gorilla/mux"
+	//	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
@@ -69,10 +70,16 @@ func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
 func MockFuncGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
-	if jobID != "578359205e935a20adb39a18" {
+
+	if jobID == "resource" {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"Status":103}`)
+		return
+	} else if jobID != "578359205e935a20adb39a18" {
 		http.Error(w, "job not found", http.StatusNotFound)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
 }

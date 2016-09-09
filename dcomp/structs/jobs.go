@@ -21,11 +21,30 @@ type JobDescription struct {
 	WorkDir   string
 }
 
+// Job status
+const (
+	// good codes
+	StatusSubmitted          = 101
+	StatusRunning            = 102
+	StatusFinished           = 103
+	StatusLoadingDockerImage = 104
+	//error codes
+	StatusSubmissionFailed  = 201
+	StatusErrorFromResource = 202
+)
+
+type JobStatus struct {
+	Status    int
+	StartTime string
+	EndTime   string
+	Message   string
+}
+
 // Structure with complete job information
 type JobInfo struct {
 	JobDescription
+	JobStatus
 	Id       string `bson:"_hex_id"`
-	Status   int
 	Resource string
 }
 
@@ -58,7 +77,14 @@ func Decode(r io.Reader, t jobs) bool {
 	return true
 }
 
-var jobStatusExplained = [...]string{"Submitted", "Allocated"}
+var jobStatusExplained = map[int]string{
+	StatusSubmitted:          "Submitted",
+	StatusRunning:            "Allocated",
+	StatusFinished:           "Finished",
+	StatusLoadingDockerImage: "Loading Docker image",
+	StatusSubmissionFailed:   "Submission failed",
+	StatusErrorFromResource:  "Resource not responding",
+}
 
 func (d *JobInfo) PrintFull(w io.Writer) {
 	fmt.Fprintf(w, "%-40s: %s\n", "Job", d.Id)
@@ -70,5 +96,5 @@ func (d *JobInfo) PrintFull(w io.Writer) {
 }
 
 func (d *JobInfo) PrintShort(w io.Writer) {
-	fmt.Fprintf(w, "%20s  %20d\n", d.Id, d.Status)
+	fmt.Fprintf(w, "%-40s: %s\n", d.Id, jobStatusExplained[d.Status])
 }

@@ -29,6 +29,35 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 
 }
 
+func updateJobs(jobs []structs.JobInfo) {
+	for i, _ := range jobs {
+		updateJobsStatusFromResources(&jobs[i])
+	}
+
+}
+
+func updateJobsStatusFromResources(job *structs.JobInfo) {
+	res := resources[job.Resource]
+
+	b, err := res.Server.CommandGet("jobs" + "/" + job.Id)
+	if err != nil {
+		job.Status = structs.StatusErrorFromResource
+		job.Message = err.Error()
+		return
+	}
+
+	var status structs.JobStatus
+	if err := json.NewDecoder(b).Decode(&status); err != nil {
+		job.Status = structs.StatusErrorFromResource
+		job.Message = err.Error()
+		return
+	}
+
+	job.JobStatus = status
+
+	return
+}
+
 func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 
 	var jobs []structs.JobInfo
@@ -36,6 +65,7 @@ func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+	updateJobs(jobs)
 	sendJobs(w, jobs, true)
 }
 
@@ -48,7 +78,6 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
 		return
 	}
-
+	updateJobs(jobs)
 	sendJobs(w, jobs, false)
-
 }

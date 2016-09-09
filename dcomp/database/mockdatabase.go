@@ -77,8 +77,11 @@ func (db *Mockdatabase) GetAllRecords(res interface{}) (err error) {
 
 func (db *Mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
 	data := [...]structs.JobInfo{
-		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18", Status: 1},
-		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243", Status: 1}}
+		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18",
+			JobStatus: structs.JobStatus{Status: 1}},
+		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243",
+			JobStatus: structs.JobStatus{Status: 1}},
+	}
 
 	resultv := reflect.ValueOf(res)
 	if resultv.Kind() != reflect.Ptr || resultv.Elem().Kind() != reflect.Slice {

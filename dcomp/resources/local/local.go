@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"io"
+
+	"errors"
 	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -16,21 +18,12 @@ type Resource struct {
 }
 
 type localJobInfo struct {
-	Message string
-	Status  int
-	Id      string
+	structs.JobStatus
+	Id string
 }
 
-const (
-	ContainerCreated  int = 1
-	ContainerStarted      = 2
-	ContainerFinished     = 3
-	ContainerDeleted      = 4
-	ContainerError    int = -1
-)
-
 func (res *Resource) SubmitJob(job structs.JobInfo) error {
-	li := localJobInfo{"", 0, job.Id}
+	li := localJobInfo{structs.JobStatus{}, job.Id}
 	_, err := res.db.CreateRecord(job.Id, &li)
 	if err != nil {
 		return err
@@ -78,36 +71,48 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 
 	id, err := createContainer(job)
 	if err != nil {
-		res.updateJobInfo(li, ContainerError, err.Error())
+		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		return
 	}
 
-	res.updateJobInfo(li, ContainerCreated, "")
+	res.updateJobInfo(li, structs.StatusLoadingDockerImage, "")
 
 	if err := startContainer(id); err != nil {
-		res.updateJobInfo(li, ContainerError, err.Error())
+		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		deleteContainer(id)
 		return
 	}
 
-	res.updateJobInfo(li, ContainerStarted, "")
+	res.updateJobInfo(li, structs.StatusRunning, "")
 
 	if err := waitFinished(fout, ferr, id, d); err != nil {
-		res.updateJobInfo(li, ContainerError, err.Error())
+		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		deleteContainer(id)
 		return
 	}
 
-	res.updateJobInfo(li, ContainerFinished, "")
-
 	if err := deleteContainer(id); err != nil {
-		res.updateJobInfo(li, ContainerError, err.Error())
+		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		return
 	}
 
-	res.updateJobInfo(li, ContainerDeleted, "")
+	res.updateJobInfo(li, structs.StatusFinished, "")
 }
 
 func (res *Resource) SetDb(db database.Agent) {
 	res.db = db
+}
+
+func (res *Resource) GetJob(id string) (status structs.JobStatus, err error) {
+	var li []localJobInfo
+	if err := res.db.GetRecordByID(id, &li); err != nil {
+		return status, err
+	}
+
+	if len(li) != 1 {
+		return status, errors.New("Database error")
+	}
+	status = li[0].JobStatus
+
+	return
 }

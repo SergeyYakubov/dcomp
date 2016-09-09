@@ -19,3 +19,12 @@ func (res *MockResource) SubmitJob(job structs.JobInfo) error {
 func (res *MockResource) SetDb(database.Agent) {
 
 }
+
+func (res *MockResource) GetJob(id string) (status structs.JobStatus, err error) {
+	if id == "578359205e935a20adb39a18" {
+		status.Status = structs.StatusSubmitted
+		return
+	}
+	err = errors.New("Job not found")
+	return
+}
