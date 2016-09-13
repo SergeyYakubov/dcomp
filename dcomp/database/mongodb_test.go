@@ -22,7 +22,7 @@ func initdb() *Mongodb {
 	dbServer.Port = 27017
 
 	db.SetServer(&dbServer)
-	db.SetDefaults("daemondbd")
+	db.SetDefaults("daemondbdtest")
 
 	return db
 }

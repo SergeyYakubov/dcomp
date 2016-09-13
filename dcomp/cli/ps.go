@@ -14,6 +14,11 @@ import (
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
 
+type psFlags struct {
+	Id           string
+	ShowFinished bool
+}
+
 // CommandPs retrieves jobs info from daemon and prints info
 func (cmd *command) CommandPs() error {
 
@@ -28,7 +33,13 @@ func (cmd *command) CommandPs() error {
 		return err
 	}
 
-	b, err := daemon.CommandGet("jobs" + "/" + flags.Id)
+	cmdstr := "jobs" + "/"
+	if flags.Id == "" && flags.ShowFinished {
+		cmdstr += "?finished=true"
+	} else {
+		cmdstr += flags.Id
+	}
+	b, err := daemon.CommandGet(cmdstr)
 	if err != nil {
 		return err
 	}
@@ -44,13 +55,14 @@ func (cmd *command) CommandPs() error {
 	return nil
 }
 
-func createPsFlags(flagset *flag.FlagSet, flags *structs.JobInfo) {
+func createPsFlags(flagset *flag.FlagSet, flags *psFlags) {
 	flagset.StringVar(&flags.Id, "id", "", "Job Id")
+	flagset.BoolVar(&flags.ShowFinished, "a", false, "Show all jobs includng finished")
 }
 
-func (cmd *command) parsePsFlags(d string) (structs.JobInfo, error) {
+func (cmd *command) parsePsFlags(d string) (psFlags, error) {
 
-	var flags structs.JobInfo
+	var flags psFlags
 	flagset := cmd.createDefaultFlagset(d, "[OPTIONS]")
 
 	createPsFlags(flagset, &flags)
@@ -82,7 +94,6 @@ func decodeJobs(b *bytes.Buffer) ([]structs.JobInfo, error) {
 
 func printJobs(OutBuf io.Writer, jobs []structs.JobInfo, short bool) {
 	if len(jobs) == 0 {
-		fmt.Fprintln(OutBuf, "no jobs found")
 		return
 	}
 

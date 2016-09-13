@@ -23,7 +23,7 @@ type jobInfoRequest struct {
 }
 
 var JobInfoTests = []jobInfoRequest{
-	{"jobs/578359205e935a20adb39a18", "GET", http.StatusOK, "101", "get job info "},
+	{"jobs/578359205e935a20adb39a18", "GET", http.StatusOK, "103", "get job info "},
 	{"jobs/578359205e935a20adb39a19", "GET", http.StatusNotFound, "12345", "no job found "},
 }
 

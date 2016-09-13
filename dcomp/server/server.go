@@ -38,7 +38,10 @@ func (srv *Server) url(s string) string {
 		s = strings.TrimSpace(s)
 		s = strings.TrimLeft(s, "/")
 		s = strings.TrimRight(s, "/")
-		s = "/" + s + "/"
+		s = "/" + s
+		if !strings.ContainsRune(s, '?') {
+			s += "/"
+		}
 	}
 	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
 }
@@ -70,6 +73,7 @@ func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 
 	res, err := http.Get(srv.url(path))
+
 	if err != nil {
 		return nil, err
 	}

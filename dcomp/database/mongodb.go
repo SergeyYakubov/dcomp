@@ -7,6 +7,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
+	"io"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 )
 
@@ -97,7 +98,7 @@ func (db *Mongodb) GetRecords(q interface{}, res interface{}) (err error) {
 
 	n, err := query.Count()
 
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return err
 	}
 

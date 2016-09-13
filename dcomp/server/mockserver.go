@@ -64,16 +64,21 @@ func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {
 
 func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+	showFinished := r.URL.Query().Get("finished")
+	if showFinished == "true" {
+		fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a19"}]`)
+	} else {
+		fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+	}
 }
 
 func MockFuncGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 
-	if jobID == "resource" {
+	if jobID == "678359205e935a20adb39a18" {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, `{"Status":103}`)
+		fmt.Fprintf(w, `{"Status":102}`)
 		return
 	} else if jobID != "578359205e935a20adb39a18" {
 		http.Error(w, "job not found", http.StatusNotFound)

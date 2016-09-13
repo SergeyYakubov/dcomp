@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -16,9 +17,9 @@ type testsPS struct {
 
 var getTests = []testsPS{
 	{structs.JobInfo{JobDescription: structs.JobDescription{},
-		Resource: "mock", Id: "resource"}, structs.StatusFinished, "get single job"},
+		Resource: "mock", Id: "678359205e935a20adb39a18"}, structs.StatusRunning, "get single job"},
 	{structs.JobInfo{JobDescription: structs.JobDescription{},
-		Resource: "aaa", Id: "resource"}, structs.StatusErrorFromResource, "get single job"},
+		Resource: "aaa", Id: "678359205e935a20adb39a18"}, structs.StatusErrorFromResource, "get single job"},
 }
 
 func TestGetJobsFromResources(t *testing.T) {
@@ -26,12 +27,30 @@ func TestGetJobsFromResources(t *testing.T) {
 	var srv server.Server
 	ts3 := server.CreateMockServer(&srv)
 	defer ts3.Close()
-
 	resources["mock"] = structs.Resource{Server: srv}
 
+	db = new(database.Mongodb)
+
+	var dbServer server.Server
+
+	dbServer.Host = "172.17.0.2"
+	dbServer.Port = 27017
+
+	db.SetServer(&dbServer)
+	db.SetDefaults("daemondbdtest")
+	err := db.Connect()
+	assert.Nil(t, err)
+
+	defer db.Close()
+
 	for _, test := range getTests {
+		var jobs []structs.JobInfo
+		db.CreateRecord(test.job.Id, structs.JobInfo{})
 		updateJobsStatusFromResources(&test.job)
-		//		assert.Nil(t, err, test.message)
-		assert.Equal(t, test.answer, test.job.Status)
+		assert.Equal(t, test.answer, test.job.Status, "get status from resources")
+		err := db.GetRecordByID(test.job.Id, &jobs)
+		assert.Nil(t, err)
+		assert.Equal(t, test.answer, jobs[0].Status, "job not updated")
+		db.DeleteRecordByID(test.job.Id)
 	}
 }

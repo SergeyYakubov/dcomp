@@ -14,6 +14,7 @@ var showJobsTests = []struct {
 	{command{args: []string{"description"}}, "information"},
 	{command{args: []string{}}, "578359205e935a20adb39a18"},
 	{command{args: []string{"-id", "578359205e935a20adb39a18"}}, "578359205e935a20adb39a18"},
+	{command{args: []string{"-a"}}, "578359205e935a20adb39a19"},
 	{command{args: []string{"-id", "578359205e935a20adb39a19"}}, "not found"},
 	{command{args: []string{"-id", "1"}}, "wrong"},
 }

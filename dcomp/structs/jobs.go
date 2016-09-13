@@ -29,6 +29,7 @@ const (
 	StatusFinished           = 103
 	StatusLoadingDockerImage = 104
 	//error codes
+	StatusError             = 201
 	StatusSubmissionFailed  = 201
 	StatusErrorFromResource = 202
 )
@@ -79,11 +80,11 @@ func Decode(r io.Reader, t jobs) bool {
 
 var jobStatusExplained = map[int]string{
 	StatusSubmitted:          "Submitted",
-	StatusRunning:            "Allocated",
+	StatusRunning:            "Running",
 	StatusFinished:           "Finished",
 	StatusLoadingDockerImage: "Loading Docker image",
 	StatusSubmissionFailed:   "Submission failed",
-	StatusErrorFromResource:  "Resource not responding",
+	StatusErrorFromResource:  "Error from resource",
 }
 
 func (d *JobInfo) PrintFull(w io.Writer) {
@@ -93,6 +94,9 @@ func (d *JobInfo) PrintFull(w io.Writer) {
 	fmt.Fprintf(w, "%-40s: %d\n", "Number of CPUs", d.NCPUs)
 	fmt.Fprintf(w, "%-40s: %s\n", "Allocated resource", d.Resource)
 	fmt.Fprintf(w, "%-40s: %s\n", "Status", jobStatusExplained[d.Status])
+	if d.Status >= StatusError {
+		fmt.Fprintf(w, "%-40s: %s\n", "Message", d.Message)
+	}
 }
 
 func (d *JobInfo) PrintShort(w io.Writer) {

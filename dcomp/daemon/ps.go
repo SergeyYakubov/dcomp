@@ -12,6 +12,7 @@ import (
 
 func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 	if len(jobs) == 0 && allowempty {
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -25,21 +26,28 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Write(b.Bytes())
 
 }
 
 func updateJobs(jobs []structs.JobInfo) {
 	for i, _ := range jobs {
-		updateJobsStatusFromResources(&jobs[i])
+		if jobs[i].Status != structs.StatusFinished {
+			updateJobsStatusFromResources(&jobs[i])
+		}
 	}
-
 }
 
 func updateJobsStatusFromResources(job *structs.JobInfo) {
+
 	res := resources[job.Resource]
+	// update database
+	defer db.PatchRecord(job.Id, job)
 
 	b, err := res.Server.CommandGet("jobs" + "/" + job.Id)
+
 	if err != nil {
 		job.Status = structs.StatusErrorFromResource
 		job.Message = err.Error()
@@ -58,12 +66,28 @@ func updateJobsStatusFromResources(job *structs.JobInfo) {
 	return
 }
 
+func pickNotFinished(jobs []structs.JobInfo) (res []structs.JobInfo) {
+	res = make([]structs.JobInfo, 0)
+	for _, job := range jobs {
+		if job.Status != structs.StatusFinished {
+			res = append(res, job)
+		}
+	}
+	return
+}
+
 func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 
 	var jobs []structs.JobInfo
+
 	if err := db.GetAllRecords(&jobs); err != nil {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	showFinished := r.URL.Query().Get("finished")
+	if showFinished != "true" {
+		jobs = pickNotFinished(jobs)
 	}
 	updateJobs(jobs)
 	sendJobs(w, jobs, true)
