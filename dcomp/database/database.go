@@ -9,7 +9,7 @@ type Agent interface {
 	PatchRecord(string, interface{}) error
 	GetAllRecords(interface{}) error
 	GetRecords(interface{}, interface{}) error
-	GetRecordByID(string, interface{}) error
+	GetRecordsByID(string, interface{}) error
 	DeleteRecordByID(string) error
 	Connect() error
 	SetDefaults(name ...interface{})

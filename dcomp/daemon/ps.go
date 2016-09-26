@@ -98,7 +98,7 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 	var jobs []structs.JobInfo
-	if err := db.GetRecordByID(jobID, &jobs); err != nil {
+	if err := db.GetRecordsByID(jobID, &jobs); err != nil {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
 		return
 	}

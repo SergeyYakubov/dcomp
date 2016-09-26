@@ -121,7 +121,7 @@ func checkID(id string) error {
 	return nil
 }
 
-func (db *Mongodb) GetRecordByID(id string, res interface{}) error {
+func (db *Mongodb) GetRecordsByID(id string, res interface{}) error {
 	if err := checkID(id); err != nil {
 		return err
 	}

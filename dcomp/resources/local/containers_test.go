@@ -72,6 +72,9 @@ func TestDeleteContainer(t *testing.T) {
 	err = deleteContainer(id)
 	assert.Nil(t, err, "First delete: Should not be error")
 
+	err = deleteContainer(id)
+	assert.NotNil(t, err, "Second delete: Should be error")
+
 }
 
 func TestWaitContainer(t *testing.T) {

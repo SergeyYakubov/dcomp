@@ -47,7 +47,7 @@ type querryM struct {
 	Id bson.ObjectId `bson:"_id"`
 }
 
-func (db *Mockdatabase) GetRecordByID(id string, records interface{}) error {
+func (db *Mockdatabase) GetRecordsByID(id string, records interface{}) error {
 	if !bson.IsObjectIdHex(id) {
 		return errors.New("wrong id")
 	}
@@ -78,9 +78,9 @@ func (db *Mockdatabase) GetAllRecords(res interface{}) (err error) {
 func (db *Mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
 	data := [...]structs.JobInfo{
 		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18",
-			JobStatus: structs.JobStatus{Status: 1}},
+			JobStatus: structs.JobStatus{Status: 1}, Resource: "mock"},
 		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243",
-			JobStatus: structs.JobStatus{Status: 1}},
+			JobStatus: structs.JobStatus{Status: 1}, Resource: "mock"},
 	}
 
 	resultv := reflect.ValueOf(res)

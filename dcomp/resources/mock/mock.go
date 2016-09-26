@@ -28,3 +28,10 @@ func (res *MockResource) GetJob(id string) (status structs.JobStatus, err error)
 	err = errors.New("Job not found")
 	return
 }
+
+func (res *MockResource) DeleteJob(id string) error {
+	if id == "578359205e935a20adb39a18" {
+		return nil
+	}
+	return errors.New("Job not found")
+}

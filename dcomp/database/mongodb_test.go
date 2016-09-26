@@ -116,13 +116,13 @@ func TestMdbGetRecordByID(t *testing.T) {
 
 	var records []structs.JobInfo
 
-	err = db.GetRecordByID(id, &records)
+	err = db.GetRecordsByID(id, &records)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(records), "TestMdbGetRecords should return 1")
 	assert.Equal(t, id, records[0].Id, "TestMdbGetRecords should return same id")
 
-	err = db.GetRecordByID("aaa", &records)
+	err = db.GetRecordsByID("aaa", &records)
 	assert.NotNil(t, err)
 
 	db.Close()
@@ -147,7 +147,7 @@ func TestMdbPatchRecord(t *testing.T) {
 
 	var records []structs.JobInfo
 
-	err = db.GetRecordByID(id, &records)
+	err = db.GetRecordsByID(id, &records)
 	assert.Nil(t, err)
 
 	assert.Equal(t, 1, len(records), "TestMdbPatchRecord should return 1")

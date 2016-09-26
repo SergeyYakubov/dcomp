@@ -17,10 +17,10 @@ var listRoutes = utils.Routes{
 		"/jobs/{jobID}/",
 		routeGetJob,
 	},
-	/*	utils.Route{
+	utils.Route{
 		"DeleteJob",
 		"DELETE",
 		"/jobs/{jobID}/",
 		routeDeleteJob,
-	},*/
+	},
 }

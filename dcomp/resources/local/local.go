@@ -19,11 +19,12 @@ type Resource struct {
 
 type localJobInfo struct {
 	structs.JobStatus
-	Id string
+	ContainerId string
+	Id          string
 }
 
 func (res *Resource) SubmitJob(job structs.JobInfo) error {
-	li := localJobInfo{structs.JobStatus{}, job.Id}
+	li := localJobInfo{JobStatus: structs.JobStatus{}, Id: job.Id}
 	_, err := res.db.CreateRecord(job.Id, &li)
 	if err != nil {
 		return err
@@ -75,6 +76,7 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 		return
 	}
 
+	li.ContainerId = id
 	res.updateJobInfo(li, structs.StatusLoadingDockerImage, "")
 
 	if err := startContainer(id); err != nil {
@@ -105,7 +107,7 @@ func (res *Resource) SetDb(db database.Agent) {
 
 func (res *Resource) GetJob(id string) (status structs.JobStatus, err error) {
 	var li []localJobInfo
-	if err := res.db.GetRecordByID(id, &li); err != nil {
+	if err := res.db.GetRecordsByID(id, &li); err != nil {
 		return status, err
 	}
 
@@ -115,4 +117,25 @@ func (res *Resource) GetJob(id string) (status structs.JobStatus, err error) {
 	status = li[0].JobStatus
 
 	return
+}
+func (res *Resource) DeleteJob(id string) error {
+
+	var li []localJobInfo
+	if err := res.db.GetRecordsByID(id, &li); err != nil {
+		return err
+	}
+
+	if len(li) != 1 {
+		return errors.New("Cannot find record in local resource database")
+	}
+
+	if err := deleteContainer(li[0].ContainerId); err != nil {
+		return err
+	}
+
+	if err := res.db.DeleteRecordByID(id); err != nil {
+		return err
+	}
+
+	return nil
 }

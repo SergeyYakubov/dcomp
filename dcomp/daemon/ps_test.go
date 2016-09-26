@@ -48,7 +48,7 @@ func TestGetJobsFromResources(t *testing.T) {
 		db.CreateRecord(test.job.Id, structs.JobInfo{})
 		updateJobsStatusFromResources(&test.job)
 		assert.Equal(t, test.answer, test.job.Status, "get status from resources")
-		err := db.GetRecordByID(test.job.Id, &jobs)
+		err := db.GetRecordsByID(test.job.Id, &jobs)
 		assert.Nil(t, err)
 		assert.Equal(t, test.answer, jobs[0].Status, "job not updated")
 		db.DeleteRecordByID(test.job.Id)

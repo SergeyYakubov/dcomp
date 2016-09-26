@@ -40,12 +40,13 @@ func TestRunScript(t *testing.T) {
 	defer db.Close()
 
 	for _, test := range runScriptTests {
-		li := localJobInfo{structs.JobStatus{}, "578359205e935a20adb39a18"}
+		li := localJobInfo{JobStatus: structs.JobStatus{}, Id: "578359205e935a20adb39a18"}
+
 		res.db.CreateRecord("578359205e935a20adb39a18", &li)
 		test.job.WorkDir = "/tmp"
 		res.runScript(li, test.job, 1*time.Hour)
 		var li_res []localJobInfo
-		res.db.GetRecordByID("578359205e935a20adb39a18", &li_res)
+		res.db.GetRecordsByID("578359205e935a20adb39a18", &li_res)
 		assert.Equal(t, test.status, li_res[0].Status)
 		res.db.DeleteRecordByID("578359205e935a20adb39a18")
 	}
@@ -66,7 +67,8 @@ func TestGetJob(t *testing.T) {
 
 	id := "578359205e935a20adb39a18"
 
-	li := localJobInfo{structs.JobStatus{Status: structs.StatusRunning}, id}
+	li := localJobInfo{JobStatus: structs.JobStatus{Status: structs.StatusRunning}, Id: id}
+
 	res.db.CreateRecord(id, &li)
 
 	status, err := res.GetJob(id)
@@ -77,6 +79,36 @@ func TestGetJob(t *testing.T) {
 	res.db.DeleteRecordByID(id)
 
 	status, err = res.GetJob(id)
+	assert.NotNil(t, err)
+
+}
+
+func TestDeleteJob(t *testing.T) {
+	var dbsrv server.Server
+	dbsrv.Host = "172.17.0.2"
+	dbsrv.Port = 27017
+	db := new(database.Mongodb)
+	db.SetServer(&dbsrv)
+	db.SetDefaults("localplugintest")
+	var res = new(Resource)
+	res.SetDb(db)
+	db.Connect()
+	defer db.Close()
+
+	id := "578359205e935a20adb39a18"
+
+	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100", WorkDir: "/home/yakubov/"}
+
+	ji := structs.JobInfo{JobDescription: job, Id: id}
+
+	res.SubmitJob(ji)
+
+	time.Sleep(time.Second * 1)
+	err := res.DeleteJob(id)
+
+	assert.Nil(t, err)
+
+	err = res.DeleteJob(id)
 	assert.NotNil(t, err)
 
 }
