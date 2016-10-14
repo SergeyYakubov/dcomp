@@ -7,10 +7,10 @@ import (
 
 	"io"
 
-	"github.com/docker/engine-api/client"
-	"github.com/docker/engine-api/types"
-	"github.com/docker/engine-api/types/container"
-	"github.com/docker_source/pkg/stdcopy"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"golang.org/x/net/context"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
