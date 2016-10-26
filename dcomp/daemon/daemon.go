@@ -12,16 +12,19 @@ import (
 var db database.Agent
 
 func Start(args []string) {
-
 	var err error
-	db, err = initializedb("mongodb")
+
+	err = setConfiguration()
+	if err != nil {
+		log.Fatal("cannot setup dcompd: " + err.Error())
+	}
+
+	db, err = connectDb("mongodb")
 	if err != nil {
 		log.Fatal("cannot connect to mongodb: " + err.Error())
 	}
 	defer db.Close()
 
-	initialize()
-
 	mux := utils.NewRouter(listRoutes)
-	log.Fatal(http.ListenAndServe(":8000", mux))
+	log.Fatal(http.ListenAndServe(addr, mux))
 }

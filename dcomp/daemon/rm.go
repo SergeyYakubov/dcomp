@@ -3,6 +3,8 @@ package daemon
 import (
 	"net/http"
 
+	"errors"
+
 	"github.com/gorilla/mux"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -13,6 +15,9 @@ func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 
 	var jobs []structs.JobInfo
 	if err := db.GetRecordsByID(jobID, &jobs); err != nil || len(jobs) != 1 {
+		if err == nil {
+			err = errors.New("job not found")
+		}
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
 		return
 	}
@@ -28,5 +33,9 @@ func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 
 	if err := db.DeleteRecordByID(jobID); err != nil {
 		http.Error(w, "cannot delete job: "+err.Error(), http.StatusNotFound)
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+
 }

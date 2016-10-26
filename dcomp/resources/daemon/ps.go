@@ -18,6 +18,7 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
+		return
 	}
 
 	w.WriteHeader(http.StatusOK)

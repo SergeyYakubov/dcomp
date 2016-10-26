@@ -11,15 +11,15 @@ import (
 
 var resource resources.Resource
 
-func Start(res resources.Resource, db database.Agent, port string) error {
+func Start(res resources.Resource, db database.Agent, addr string) error {
 	resource = res
 	if err := db.Connect(); err != nil {
-		return err
+		log.Fatal(err)
 	}
 	defer db.Close()
 
 	resource.SetDb(db)
 	mux := utils.NewRouter(listRoutes)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	log.Fatal(http.ListenAndServe(addr, mux))
 	return nil
 }

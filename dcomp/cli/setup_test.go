@@ -8,5 +8,5 @@ import (
 func TestSetServerConfiguration(t *testing.T) {
 	SetDaemonConfiguration()
 	assert.Equal(t, "localhost", daemon.Host, "")
-	assert.Equal(t, 8000, daemon.Port, "")
+	assert.Equal(t, 8001, daemon.Port, "")
 }

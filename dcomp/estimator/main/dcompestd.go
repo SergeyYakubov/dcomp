@@ -12,6 +12,5 @@ func main() {
 	if ret := version.ShowVersion(os.Stdout, "dcompestd"); ret {
 		return
 	}
-
 	daemon.Start()
 }

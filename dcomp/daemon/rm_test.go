@@ -26,9 +26,9 @@ var getdeleteTests = []request{
 	//	{structs.JobDescription{}, "jobs/1", "GET", 404, "Get non-existing job"},
 	//	{structs.JobDescription{}, "job", "GET", 404, "get job - wrong path"},
 	{structs.JobDescription{}, "jobs/578359205e935a20adb39a18", "DELETE", 200, "delete existing job"},
-	//	{structs.JobDescription{}, "jobs/1", "DELETE", 404, "delete non-existing job"},
-	//	{structs.JobDescription{}, "jobs", "DELETE", 404, "delete all jobs"},
-	//	{structs.JobDescription{}, "job", "DELETE", 404, "delete job - wrong path"},
+	{structs.JobDescription{}, "jobs/578359205e935a20adb39a19", "DELETE", 404, "delete non-existing job"},
+	{structs.JobDescription{}, "jobs", "DELETE", 404, "delete all jobs"},
+	{structs.JobDescription{}, "job", "DELETE", 404, "delete job - wrong path"},
 }
 
 func TestRouteDeleteJob(t *testing.T) {

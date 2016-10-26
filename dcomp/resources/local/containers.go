@@ -7,10 +7,12 @@ import (
 
 	"io"
 
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/pkg/stdcopy"
+	"io/ioutil"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/net/context"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -33,7 +35,26 @@ func createContainer(job structs.JobDescription) (string, error) {
 		AttachStderr: false, Cmd: cmd}
 	resp, err := cli.ContainerCreate(context.Background(), &config, nil, nil, "")
 	if err != nil {
-		return "", err
+		if client.IsErrImageNotFound(err) {
+			options := types.ImageCreateOptions{}
+			resp, err := cli.ImageCreate(context.Background(), job.ImageName, options)
+			if err != nil {
+				return "", err
+			}
+			defer resp.Close()
+			_, err = ioutil.ReadAll(resp)
+			if err != nil {
+				return "", err
+			}
+		} else {
+			return "", err
+		}
+		resp, errRetry := cli.ContainerCreate(context.Background(), &config, nil, nil, "")
+		if errRetry != nil {
+			return "", errRetry
+		} else {
+			return resp.ID, nil
+		}
 	}
 
 	return resp.ID, nil

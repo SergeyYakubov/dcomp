@@ -1,0 +1,7 @@
+database:
+ host: 172.17.0.2
+ port: 27017
+daemon:
+ addr: :8006
+
+

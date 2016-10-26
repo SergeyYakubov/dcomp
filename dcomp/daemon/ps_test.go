@@ -23,10 +23,11 @@ var getTests = []testsPS{
 }
 
 func TestGetJobsFromResources(t *testing.T) {
-	initialize()
+	setConfiguration()
 	var srv server.Server
 	ts3 := server.CreateMockServer(&srv)
 	defer ts3.Close()
+	resources = make(map[string]structs.Resource)
 	resources["mock"] = structs.Resource{Server: srv}
 
 	db = new(database.Mongodb)

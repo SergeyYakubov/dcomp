@@ -28,6 +28,8 @@ const (
 	StatusRunning            = 102
 	StatusFinished           = 103
 	StatusLoadingDockerImage = 104
+	StatusCreatingContainer  = 105
+	StatusStartingContainer  = 106
 	//error codes
 	StatusError             = 201
 	StatusSubmissionFailed  = 201
@@ -79,12 +81,13 @@ func Decode(r io.Reader, t jobs) bool {
 }
 
 var jobStatusExplained = map[int]string{
-	StatusSubmitted:          "Submitted",
-	StatusRunning:            "Running",
-	StatusFinished:           "Finished",
-	StatusLoadingDockerImage: "Loading Docker image",
-	StatusSubmissionFailed:   "Submission failed",
-	StatusErrorFromResource:  "Error from resource",
+	StatusSubmitted:         "Submitted",
+	StatusRunning:           "Running",
+	StatusFinished:          "Finished",
+	StatusCreatingContainer: "Creating Docker container",
+	StatusStartingContainer: "Starting Docker container",
+	StatusSubmissionFailed:  "Submission failed",
+	StatusErrorFromResource: "Error from resource",
 }
 
 func (d *JobInfo) PrintFull(w io.Writer) {

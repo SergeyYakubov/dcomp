@@ -1,0 +1,5 @@
+dcompd:
+ host: localhost
+ port: 8001
+
+

@@ -1,0 +1,14 @@
+database:
+ host: 172.17.0.2
+ port: 27017
+estimator:
+ host: localhost
+ port: 8005
+daemon:
+ addr: :8001
+plugins:
+        - name: Local
+          host: localhost
+          port: 8006
+
+

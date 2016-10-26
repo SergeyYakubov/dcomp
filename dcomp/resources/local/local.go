@@ -70,6 +70,7 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 	defer fout.Close()
 	defer ferr.Close()
 
+	res.updateJobInfo(li, structs.StatusCreatingContainer, "")
 	id, err := createContainer(job)
 	if err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
@@ -77,7 +78,7 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 	}
 
 	li.ContainerId = id
-	res.updateJobInfo(li, structs.StatusLoadingDockerImage, "")
+	res.updateJobInfo(li, structs.StatusStartingContainer, "")
 
 	if err := startContainer(id); err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
@@ -129,8 +130,10 @@ func (res *Resource) DeleteJob(id string) error {
 		return errors.New("Cannot find record in local resource database")
 	}
 
-	if err := deleteContainer(li[0].ContainerId); err != nil {
-		return err
+	if li[0].Status == structs.StatusRunning {
+		if err := deleteContainer(li[0].ContainerId); err != nil {
+			return err
+		}
 	}
 
 	if err := res.db.DeleteRecordByID(id); err != nil {

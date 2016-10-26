@@ -35,7 +35,7 @@ var submitTests = []submitRequest{
 
 func TestRouteSubmitJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
-	initialize()
+	setConfiguration()
 	db = new(database.Mockdatabase)
 	defer func() { db = nil }()
 
@@ -75,7 +75,7 @@ func TestRouteSubmitJob(t *testing.T) {
 
 func TestSubmitJob(t *testing.T) {
 
-	initialize()
+	setConfiguration()
 	db = new(database.Mockdatabase)
 	defer func() { db = nil }()
 

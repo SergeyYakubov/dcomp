@@ -88,7 +88,7 @@ func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
 	return b, nil
 }
 
-// CommandPost issues the DELETE command to srv. Returns response body or error
+// CommandDelete issues the DELETE command to srv. Returns response body or error
 func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 
@@ -96,7 +96,10 @@ func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
 	if err != nil {
 		return nil, err
 	}
+	req.Close = true
+
 	res, err := http.DefaultClient.Do(req)
+
 	if err != nil {
 		return nil, err
 	}
@@ -123,6 +126,9 @@ func (srv *Server) CommandPatch(path string, data interface{}) (err error) {
 	if err != nil {
 		return err
 	}
+
+	req.Close = true
+
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
