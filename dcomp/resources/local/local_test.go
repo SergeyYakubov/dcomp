@@ -43,7 +43,7 @@ func TestRunScript(t *testing.T) {
 		li := localJobInfo{JobStatus: structs.JobStatus{}, Id: "578359205e935a20adb39a18"}
 
 		res.db.CreateRecord("578359205e935a20adb39a18", &li)
-		test.job.WorkDir = "/tmp"
+		res.Basedir = "/tmp"
 		res.runScript(li, test.job, 1*time.Hour)
 		var li_res []localJobInfo
 		res.db.GetRecordsByID("578359205e935a20adb39a18", &li_res)
@@ -97,10 +97,11 @@ func TestDeleteJob(t *testing.T) {
 
 	id := "578359205e935a20adb39a18"
 
-	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100", WorkDir: "/home/yakubov/"}
+	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100"}
 
 	ji := structs.JobInfo{JobDescription: job, Id: id}
 
+	res.Basedir = "/tmp"
 	res.SubmitJob(ji)
 
 	time.Sleep(time.Second * 1)

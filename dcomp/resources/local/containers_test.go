@@ -120,11 +120,9 @@ func TestPrintLogs(t *testing.T) {
 	err = startContainer(id)
 
 	buf_out := new(bytes.Buffer)
-	buf_err := new(bytes.Buffer)
-
 	// echo command, logs are written
 
-	err = waitFinished(buf_out, buf_err, id, 5*time.Second)
+	err = waitFinished(buf_out, id, 5*time.Second)
 	assert.Equal(t, "hi\n", buf_out.String(), "Ouput should be hi")
 	assert.Nil(t, err, "Print logs: should not be error")
 
@@ -136,33 +134,9 @@ func TestPrintLogs(t *testing.T) {
 
 	startContainer(id)
 
-	err = waitFinished(buf_out, buf_err, id, 10*time.Millisecond)
+	err = waitFinished(buf_out, id, 10*time.Millisecond)
 	assert.NotNil(t, err, "Print logs: should be error")
 
 	deleteContainer(id)
 
 }
-
-/*
-func TestRunScript(t *testing.T) {
-	buf_out := new(bytes.Buffer)
-	buf_err := new(bytes.Buffer)
-
-	for _, test := range submitTests {
-
-		err := runScript(buf_out, buf_err, test.job, 10*time.Millisecond)
-		if test.job.ImageName == "max-adm01:0000/nosuchcontainer" || test.job.Script == "hi" {
-			assert.NotNil(t, err, test.message)
-			if test.job.Script == "hi" {
-				assert.Equal(t, "hi\n", buf_err.String(), "not found")
-			}
-
-			continue
-		}
-		assert.Nil(t, err, "Should not be error")
-		assert.Equal(t, "hi\n", buf_out.String(), "Output should be hi")
-
-	}
-
-}
-*/

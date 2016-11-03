@@ -13,8 +13,9 @@ import (
 )
 
 type Resource struct {
-	db         database.Agent
-	werr, wout io.Writer
+	db      database.Agent
+	wout    io.Writer
+	Basedir string
 }
 
 type localJobInfo struct {
@@ -36,39 +37,31 @@ func (res *Resource) SubmitJob(job structs.JobInfo) error {
 func (res *Resource) updateJobInfo(li localJobInfo, status int, message string) {
 	li.Status = status
 	li.Message = message
-	fmt.Fprintln(res.werr, message)
+	if message != "" {
+		fmt.Fprintln(res.wout, message)
+	}
 	res.db.PatchRecord(li.Id, li)
 }
 
-func createOutputFiles(job structs.JobDescription) (fout, ferr *os.File, err error) {
-	foutname := job.WorkDir + `/out.txt`
-	fout, err = os.Create(foutname)
-	if err != nil {
-		return
-	}
+func (res *Resource) createLogFile(id string, job structs.JobDescription) (flog *os.File, err error) {
 
-	ferrname := job.WorkDir + `/err.txt`
-	ferr, err = os.Create(ferrname)
-	if err != nil {
-		fout.Close()
-	}
+	fname := res.Basedir + `/` + id + `.log`
+	flog, err = os.Create(fname)
 
 	return
 }
 
 func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d time.Duration) {
 
-	fout, ferr, err := createOutputFiles(job)
+	fout, err := res.createLogFile(li.Id, job)
 
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	res.werr = ferr
 	res.wout = fout
 	defer fout.Close()
-	defer ferr.Close()
 
 	res.updateJobInfo(li, structs.StatusCreatingContainer, "")
 	id, err := createContainer(job)
@@ -88,7 +81,7 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 
 	res.updateJobInfo(li, structs.StatusRunning, "")
 
-	if err := waitFinished(fout, ferr, id, d); err != nil {
+	if err := waitFinished(fout, id, d); err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		deleteContainer(id)
 		return

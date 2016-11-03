@@ -5,6 +5,7 @@ import (
 
 	"log"
 
+	"github.com/pkg/errors"
 	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/resources/daemon"
 	"stash.desy.de/scm/dc/main.git/dcomp/resources/local"
@@ -21,15 +22,36 @@ type config struct {
 		Host string
 		Port int
 	}
+	BaseDir string
 }
 
+func (c *config) check() error {
+
+	src, err := os.Stat(c.BaseDir)
+	if err != nil {
+		return err
+	}
+
+	if !src.IsDir() {
+		err := errors.New(c.BaseDir + " is not a directory")
+		return err
+	}
+	return nil
+}
+
+var configFileName = `/etc/dcomp/plugins/local.yaml`
+
 func setConfiguration() (config, error) {
-	fname := `/etc/dcomp/plugins/local.yaml`
 
 	var c config
 
-	err := utils.ReadYaml(fname, &c)
+	if err := utils.ReadYaml(configFileName, &c); err != nil {
+		return c, err
+	}
+
+	err := c.check()
 	return c, err
+
 }
 
 func main() {
@@ -53,6 +75,7 @@ func main() {
 
 	var res = new(local.Resource)
 
+	res.Basedir = c.BaseDir
 	daemon.Start(res, db, addr)
 	return
 }

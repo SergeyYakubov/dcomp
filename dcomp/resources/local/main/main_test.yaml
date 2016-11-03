@@ -4,5 +4,3 @@ database:
 daemon:
  addr: :8006
 basedir: /home/yakubov/dcomp_test
-
-

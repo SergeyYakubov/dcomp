@@ -76,7 +76,7 @@ func waitContainer(id string, d time.Duration) (int, error) {
 }
 
 // waitFinished read log files in follow mode, blocking execution until container stops or timeout
-func waitFinished(wout io.Writer, werr io.Writer, id string, d time.Duration) error {
+func waitFinished(wout io.Writer, id string, d time.Duration) error {
 	ctx, cancel := context.WithTimeout(context.Background(), d)
 	defer cancel()
 
@@ -89,7 +89,7 @@ func waitFinished(wout io.Writer, werr io.Writer, id string, d time.Duration) er
 	}
 
 	defer reader.Close()
-	_, err = stdcopy.StdCopy(wout, werr, reader)
+	_, err = stdcopy.StdCopy(wout, wout, reader)
 
 	if err != nil && err != io.EOF {
 		return err

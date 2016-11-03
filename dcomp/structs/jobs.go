@@ -18,18 +18,16 @@ type JobDescription struct {
 	Script    string
 	NCPUs     int
 	Local     bool
-	WorkDir   string
 }
 
 // Job status
 const (
 	// good codes
-	StatusSubmitted          = 101
-	StatusRunning            = 102
-	StatusFinished           = 103
-	StatusLoadingDockerImage = 104
-	StatusCreatingContainer  = 105
-	StatusStartingContainer  = 106
+	StatusSubmitted         = 101
+	StatusRunning           = 102
+	StatusFinished          = 103
+	StatusCreatingContainer = 104
+	StatusStartingContainer = 105
 	//error codes
 	StatusError             = 201
 	StatusSubmissionFailed  = 201
