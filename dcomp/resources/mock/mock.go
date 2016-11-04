@@ -1,7 +1,10 @@
 package mock
 
 import (
+	"bytes"
+	"compress/gzip"
 	"errors"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -34,4 +37,16 @@ func (res *MockResource) DeleteJob(id string) error {
 		return nil
 	}
 	return errors.New("Job not found")
+}
+
+func (res *MockResource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
+	if compressed {
+		gz := gzip.NewWriter(b)
+		defer gz.Close()
+		gz.Write([]byte("hello"))
+	} else {
+		b.WriteString("hello")
+	}
+	return b, nil
 }

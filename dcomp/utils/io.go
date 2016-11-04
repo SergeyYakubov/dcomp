@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"bytes"
+	"compress/gzip"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 )
@@ -16,4 +18,11 @@ func ReadYaml(fname string, config interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func CompressString(s string) string {
+	var b bytes.Buffer
+	gz := gzip.NewWriter(&b)
+	gz.Write([]byte(s))
+	return b.String()
 }

@@ -16,6 +16,7 @@ import (
 
 type jobInfoRequest struct {
 	path       string
+	querry     string
 	cmd        string
 	answercode int
 	answer     string
@@ -23,8 +24,11 @@ type jobInfoRequest struct {
 }
 
 var JobInfoTests = []jobInfoRequest{
-	{"jobs/578359205e935a20adb39a18", "GET", http.StatusOK, "103", "get job info "},
-	{"jobs/578359205e935a20adb39a19", "GET", http.StatusNotFound, "12345", "no job found "},
+	{"jobs/578359205e935a20adb39a18", "", "GET", http.StatusOK, "103", "get job info "},
+	{"jobs/578359205e935a20adb39a18", "?log=true", "GET", http.StatusOK, "hello", "get job info "},
+	{"jobs/578359205e935a20adb39a18", "?log=true&compress=true", "GET", http.StatusOK,
+		utils.CompressString("hello"), "get job info "},
+	{"jobs/578359205e935a20adb39a19", "", "GET", http.StatusNotFound, "12345", "no job found "},
 }
 
 func TestGetJobInfo(t *testing.T) {
@@ -33,7 +37,7 @@ func TestGetJobInfo(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
 	for _, test := range JobInfoTests {
 
-		req, err := http.NewRequest(test.cmd, "http://localhost:8002/"+test.path+"/", nil)
+		req, err := http.NewRequest(test.cmd, "http://localhost:8002/"+test.path+"/"+test.querry, nil)
 
 		assert.Nil(t, err, "Should not be error")
 

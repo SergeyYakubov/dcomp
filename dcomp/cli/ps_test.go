@@ -2,9 +2,11 @@ package cli
 
 import (
 	"bytes"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"stash.desy.de/scm/dc/main.git/dcomp/server"
-	"testing"
+	"stash.desy.de/scm/dc/main.git/dcomp/utils"
 )
 
 var showJobsTests = []struct {
@@ -17,6 +19,11 @@ var showJobsTests = []struct {
 	{command{args: []string{"-a"}}, "578359205e935a20adb39a19"},
 	{command{args: []string{"-id", "578359205e935a20adb39a19"}}, "not found"},
 	{command{args: []string{"-id", "1"}}, "wrong"},
+	{command{args: []string{"-id", "578359205e935a20adb39a20", "-log"}}, "hello"},
+	{command{args: []string{"-id", "578359205e935a20adb39a18", "-log", "-compress"}},
+		utils.CompressString("hello")},
+	{command{args: []string{"-log", "-compress"}}, "specify"},
+	{command{args: []string{"-id", "578359205e935a20adb39a18", "-compress"}}, "compress"},
 }
 
 func TestCommandPs(t *testing.T) {

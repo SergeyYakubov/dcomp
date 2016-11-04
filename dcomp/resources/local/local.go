@@ -7,6 +7,8 @@ import (
 
 	"io"
 
+	"bytes"
+	"compress/gzip"
 	"errors"
 	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
@@ -43,9 +45,13 @@ func (res *Resource) updateJobInfo(li localJobInfo, status int, message string) 
 	res.db.PatchRecord(li.Id, li)
 }
 
+func (res *Resource) logFileName(id string) string {
+	return res.Basedir + `/` + id + `.log`
+}
+
 func (res *Resource) createLogFile(id string, job structs.JobDescription) (flog *os.File, err error) {
 
-	fname := res.Basedir + `/` + id + `.log`
+	fname := res.logFileName(id)
 	flog, err = os.Create(fname)
 
 	return
@@ -100,31 +106,38 @@ func (res *Resource) SetDb(db database.Agent) {
 }
 
 func (res *Resource) GetJob(id string) (status structs.JobStatus, err error) {
-	var li []localJobInfo
-	if err := res.db.GetRecordsByID(id, &li); err != nil {
+
+	li, err := res.findJob(id)
+	if err != nil {
 		return status, err
 	}
 
-	if len(li) != 1 {
-		return status, errors.New("Database error")
-	}
-	status = li[0].JobStatus
+	status = li.JobStatus
 
 	return
 }
+
+func (res *Resource) findJob(id string) (li localJobInfo, err error) {
+	var listjobs []localJobInfo
+	if err := res.db.GetRecordsByID(id, &listjobs); err != nil {
+		return li, err
+	}
+
+	if len(listjobs) != 1 {
+		return li, errors.New("Cannot find record in local resource database")
+	}
+	return listjobs[0], nil
+}
+
 func (res *Resource) DeleteJob(id string) error {
 
-	var li []localJobInfo
-	if err := res.db.GetRecordsByID(id, &li); err != nil {
+	li, err := res.findJob(id)
+	if err != nil {
 		return err
 	}
 
-	if len(li) != 1 {
-		return errors.New("Cannot find record in local resource database")
-	}
-
-	if li[0].Status == structs.StatusRunning {
-		if err := deleteContainer(li[0].ContainerId); err != nil {
+	if li.Status == structs.StatusRunning {
+		if err := deleteContainer(li.ContainerId); err != nil {
 			return err
 		}
 	}
@@ -134,4 +147,38 @@ func (res *Resource) DeleteJob(id string) error {
 	}
 
 	return nil
+}
+
+func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
+
+	li, err := res.findJob(id)
+	if err != nil {
+		return b, err
+	}
+
+	fname := res.logFileName(li.Id)
+
+	f, err := os.Open(fname)
+	if err != nil {
+		return b, err
+	}
+	defer f.Close()
+
+	//select whether to write via compressor or not
+	var w io.Writer
+	if compressed {
+		gz := gzip.NewWriter(b)
+		w = gz
+		defer gz.Close()
+	} else {
+		w = b
+	}
+
+	_, err = io.Copy(w, f)
+	if err != nil {
+		return b, err
+	}
+
+	return b, nil
 }

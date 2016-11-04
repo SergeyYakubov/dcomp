@@ -3,6 +3,7 @@
 package server
 
 import (
+	"compress/gzip"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -67,14 +68,32 @@ func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
 	showFinished := r.URL.Query().Get("finished")
 	if showFinished == "true" {
 		fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a19"}]`)
-	} else {
-		fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+		return
 	}
+	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
 }
 
 func MockFuncGet(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
+
 	jobID := vars["jobID"]
+	jobLog := r.URL.Query().Get("log")
+
+	logCompress := r.URL.Query().Get("compress")
+
+	if jobLog == "true" {
+		w.WriteHeader(http.StatusOK)
+		if logCompress == "true" {
+			w.Header().Set("Content-Encoding", "gzip")
+			gz := gzip.NewWriter(w)
+			defer gz.Close()
+			gzr := gzipResponseWriter{Writer: gz, ResponseWriter: w}
+			fmt.Fprintf(gzr, `hello compressed`)
+		} else {
+			fmt.Fprintf(w, `hello`)
+		}
+		return
+	}
 
 	if jobID == "678359205e935a20adb39a18" {
 		w.WriteHeader(http.StatusOK)

@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"encoding/json"
 
+	"net/url"
+
 	"github.com/gorilla/mux"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -93,6 +95,12 @@ func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 	sendJobs(w, jobs, true)
 }
 
+func getJobLog(job structs.JobInfo, u *url.URL) (*bytes.Buffer, error) {
+	res := resources[job.Resource]
+	cmd := u.Path + "?" + u.RawQuery
+	return res.Server.CommandGet(cmd)
+}
+
 func routeGetJob(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
@@ -102,6 +110,20 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
 		return
 	}
+
+	jobLog := r.URL.Query().Get("log")
+
+	if jobLog == "true" {
+		b, err := getJobLog(jobs[0], r.URL)
+		if err != nil {
+			http.Error(w, "cannot retrieve job log: "+err.Error(), http.StatusNotFound)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		w.Write(b.Bytes())
+		return
+	}
+
 	updateJobs(jobs)
 	sendJobs(w, jobs, false)
 }
