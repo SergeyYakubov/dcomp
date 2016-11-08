@@ -4,6 +4,5 @@ dComp project
 
 ## Contributors
 
-Sergey Yakubov <sergey.yakubov@desy.de>
+Sergey Yakubov <yakser@gmx.de>
 
-Copyright (C) 2016 Desy IT Group                                       
