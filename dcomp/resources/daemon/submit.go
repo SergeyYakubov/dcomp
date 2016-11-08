@@ -3,7 +3,7 @@ package daemon
 import (
 	"net/http"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 func routeSubmitJob(w http.ResponseWriter, r *http.Request) {

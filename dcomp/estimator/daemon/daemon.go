@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/utils"
 )
 
 type config struct {

@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"stash.desy.de/scm/dc/main.git/dcomp/cli"
-	"stash.desy.de/scm/dc/main.git/dcomp/daemon"
-	"stash.desy.de/scm/dc/main.git/dcomp/version"
+	"github.com/dcomp/dcomp/cli"
+	"github.com/dcomp/dcomp/daemon"
+	"github.com/dcomp/dcomp/version"
 )
 
 var (

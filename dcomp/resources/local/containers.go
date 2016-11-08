@@ -14,7 +14,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"golang.org/x/net/context"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 var cli *client.Client

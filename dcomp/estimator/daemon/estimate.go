@@ -6,7 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 func routeEstimateJob(w http.ResponseWriter, r *http.Request) {

@@ -7,7 +7,7 @@ import (
 	"bytes"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 type request struct {

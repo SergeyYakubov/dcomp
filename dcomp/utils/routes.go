@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"net/url"
 )
 
 type Routes []Route
@@ -41,6 +42,14 @@ func checkMAC(message, messageMAC, key []byte) bool {
 	return hmac.Equal(messageMAC, expectedMAC)
 }
 
+func StripURL(u *url.URL) string {
+	s := u.Path + u.RawQuery
+	s = strings.Replace(s, "/", "", -1)
+	s = strings.Replace(s, "?", "", -1)
+	return s
+
+}
+
 func Auth(fn http.HandlerFunc, key string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		sha := r.Header.Get("Authorization")
@@ -49,9 +58,7 @@ func Auth(fn http.HandlerFunc, key string) http.HandlerFunc {
 			http.Error(w, "Internal authorization error - empty tocken", http.StatusUnauthorized)
 			return
 		}
-		message := r.URL.Path + r.URL.RawQuery
-		message = strings.Replace(message, "/", "", -1)
-		message = strings.Replace(message, "?", "", -1)
+		message := StripURL(r.URL)
 
 		ok := checkMAC([]byte(message), reqToken, []byte(key))
 		if !ok {

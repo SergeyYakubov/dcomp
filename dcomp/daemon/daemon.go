@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/utils"
 )
 
 var db database.Agent

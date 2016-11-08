@@ -5,8 +5,8 @@ import (
 	"compress/gzip"
 	"errors"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/structs"
 )
 
 type MockResource struct {

@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 func TestCreateRecord(t *testing.T) {

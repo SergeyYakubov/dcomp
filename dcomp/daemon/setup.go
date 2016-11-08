@@ -2,10 +2,10 @@ package daemon
 
 import (
 	"fmt"
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/server"
+	"github.com/dcomp/dcomp/structs"
+	"github.com/dcomp/dcomp/utils"
 )
 
 var estimatorServer server.Server

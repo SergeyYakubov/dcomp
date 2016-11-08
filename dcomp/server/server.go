@@ -13,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"github.com/dcomp/dcomp/utils"
 	"strconv"
 	"strings"
 )
@@ -69,10 +70,12 @@ func (srv *Server) addAuthorizationHeader(r *http.Request, s string) {
 		return
 	}
 
-	s = strings.Replace(s, "/", "", -1)
-	s = strings.Replace(s, "?", "", -1)
+	u := utils.StripURL(r.URL)
 	mac := hmac.New(sha256.New, []byte(srv.Key))
-	mac.Write([]byte(s))
+	mac.Write([]byte(u))
+	if s != "" {
+		mac.Write([]byte(s))
+	}
 	sha := base64.URLEncoding.EncodeToString(mac.Sum(nil))
 	r.Header.Add("Authorization", sha)
 }
@@ -90,9 +93,10 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 	if err != nil {
 		return nil, err
 	}
-	//	req.Close = true
 
-	srv.addAuthorizationHeader(req, path)
+	req.Close = true
+
+	srv.addAuthorizationHeader(req, "")
 
 	res, err := http.DefaultClient.Do(req)
 

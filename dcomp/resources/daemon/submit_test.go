@@ -12,12 +12,12 @@ import (
 	"io"
 	"net/http/httptest"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/resources/mock"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
+	"github.com/dcomp/dcomp/resources/mock"
+	"github.com/dcomp/dcomp/server"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/structs"
+	"github.com/dcomp/dcomp/utils"
 )
 
 type request struct {

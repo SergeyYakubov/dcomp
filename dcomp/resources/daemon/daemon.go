@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/resources"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/resources"
+	"github.com/dcomp/dcomp/utils"
 )
 
 var resource resources.Resource

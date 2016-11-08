@@ -2,7 +2,7 @@ package structs
 
 import (
 	"sort"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
+	"github.com/dcomp/dcomp/server"
 )
 
 // Keeps resources and their priorities

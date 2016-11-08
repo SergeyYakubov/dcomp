@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/estimator/daemon"
-	"stash.desy.de/scm/dc/main.git/dcomp/version"
+	"github.com/dcomp/dcomp/estimator/daemon"
+	"github.com/dcomp/dcomp/version"
 )
 
 func main() {

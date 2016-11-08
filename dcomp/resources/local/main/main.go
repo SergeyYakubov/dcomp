@@ -6,12 +6,12 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-	"stash.desy.de/scm/dc/main.git/dcomp/database"
-	"stash.desy.de/scm/dc/main.git/dcomp/resources/daemon"
-	"stash.desy.de/scm/dc/main.git/dcomp/resources/local"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
-	"stash.desy.de/scm/dc/main.git/dcomp/version"
+	"github.com/dcomp/dcomp/database"
+	"github.com/dcomp/dcomp/resources/daemon"
+	"github.com/dcomp/dcomp/resources/local"
+	"github.com/dcomp/dcomp/server"
+	"github.com/dcomp/dcomp/utils"
+	"github.com/dcomp/dcomp/version"
 )
 
 type config struct {

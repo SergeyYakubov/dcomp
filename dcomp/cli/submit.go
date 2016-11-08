@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/structs"
+	"github.com/dcomp/dcomp/structs"
 )
 
 // CommandSubmit sends damon a command to submit a new job. Job id is printed on success, error message otherwise.

@@ -9,9 +9,9 @@ import (
 
 	"net/http/httptest"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/resources/mock"
+	"github.com/dcomp/dcomp/resources/mock"
 
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/utils"
 )
 
 type jobInfoRequest struct {

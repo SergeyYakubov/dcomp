@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"stash.desy.de/scm/dc/main.git/dcomp/server"
-	"stash.desy.de/scm/dc/main.git/dcomp/utils"
+	"github.com/dcomp/dcomp/server"
+	"github.com/dcomp/dcomp/utils"
 )
 
 var showJobsTests = []struct {
