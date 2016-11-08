@@ -2,7 +2,7 @@
 // db is an interface to a specific implementation (currently implemented mongodb and mockdatabase used for tests)
 package database
 
-import "github.com/dcomp/dcomp/server"
+import "github.com/sergeyyakubov/dcomp/dcomp/server"
 
 type Agent interface {
 	CreateRecord(string, interface{}) (string, error)

@@ -10,8 +10,8 @@ import (
 	"io"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/dcomp/dcomp/structs"
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type request struct {

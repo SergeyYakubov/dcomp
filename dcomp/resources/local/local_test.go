@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/dcomp/dcomp/database"
-	"github.com/dcomp/dcomp/server"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 type scriptRequest struct {

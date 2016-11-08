@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 // CommandSubmit sends damon a command to submit a new job. Job id is printed on success, error message otherwise.

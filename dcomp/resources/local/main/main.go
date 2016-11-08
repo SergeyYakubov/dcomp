@@ -6,12 +6,12 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-	"github.com/dcomp/dcomp/database"
-	"github.com/dcomp/dcomp/resources/daemon"
-	"github.com/dcomp/dcomp/resources/local"
-	"github.com/dcomp/dcomp/server"
-	"github.com/dcomp/dcomp/utils"
-	"github.com/dcomp/dcomp/version"
+	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/resources/daemon"
+	"github.com/sergeyyakubov/dcomp/dcomp/resources/local"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/version"
 )
 
 type config struct {

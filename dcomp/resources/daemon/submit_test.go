@@ -12,12 +12,12 @@ import (
 	"io"
 	"net/http/httptest"
 
-	"github.com/dcomp/dcomp/resources/mock"
-	"github.com/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/resources/mock"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 
-	"github.com/dcomp/dcomp/database"
-	"github.com/dcomp/dcomp/structs"
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type request struct {

@@ -13,7 +13,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"strconv"
 	"strings"
 )

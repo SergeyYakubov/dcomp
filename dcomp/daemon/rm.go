@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	"github.com/gorilla/mux"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 func routeDeleteJob(w http.ResponseWriter, r *http.Request) {

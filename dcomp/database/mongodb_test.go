@@ -3,12 +3,12 @@ package database
 import (
 	"testing"
 
-	"github.com/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 //these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)

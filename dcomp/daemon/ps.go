@@ -9,7 +9,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {

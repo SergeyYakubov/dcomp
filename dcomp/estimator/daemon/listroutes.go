@@ -1,7 +1,7 @@
 package daemon
 
 import (
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 var listRoutes = utils.Routes{

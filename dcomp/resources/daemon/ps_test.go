@@ -9,9 +9,9 @@ import (
 
 	"net/http/httptest"
 
-	"github.com/dcomp/dcomp/resources/mock"
+	"github.com/sergeyyakubov/dcomp/dcomp/resources/mock"
 
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type jobInfoRequest struct {

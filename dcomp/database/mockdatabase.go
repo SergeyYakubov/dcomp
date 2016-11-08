@@ -8,8 +8,8 @@ import (
 	"reflect"
 
 	"gopkg.in/mgo.v2/bson"
-	"github.com/dcomp/dcomp/server"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 type Mockdatabase struct {

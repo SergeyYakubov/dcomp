@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/mux"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 func writeStatus(w http.ResponseWriter, status structs.JobStatus) {

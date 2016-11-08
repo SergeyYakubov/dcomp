@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dcomp/dcomp/database"
-	"github.com/dcomp/dcomp/resources"
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/resources"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 var resource resources.Resource

@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/dcomp/dcomp/estimator/daemon"
-	"github.com/dcomp/dcomp/version"
+	"github.com/sergeyyakubov/dcomp/dcomp/estimator/daemon"
+	"github.com/sergeyyakubov/dcomp/dcomp/version"
 )
 
 func main() {

@@ -9,8 +9,8 @@ import (
 	"net/http/httptest"
 
 	"github.com/gorilla/mux"
-	//	"github.com/dcomp/dcomp/structs"
-	"github.com/dcomp/dcomp/utils"
+	//	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 var listRoutes = utils.Routes{

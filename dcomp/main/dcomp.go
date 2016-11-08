@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"github.com/dcomp/dcomp/cli"
-	"github.com/dcomp/dcomp/daemon"
-	"github.com/dcomp/dcomp/version"
+	"github.com/sergeyyakubov/dcomp/dcomp/cli"
+	"github.com/sergeyyakubov/dcomp/dcomp/daemon"
+	"github.com/sergeyyakubov/dcomp/dcomp/version"
 )
 
 var (

@@ -2,7 +2,7 @@ package structs
 
 import (
 	"sort"
-	"github.com/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
 // Keeps resources and their priorities

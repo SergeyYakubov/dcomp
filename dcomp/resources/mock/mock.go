@@ -5,8 +5,8 @@ import (
 	"compress/gzip"
 	"errors"
 
-	"github.com/dcomp/dcomp/database"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 type MockResource struct {

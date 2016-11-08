@@ -8,7 +8,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"io"
-	"github.com/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
 type Mongodb struct {

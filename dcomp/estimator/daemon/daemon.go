@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type config struct {

@@ -7,7 +7,7 @@ import (
 
 	"errors"
 
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 func routeSubmitJob(w http.ResponseWriter, r *http.Request) {

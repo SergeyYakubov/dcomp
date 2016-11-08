@@ -7,7 +7,7 @@ import (
 
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 // CommandRm removes job with given id from all places (computation queue, database, etc.)
