@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
+
 	"stash.desy.de/scm/dc/main.git/dcomp/database"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -154,14 +155,14 @@ func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err e
 
 	li, err := res.findJob(id)
 	if err != nil {
-		return b, err
+		return nil, err
 	}
 
 	fname := res.logFileName(li.Id)
 
 	f, err := os.Open(fname)
 	if err != nil {
-		return b, err
+		return nil, err
 	}
 	defer f.Close()
 
@@ -177,7 +178,7 @@ func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err e
 
 	_, err = io.Copy(w, f)
 	if err != nil {
-		return b, err
+		return nil, err
 	}
 
 	return b, nil

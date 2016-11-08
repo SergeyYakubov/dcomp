@@ -3,6 +3,9 @@ package server
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -31,6 +34,7 @@ func (w gzipResponseWriter) Write(b []byte) (int, error) {
 type Server struct {
 	Host string
 	Port int
+	Key  string
 }
 
 // ParseUrl extacts host anf port from a string and sets corresponding structure fields
@@ -60,13 +64,37 @@ func (srv *Server) url(s string) string {
 	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
 }
 
-// CommandPost issues the POST command to srv. data should be JSON-encodable. Returns response body or error
-func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, err error) {
+func (srv *Server) addAuthorizationHeader(r *http.Request, s string) {
+	if srv.Key == "" {
+		return
+	}
+
+	s = strings.Replace(s, "/", "", -1)
+	s = strings.Replace(s, "?", "", -1)
+	mac := hmac.New(sha256.New, []byte(srv.Key))
+	mac.Write([]byte(s))
+	sha := base64.URLEncoding.EncodeToString(mac.Sum(nil))
+	r.Header.Add("Authorization", sha)
+}
+
+// CommandDelete issues the http command to srv. Returns response body or error
+func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
-	if err := json.NewEncoder(b).Encode(data); err != nil {
+	if data != nil {
+		if err := json.NewEncoder(b).Encode(data); err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := http.NewRequest(method, srv.url(path), b)
+	if err != nil {
 		return nil, err
 	}
-	res, err := http.Post(srv.url(path), "application/json; charset=utf-8", b)
+	//	req.Close = true
+
+	srv.addAuthorizationHeader(req, path)
+
+	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -82,78 +110,23 @@ func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, 
 	return b, nil
 }
 
+// CommandPost issues the POST command to srv. data should be JSON-encodable. Returns response body or error
+func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, err error) {
+	return srv.httpCommand(http.MethodPost, path, data)
+}
+
 // CommandGet issues the GET command to srv. Returns response body or error
 func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
-	b = new(bytes.Buffer)
-
-	res, err := http.Get(srv.url(path))
-
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	io.Copy(b, res.Body)
-
-	if res.StatusCode != http.StatusOK {
-		err = errors.New(b.String())
-		return nil, err
-	}
-
-	return b, nil
+	return srv.httpCommand(http.MethodGet, path, nil)
 }
 
 // CommandDelete issues the DELETE command to srv. Returns response body or error
 func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
-	b = new(bytes.Buffer)
-
-	req, err := http.NewRequest(http.MethodDelete, srv.url(path), nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Close = true
-
-	res, err := http.DefaultClient.Do(req)
-
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	io.Copy(b, res.Body)
-
-	if res.StatusCode != http.StatusOK {
-		err = errors.New(b.String())
-		return nil, err
-	}
-
-	return b, nil
+	return srv.httpCommand(http.MethodDelete, path, nil)
 }
 
 // CommandPatch issues the PATCH command to srv. Returns response body or error
 func (srv *Server) CommandPatch(path string, data interface{}) (err error) {
-	b := new(bytes.Buffer)
-
-	if err := json.NewEncoder(b).Encode(data); err != nil {
-		return err
-	}
-
-	req, err := http.NewRequest(http.MethodPatch, srv.url(path), b)
-	if err != nil {
-		return err
-	}
-
-	req.Close = true
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		io.Copy(b, res.Body)
-		err = errors.New(b.String())
-		return err
-	}
-
-	return nil
+	_, err = srv.httpCommand(http.MethodPatch, path, data)
+	return
 }

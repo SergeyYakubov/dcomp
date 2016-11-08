@@ -11,6 +11,7 @@ import (
 type config struct {
 	Daemon struct {
 		Addr string
+		Key  string
 	}
 }
 
@@ -26,12 +27,15 @@ func setDaemonConfiguration() (config, error) {
 
 }
 
+var c config
+
 func Start() {
 
 	mux := utils.NewRouter(listRoutes)
-	c, err := setDaemonConfiguration()
+	var err error
+	c, err = setDaemonConfiguration()
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(http.ListenAndServe(c.Daemon.Addr, mux))
+	log.Fatal(http.ListenAndServe(c.Daemon.Addr, utils.Auth(mux.ServeHTTP, c.Daemon.Key)))
 }

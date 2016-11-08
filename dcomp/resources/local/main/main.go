@@ -17,6 +17,7 @@ import (
 type config struct {
 	Daemon struct {
 		Addr string
+		Key  string
 	}
 	Database struct {
 		Host string
@@ -72,10 +73,11 @@ func main() {
 	db.SetServer(&dbsrv)
 	db.SetDefaults("localplugin")
 	addr := c.Daemon.Addr
+	key := c.Daemon.Key
 
 	var res = new(local.Resource)
 
 	res.Basedir = c.BaseDir
-	daemon.Start(res, db, addr)
+	daemon.Start(res, db, addr, key)
 	return
 }

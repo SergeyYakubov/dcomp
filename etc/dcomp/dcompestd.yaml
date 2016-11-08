@@ -1,4 +1,5 @@
 daemon:
  addr: :8005
+ key: estim003
 
 

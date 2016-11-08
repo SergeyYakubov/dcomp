@@ -121,7 +121,11 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 func CreateMockServer(srv *Server) *httptest.Server {
 	var ts *httptest.Server
 	mux := utils.NewRouter(listRoutes)
-	ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
+	if srv.Key == "" {
+		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
+	} else {
+		ts = httptest.NewServer(utils.Auth(http.HandlerFunc(mux.ServeHTTP), srv.Key))
+	}
 	srv.parseUrl(ts.URL)
 	return ts
 }

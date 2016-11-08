@@ -11,7 +11,7 @@ import (
 
 var resource resources.Resource
 
-func Start(res resources.Resource, db database.Agent, addr string) error {
+func Start(res resources.Resource, db database.Agent, addr, key string) error {
 	resource = res
 	if err := db.Connect(); err != nil {
 		log.Fatal(err)
@@ -20,6 +20,8 @@ func Start(res resources.Resource, db database.Agent, addr string) error {
 
 	resource.SetDb(db)
 	mux := utils.NewRouter(listRoutes)
-	log.Fatal(http.ListenAndServe(addr, mux))
+
+	log.Fatal(http.ListenAndServe(addr, utils.Auth(mux.ServeHTTP, key)))
+
 	return nil
 }

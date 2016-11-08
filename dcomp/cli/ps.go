@@ -10,6 +10,7 @@ import (
 	"io"
 
 	"bytes"
+
 	"gopkg.in/mgo.v2/bson"
 	"stash.desy.de/scm/dc/main.git/dcomp/structs"
 )
@@ -41,7 +42,7 @@ func (cmd *command) CommandPs() error {
 	} else {
 		cmdstr += flags.Id
 		if flags.ShowLog {
-			cmdstr += "?log=true"
+			cmdstr += "/?log=true"
 			if flags.CompressLog {
 				cmdstr += "&compress=true"
 			}

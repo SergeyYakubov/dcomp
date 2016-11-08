@@ -26,7 +26,6 @@ var submitTests = []request{
 }
 
 func TestCreateContainer(t *testing.T) {
-
 	for _, test := range submitTests {
 
 		id, err := createContainer(test.job)
@@ -41,7 +40,6 @@ func TestCreateContainer(t *testing.T) {
 }
 
 func TestStartContainer(t *testing.T) {
-
 	id, err := createContainer(submitTests[0].job)
 	assert.Nil(t, err, "Create: should not be error")
 
@@ -65,7 +63,6 @@ func TestStartContainer(t *testing.T) {
 }
 
 func TestDeleteContainer(t *testing.T) {
-
 	id, err := createContainer(submitTests[0].job)
 	assert.Nil(t, err, "Should not be error")
 
@@ -78,7 +75,6 @@ func TestDeleteContainer(t *testing.T) {
 }
 
 func TestWaitContainer(t *testing.T) {
-
 	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 10s"}
 	id, err := createContainer(job)
 	assert.Nil(t, err, "Should not be error")

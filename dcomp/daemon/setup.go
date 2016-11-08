@@ -20,15 +20,18 @@ type config struct {
 	Database struct {
 		Host string
 		Port int
+		Key  string
 	}
 	Estimator struct {
 		Host string
 		Port int
+		Key  string
 	}
 	Plugins []struct {
 		Name string
 		Host string
 		Port int
+		Key  string
 	}
 }
 
@@ -44,9 +47,11 @@ func setConfiguration() error {
 
 	dbServer.Host = c.Database.Host
 	dbServer.Port = c.Database.Port
+	dbServer.Key = c.Database.Key
 
 	estimatorServer.Host = c.Estimator.Host
 	estimatorServer.Port = c.Estimator.Port
+	estimatorServer.Key = c.Estimator.Key
 
 	addr = c.Daemon.Addr
 
@@ -54,7 +59,7 @@ func setConfiguration() error {
 
 	// add plugins found in config file
 	for _, p := range c.Plugins {
-		resources[p.Name] = structs.Resource{Server: server.Server{p.Host, p.Port}}
+		resources[p.Name] = structs.Resource{Server: server.Server{p.Host, p.Port, p.Key}}
 	}
 
 	return nil

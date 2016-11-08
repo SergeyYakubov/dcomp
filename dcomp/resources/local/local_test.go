@@ -27,7 +27,6 @@ var runScriptTests = []scriptRequest{
 }
 
 func TestRunScript(t *testing.T) {
-
 	var dbsrv server.Server
 	dbsrv.Host = "172.17.0.2"
 	dbsrv.Port = 27017

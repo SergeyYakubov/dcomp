@@ -29,6 +29,8 @@ func TestSetConfiguration(t *testing.T) {
 	assert.Nil(t, err, "Should not be error")
 
 	assert.Equal(t, c.Daemon.Addr, ":8006", "addr")
+	assert.Equal(t, c.Daemon.Key, "12345", "key")
+
 	assert.Equal(t, c.Database.Port, 27017, "port")
 
 	configFileName = `aaa`
