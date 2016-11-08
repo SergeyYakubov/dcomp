@@ -47,11 +47,13 @@ func setConfiguration() error {
 
 	dbServer.Host = c.Database.Host
 	dbServer.Port = c.Database.Port
-	dbServer.Key = c.Database.Key
+	auth := server.NewHMACAuth(c.Database.Key)
+	dbServer.SetAuth(auth)
 
 	estimatorServer.Host = c.Estimator.Host
 	estimatorServer.Port = c.Estimator.Port
-	estimatorServer.Key = c.Estimator.Key
+	auth = server.NewHMACAuth(c.Estimator.Key)
+	estimatorServer.SetAuth(auth)
 
 	addr = c.Daemon.Addr
 
@@ -59,7 +61,10 @@ func setConfiguration() error {
 
 	// add plugins found in config file
 	for _, p := range c.Plugins {
-		resources[p.Name] = structs.Resource{Server: server.Server{p.Host, p.Port, p.Key}}
+		s := server.Server{Host: p.Host, Port: p.Port}
+		auth := server.NewHMACAuth(p.Key)
+		s.SetAuth(auth)
+		resources[p.Name] = structs.Resource{Server: s}
 	}
 
 	return nil

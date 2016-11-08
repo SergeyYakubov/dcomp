@@ -37,5 +37,5 @@ func Start() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(http.ListenAndServe(c.Daemon.Addr, utils.Auth(mux.ServeHTTP, c.Daemon.Key)))
+	log.Fatal(http.ListenAndServe(c.Daemon.Addr, utils.HMACAuth(mux.ServeHTTP, c.Daemon.Key)))
 }

@@ -121,10 +121,14 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 func CreateMockServer(srv *Server) *httptest.Server {
 	var ts *httptest.Server
 	mux := utils.NewRouter(listRoutes)
-	if srv.Key == "" {
+	auth := srv.GetAuth()
+	switch auth := auth.(type) {
+	case nil:
 		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
-	} else {
-		ts = httptest.NewServer(utils.Auth(http.HandlerFunc(mux.ServeHTTP), srv.Key))
+	case *HMACAuth:
+		ts = httptest.NewServer(utils.HMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
+	case *BasicAuth:
+		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
 	}
 	srv.parseUrl(ts.URL)
 	return ts

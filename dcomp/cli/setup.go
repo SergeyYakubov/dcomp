@@ -28,5 +28,9 @@ func SetDaemonConfiguration() error {
 
 	daemon.Host = c.Dcompd.Host
 	daemon.Port = c.Dcompd.Port
+
+	auth := server.NewBasicAuth()
+	daemon.SetAuth(auth)
+
 	return nil
 }

@@ -11,9 +11,9 @@ var urltests = []struct {
 	Path   string
 	Url    string
 }{
-	{Server{"localhost", 8000, "key"}, "test", "http://localhost:8000/test/"},
-	{Server{"localhost", 8000, "key"}, "/test/", "http://localhost:8000/test/"},
-	{Server{"localhost", 8000, "key"}, " test ", "http://localhost:8000/test/"},
+	{Server{Host: "localhost", Port: 8000}, "test", "http://localhost:8000/test/"},
+	{Server{Host: "localhost", Port: 8000}, "/test/", "http://localhost:8000/test/"},
+	{Server{Host: "localhost", Port: 8000}, " test ", "http://localhost:8000/test/"},
 }
 
 func TestUrl(t *testing.T) {
@@ -27,8 +27,7 @@ func TestUrl(t *testing.T) {
 func TestPostcommand(t *testing.T) {
 
 	var srv Server
-
-	srv.Key = "1234"
+	srv.SetAuth(NewHMACAuth("1234"))
 	srv.Port = -4
 	b, err := srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
@@ -44,11 +43,12 @@ func TestPostcommand(t *testing.T) {
 	assert.Equal(t, "{\"ImageName\":\"submittedimage\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"578359205e935a20adb39a18\",\"Status\":1}\n",
 		b.String(), "")
 
-	srv.Key = "123"
+	srv.SetAuth(NewHMACAuth("123"))
+
 	b, err = srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "authorization should fail")
 
-	srv.Key = "1234"
+	srv.SetAuth(NewHMACAuth("1234"))
 	srv.Port = 10000
 	b, err = srv.CommandPost("jobs", nil)
 	assert.Contains(t, err.Error(), "connection refused", "")
@@ -86,7 +86,7 @@ func TestGetcommand(t *testing.T) {
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 	for _, test := range getTests {
-		srv.Key = test.key
+		srv.SetAuth(NewHMACAuth(test.key))
 		b, err := srv.CommandGet(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)
@@ -101,7 +101,7 @@ func TestDeletecommand(t *testing.T) {
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 	for _, test := range rmTests {
-		srv.Key = test.key
+		srv.SetAuth(NewHMACAuth(test.key))
 		b, err := srv.CommandDelete(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)
@@ -123,7 +123,7 @@ func TestPatchcommand(t *testing.T) {
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 	for _, test := range patchTests {
-		srv.Key = test.key
+		srv.SetAuth(NewHMACAuth(test.key))
 		err := srv.CommandPatch(test.path, nil)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)

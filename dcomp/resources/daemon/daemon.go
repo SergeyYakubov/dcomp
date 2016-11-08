@@ -21,7 +21,7 @@ func Start(res resources.Resource, db database.Agent, addr, key string) error {
 	resource.SetDb(db)
 	mux := utils.NewRouter(listRoutes)
 
-	log.Fatal(http.ListenAndServe(addr, utils.Auth(mux.ServeHTTP, key)))
+	log.Fatal(http.ListenAndServe(addr, utils.HMACAuth(mux.ServeHTTP, key)))
 
 	return nil
 }

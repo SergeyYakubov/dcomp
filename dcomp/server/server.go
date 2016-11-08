@@ -3,17 +3,14 @@ package server
 
 import (
 	"bytes"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
-	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"strconv"
 	"strings"
 )
@@ -35,7 +32,15 @@ func (w gzipResponseWriter) Write(b []byte) (int, error) {
 type Server struct {
 	Host string
 	Port int
-	Key  string
+	auth Auth
+}
+
+func (srv *Server) SetAuth(a Auth) {
+	srv.auth = a
+}
+
+func (srv *Server) GetAuth() Auth {
+	return srv.auth
 }
 
 // ParseUrl extacts host anf port from a string and sets corresponding structure fields
@@ -44,7 +49,6 @@ func (srv *Server) parseUrl(s string) {
 	host, port, _ := net.SplitHostPort(u.Host)
 	srv.Host = host
 	srv.Port, _ = strconv.Atoi(port)
-
 }
 
 //
@@ -65,19 +69,18 @@ func (srv *Server) url(s string) string {
 	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
 }
 
-func (srv *Server) addAuthorizationHeader(r *http.Request, s string) {
-	if srv.Key == "" {
+func (srv *Server) addAuthorizationHeader(r *http.Request) {
+	if srv.auth == nil {
 		return
 	}
 
-	u := utils.StripURL(r.URL)
-	mac := hmac.New(sha256.New, []byte(srv.Key))
-	mac.Write([]byte(u))
-	if s != "" {
-		mac.Write([]byte(s))
+	token, err := srv.auth.GenerateToken(r)
+	if err != nil {
+		log.Print("cannot generat auth token " + err.Error())
+		return
 	}
-	sha := base64.URLEncoding.EncodeToString(mac.Sum(nil))
-	r.Header.Add("Authorization", sha)
+
+	r.Header.Add("Authorization", token)
 }
 
 // CommandDelete issues the http command to srv. Returns response body or error
@@ -96,7 +99,7 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 
 	req.Close = true
 
-	srv.addAuthorizationHeader(req, "")
+	srv.addAuthorizationHeader(req)
 
 	res, err := http.DefaultClient.Do(req)
 
