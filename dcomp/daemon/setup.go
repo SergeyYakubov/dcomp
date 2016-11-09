@@ -11,28 +11,37 @@ import (
 var estimatorServer server.Server
 var resources map[string]structs.Resource
 var dbServer server.Server
+var authServer server.Server
 var addr string
+
+type HostInfo struct {
+	Host string
+	Port int
+	Key  string
+}
 
 type config struct {
 	Daemon struct {
 		Addr string
 	}
-	Database struct {
-		Host string
-		Port int
-		Key  string
-	}
-	Estimator struct {
-		Host string
-		Port int
-		Key  string
-	}
+	Database      HostInfo
+	Estimator     HostInfo
+	Authorization HostInfo
+
 	Plugins []struct {
-		Name string
 		Host string
 		Port int
 		Key  string
+		Name string
 	}
+}
+
+func setHostInfo(srv *server.Server, h HostInfo) {
+	srv.Host = h.Host
+	srv.Port = h.Port
+	auth := server.NewHMACAuth(h.Key)
+	srv.SetAuth(auth)
+
 }
 
 func setConfiguration() error {
@@ -45,15 +54,9 @@ func setConfiguration() error {
 		return err
 	}
 
-	dbServer.Host = c.Database.Host
-	dbServer.Port = c.Database.Port
-	auth := server.NewHMACAuth(c.Database.Key)
-	dbServer.SetAuth(auth)
-
-	estimatorServer.Host = c.Estimator.Host
-	estimatorServer.Port = c.Estimator.Port
-	auth = server.NewHMACAuth(c.Estimator.Key)
-	estimatorServer.SetAuth(auth)
+	setHostInfo(&dbServer, c.Database)
+	setHostInfo(&estimatorServer, c.Estimator)
+	setHostInfo(&authServer, c.Authorization)
 
 	addr = c.Daemon.Addr
 

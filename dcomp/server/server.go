@@ -106,6 +106,7 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 	if err != nil {
 		return nil, err
 	}
+
 	defer res.Body.Close()
 	io.Copy(b, res.Body)
 
@@ -113,7 +114,6 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 		err = errors.New(b.String())
 		return nil, err
 	}
-
 	return b, nil
 }
 

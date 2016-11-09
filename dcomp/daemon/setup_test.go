@@ -19,5 +19,7 @@ func TestSetConfiguration(t *testing.T) {
 	assert.Equal(t, "localhost", estimatorServer.Host, "est host")
 	assert.Equal(t, 8005, estimatorServer.Port, "est port")
 	assert.Equal(t, "estim003", estimatorServer.GetAuth().(*server.HMACAuth).Key, "est key")
-
+	assert.Equal(t, "localhost", authServer.Host, "auth host")
+	assert.Equal(t, 8007, authServer.Port, "auth port")
+	assert.Equal(t, "auth14", authServer.GetAuth().(*server.HMACAuth).Key, "auth key")
 }

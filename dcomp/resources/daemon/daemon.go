@@ -6,6 +6,7 @@ import (
 
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/resources"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
@@ -21,7 +22,7 @@ func Start(res resources.Resource, db database.Agent, addr, key string) error {
 	resource.SetDb(db)
 	mux := utils.NewRouter(listRoutes)
 
-	log.Fatal(http.ListenAndServe(addr, utils.HMACAuth(mux.ServeHTTP, key)))
+	log.Fatal(http.ListenAndServe(addr, server.ProcessHMACAuth(mux.ServeHTTP, key)))
 
 	return nil
 }

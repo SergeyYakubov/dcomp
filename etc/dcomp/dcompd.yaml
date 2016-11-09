@@ -6,6 +6,10 @@ estimator:
  host: localhost
  port: 8005
  key: estim003
+authorization:
+ host: localhost
+ port: 8007
+ key: auth14
 daemon:
  addr: :8001
 plugins:

@@ -10,6 +10,9 @@ import (
 
 	"github.com/gorilla/mux"
 	//	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"encoding/json"
+
+	"bytes"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
@@ -51,6 +54,12 @@ var listRoutes = utils.Routes{
 		"/estimations/",
 		MockFuncEstimate,
 	},
+	utils.Route{
+		"Authorize",
+		"POST",
+		"/authorize/",
+		MockFuncAuthorize,
+	},
 }
 
 func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
@@ -71,6 +80,40 @@ func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a18"}]`)
+}
+
+func MockFuncAuthorize(w http.ResponseWriter, r *http.Request) {
+	var t AuthorizationRequest
+
+	d := json.NewDecoder(r.Body)
+	d.Decode(&t)
+
+	authType, user, err := SplitAuthToken(t.Token)
+
+	if err != nil {
+		http.Error(w, "cannot split token", http.StatusUnauthorized)
+		return
+	}
+
+	if authType != "Basic" {
+		http.Error(w, "wrong auth type", http.StatusUnauthorized)
+		return
+	}
+
+	if user == "wronguser" {
+		http.Error(w, "user not allowed", http.StatusUnauthorized)
+		return
+	}
+
+	var tt AuthorizationResponce
+	tt.UserName = user
+
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(tt)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(b.Bytes())
+
 }
 
 func MockFuncGet(w http.ResponseWriter, r *http.Request) {
@@ -118,6 +161,33 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func ProcessMockBasicAuth(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		at, au, err := ExtractAuthInfo(r)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+		if at != "Basic" {
+			http.Error(w, "wrong auth type", http.StatusUnauthorized)
+			return
+		}
+
+		if au == "wronguser" {
+			http.Error(w, "user not allowed", http.StatusUnauthorized)
+			return
+		}
+		fn(w, r)
+	}
+}
+
 func CreateMockServer(srv *Server) *httptest.Server {
 	var ts *httptest.Server
 	mux := utils.NewRouter(listRoutes)
@@ -126,9 +196,9 @@ func CreateMockServer(srv *Server) *httptest.Server {
 	case nil:
 		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
 	case *HMACAuth:
-		ts = httptest.NewServer(utils.HMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
+		ts = httptest.NewServer(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 	case *BasicAuth:
-		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
+		ts = httptest.NewServer(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
 	}
 	srv.parseUrl(ts.URL)
 	return ts

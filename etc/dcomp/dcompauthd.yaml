@@ -1,0 +1,5 @@
+daemon:
+ addr: :8007
+ key: auth14
+
+

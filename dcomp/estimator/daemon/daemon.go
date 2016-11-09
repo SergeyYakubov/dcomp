@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
 type config struct {
@@ -37,5 +38,5 @@ func Start() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Fatal(http.ListenAndServe(c.Daemon.Addr, utils.HMACAuth(mux.ServeHTTP, c.Daemon.Key)))
+	log.Fatal(http.ListenAndServe(c.Daemon.Addr, server.ProcessHMACAuth(mux.ServeHTTP, c.Daemon.Key)))
 }
