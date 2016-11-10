@@ -15,12 +15,12 @@ func ProcessUserAuth(fn http.HandlerFunc) http.HandlerFunc {
 		_, _, err := server.ExtractAuthInfo(r)
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "authorization failed: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 		resp, err := authorize(r)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, "authorization failed: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
 		context.Set(r, "authorizationResponce", &resp)

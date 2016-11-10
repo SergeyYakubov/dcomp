@@ -12,7 +12,11 @@ var estimatorServer server.Server
 var resources map[string]structs.Resource
 var dbServer server.Server
 var authServer server.Server
-var addr string
+var settings struct {
+	Addr     string
+	Certfile string
+	Keyfile  string
+}
 
 type HostInfo struct {
 	Host string
@@ -22,7 +26,9 @@ type HostInfo struct {
 
 type config struct {
 	Daemon struct {
-		Addr string
+		Addr     string
+		Certfile string
+		Keyfile  string
 	}
 	Database      HostInfo
 	Estimator     HostInfo
@@ -57,8 +63,11 @@ func setConfiguration() error {
 	setHostInfo(&dbServer, c.Database)
 	setHostInfo(&estimatorServer, c.Estimator)
 	setHostInfo(&authServer, c.Authorization)
+	authServer.Tls = true
 
-	addr = c.Daemon.Addr
+	settings.Addr = c.Daemon.Addr
+	settings.Certfile = c.Daemon.Certfile
+	settings.Keyfile = c.Daemon.Keyfile
 
 	resources = make(map[string]structs.Resource)
 

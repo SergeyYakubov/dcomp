@@ -31,6 +31,7 @@ func SetDaemonConfiguration() error {
 
 	auth := server.NewBasicAuth()
 	daemon.SetAuth(auth)
+	daemon.Tls = true
 
 	return nil
 }

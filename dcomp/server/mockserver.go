@@ -192,13 +192,19 @@ func CreateMockServer(srv *Server) *httptest.Server {
 	var ts *httptest.Server
 	mux := utils.NewRouter(listRoutes)
 	auth := srv.GetAuth()
+	var newsrv func(http.Handler) *httptest.Server
+	if srv.Tls {
+		newsrv = httptest.NewTLSServer
+	} else {
+		newsrv = httptest.NewServer
+	}
 	switch auth := auth.(type) {
 	case nil:
-		ts = httptest.NewServer(http.HandlerFunc(mux.ServeHTTP))
+		ts = newsrv(http.HandlerFunc(mux.ServeHTTP))
 	case *HMACAuth:
-		ts = httptest.NewServer(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
+		ts = newsrv(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 	case *BasicAuth:
-		ts = httptest.NewServer(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
+		ts = newsrv(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
 	}
 	srv.parseUrl(ts.URL)
 	return ts

@@ -1,5 +1,8 @@
 daemon:
  addr: :8007
  key: auth14
+ certfile: /etc/dcomp/certauth.pem
+ keyfile: /etc/dcomp/keyauth.pem
+
 
 

@@ -3,6 +3,7 @@ package server
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -33,6 +34,7 @@ type Server struct {
 	Host string
 	Port int
 	auth Auth
+	Tls  bool
 }
 
 func (srv *Server) SetAuth(a Auth) {
@@ -66,7 +68,11 @@ func (srv *Server) url(s string) string {
 			s += "/"
 		}
 	}
-	return fmt.Sprintf("http://%s:%d%s", srv.Host, srv.Port, s)
+	protocol := "http"
+	if srv.Tls {
+		protocol += "s"
+	}
+	return fmt.Sprintf(protocol+"://%s:%d%s", srv.Host, srv.Port, s)
 }
 
 func (srv *Server) addAuthorizationHeader(r *http.Request) {
@@ -101,7 +107,17 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 
 	srv.addAuthorizationHeader(req)
 
-	res, err := http.DefaultClient.Do(req)
+	var client *http.Client
+	if srv.Tls {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = &http.Client{Transport: tr}
+	} else {
+		client = http.DefaultClient
+	}
+
+	res, err := client.Do(req)
 
 	if err != nil {
 		return nil, err

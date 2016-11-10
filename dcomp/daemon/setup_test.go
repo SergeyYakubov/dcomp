@@ -11,7 +11,9 @@ func TestSetConfiguration(t *testing.T) {
 	assert.Equal(t, "172.17.0.2", dbServer.Host, "Host")
 	assert.Equal(t, 27017, dbServer.Port, "Port")
 	assert.Equal(t, "db3415", dbServer.GetAuth().(*server.HMACAuth).Key, "Key")
-	assert.Equal(t, ":8001", addr, "addr")
+	assert.Equal(t, ":8001", settings.Addr, "addr")
+	assert.Equal(t, "/etc/dcomp/certd.pem", settings.Certfile, "certfile")
+	assert.Equal(t, "/etc/dcomp/keyd.pem", settings.Keyfile, "certfile")
 	s := resources["Local"].Server
 	assert.Equal(t, "localhost", s.Host, "local res host")
 	assert.Equal(t, 8006, s.Port, "local res port")

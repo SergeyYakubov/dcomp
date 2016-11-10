@@ -21,6 +21,12 @@ add_custom_target(dcompestd ALL
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
+add_custom_target(dcompauthd ALL
+        				  COMMAND go build -o bin/dcompauthd ./dcomp/authorizer/main
+        				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
+        				  VERBATIM)
+
+
 add_custom_target(dcomplocalpd ALL
         				  COMMAND go build -o bin/dcomplocalpd ./dcomp/resources/local/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
@@ -29,4 +35,5 @@ add_custom_target(dcomplocalpd ALL
 
 add_dependencies (dcomp make_version)
 add_dependencies (dcompestd make_version)
+add_dependencies (dcompauthd make_version)
 add_dependencies (dcomplocalpd make_version)

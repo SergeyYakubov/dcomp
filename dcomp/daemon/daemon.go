@@ -26,5 +26,6 @@ func Start(args []string) {
 	defer db.Close()
 
 	mux := utils.NewRouter(listRoutes)
-	log.Fatal(http.ListenAndServe(addr, ProcessUserAuth(mux.ServeHTTP)))
+	log.Fatal(http.ListenAndServeTLS(settings.Addr, settings.Certfile, settings.Keyfile,
+		ProcessUserAuth(mux.ServeHTTP)))
 }
