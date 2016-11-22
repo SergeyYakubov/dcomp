@@ -7,7 +7,7 @@ import (
 )
 
 func TestCheck(t *testing.T) {
-	configFileName = `main_test.yaml`
+	configFileName = `daemon_test.yaml`
 	c, _ := setConfiguration()
 
 	c.BaseDir = "/aaa"

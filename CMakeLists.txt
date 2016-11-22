@@ -32,8 +32,15 @@ add_custom_target(dcomplocalpd ALL
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
+add_custom_target(dcompdmd ALL
+        				  COMMAND go build -o bin/dcompdmd ./dcomp/datamanager/main
+        				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
+        				  VERBATIM)
+
+
 
 add_dependencies (dcomp make_version)
 add_dependencies (dcompestd make_version)
 add_dependencies (dcompauthd make_version)
 add_dependencies (dcomplocalpd make_version)
+add_dependencies (dcompdmd make_version)

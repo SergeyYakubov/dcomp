@@ -205,6 +205,9 @@ func CreateMockServer(srv *Server) *httptest.Server {
 		ts = newsrv(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 	case *BasicAuth:
 		ts = newsrv(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
+	case *JWTAuth:
+		ts = newsrv(ProcessJWTAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
+
 	}
 	srv.parseUrl(ts.URL)
 	return ts

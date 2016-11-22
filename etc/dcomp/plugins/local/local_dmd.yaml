@@ -1,0 +1,11 @@
+dcompd:
+ host: localhost
+ port: 8001
+ key:  dcompd18
+daemon:
+ addr: :8008
+ key: dcompdmd45
+ certfile: /etc/dcomp/plugins/local/certd.pem
+ keyfile: /etc/dcomp/plugins/local/keyd.pem
+resource:
+ basedir: /home/yakubov/dcomp_test

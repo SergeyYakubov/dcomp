@@ -40,7 +40,7 @@ func (c *config) check() error {
 	return nil
 }
 
-var configFileName = `/etc/dcomp/plugins/local.yaml`
+var configFileName = `/etc/dcomp/plugins/local/local.yaml`
 
 func setConfiguration() (config, error) {
 

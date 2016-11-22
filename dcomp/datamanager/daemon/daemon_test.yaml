@@ -1,0 +1,11 @@
+dcompd:
+ host: localhost
+ port: 8001
+ key:  23456
+daemon:
+ addr: :8006
+ key: 12345
+ certfile: cert
+ keyfile:  key
+resource:
+ basedir: /home/yakubov/dcomp_test
