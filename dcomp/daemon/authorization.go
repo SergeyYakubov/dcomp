@@ -5,7 +5,7 @@ import (
 
 	"encoding/json"
 
-	"github.com/gorilla/context"
+	"context"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
@@ -23,9 +23,8 @@ func ProcessUserAuth(fn http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, "authorization failed: "+err.Error(), http.StatusUnauthorized)
 			return
 		}
-		context.Set(r, "authorizationResponce", &resp)
-		defer context.Clear(r)
-		fn(w, r)
+		ctx := context.WithValue(r.Context(), "authorizationResponce", &resp)
+		fn(w, r.WithContext(ctx))
 	}
 }
 

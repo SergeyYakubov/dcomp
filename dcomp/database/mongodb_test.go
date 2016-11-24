@@ -6,9 +6,9 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"time"
 
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 //these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)
@@ -28,6 +28,9 @@ func initdb() *Mongodb {
 }
 
 func TestMdbConnect(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	db := initdb()
 	err := db.Connect()
@@ -43,6 +46,9 @@ func TestMdbConnect(t *testing.T) {
 }
 
 func TestMdbCreateRecord(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	db := initdb()
 
@@ -74,6 +80,9 @@ func TestMdbCreateRecord(t *testing.T) {
 }
 
 func TestMdbGetRecords(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	db := initdb()
 
@@ -103,6 +112,9 @@ func TestMdbGetRecords(t *testing.T) {
 }
 
 func TestMdbGetRecordByID(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	db := initdb()
 	err := db.Connect()
@@ -129,6 +141,9 @@ func TestMdbGetRecordByID(t *testing.T) {
 }
 
 func TestMdbPatchRecord(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 
 	db := initdb()
 	err := db.Connect()

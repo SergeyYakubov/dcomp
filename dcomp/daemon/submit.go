@@ -2,13 +2,85 @@ package daemon
 
 import (
 	"net/http"
+	"time"
 
 	"encoding/json"
 
 	"errors"
 
+	"bytes"
+	"io"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
+
+func createJWT(job structs.JobInfo, r *http.Request) (token string, err error) {
+	srv := resources[job.Resource].DataManager
+	val := r.Context().Value("authorizationResponce")
+
+	if val == nil {
+		err = errors.New("No authorization context")
+		return
+	}
+
+	auth, ok := val.(*server.AuthorizationResponce)
+	if !ok {
+		err = errors.New("Bad authorization context")
+		return
+	}
+
+	var claim server.JobClaim
+	claim.UserName = auth.UserName
+	claim.JobInd = job.Id
+
+	var c server.CustomClaims
+	c.ExtraClaims = &claim
+	c.Duration = time.Hour * 2
+	token, err = srv.GetAuth().GenerateToken(&c)
+	return
+}
+
+func encodeJobFilesTransferInfo(job structs.JobInfo, token string) (b *bytes.Buffer, err error) {
+	var s structs.JobFilesTransfer
+	s.JobID = job.Id
+	s.Srv = resources[job.Resource].DataManager
+	s.Token = token
+
+	b = new(bytes.Buffer)
+	err = json.NewEncoder(b).Encode(&s)
+	return
+}
+
+func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.JobInfo) {
+	if job.Status == structs.StatusSubmitted {
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(&job)
+		return
+	}
+	if job.Status == structs.StatusWaitData {
+
+		token, err := createJWT(job, r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		b, err := encodeJobFilesTransferInfo(job, token)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
+		io.Copy(w, b)
+
+		return
+	}
+
+	http.Error(w, "unknow job status", http.StatusInternalServerError)
+	return
+}
 
 func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 
@@ -21,18 +93,44 @@ func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job, err := submitJob(t)
+	job, err := trySubmitJob(t)
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(&job)
+	writeSubmitResponce(w, r, job)
+
+	return
+}
+
+func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
+
+	job, err := GetJobFromDatabase(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if err = submitToResource(job); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	job.Status = structs.StatusSubmitted
+	if err := modifyJobInDatabase(job.Id, &job); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	writeSubmitResponce(w, r, job)
+	return
 
 }
 
-func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
+func trySubmitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 
 	job, err = addJobToDatabase(t)
 	if err != nil {
@@ -44,12 +142,20 @@ func submitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
 		return
 	}
 
-	job.Resource, err = submitToResource(job, prio.Sort())
+	job.Resource, err = checkResources(job, prio.Sort())
 	if err != nil {
 		return
 	}
 
-	job.Status = 1
+	if t.NeedData() {
+		job.Status = structs.StatusWaitData
+	} else {
+		if err = submitToResource(job); err != nil {
+			return
+		}
+		job.Status = structs.StatusSubmitted
+	}
+
 	err = modifyJobInDatabase(job.Id, &job)
 	return
 }
@@ -70,11 +176,11 @@ func addJobToDatabase(t structs.JobDescription) (job structs.JobInfo, err error)
 	return
 }
 
-func submitToResource(job structs.JobInfo, prio []string) (res string, err error) {
+func checkResources(job structs.JobInfo, prio []string) (res string, err error) {
 	for i := range prio {
 		r, ok := resources[prio[i]]
 		if ok {
-			_, e := r.Server.CommandPost("jobs", job)
+			_, e := r.Server.CommandPost("jobs/?checkonly=true", job)
 			if e == nil {
 				res = prio[i]
 				return
@@ -83,6 +189,15 @@ func submitToResource(job structs.JobInfo, prio []string) (res string, err error
 	}
 
 	err = errors.New("no resource available")
+	return
+}
+
+func submitToResource(job structs.JobInfo) (err error) {
+	r, ok := resources[job.Resource]
+	if !ok {
+		err = errors.New("Resource unvailable " + job.Resource)
+	}
+	_, err = r.Server.CommandPost("jobs", job)
 	return
 }
 

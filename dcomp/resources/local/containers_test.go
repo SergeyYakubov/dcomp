@@ -26,6 +26,9 @@ var submitTests = []request{
 }
 
 func TestCreateContainer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	for _, test := range submitTests {
 
 		id, err := createContainer(test.job)
@@ -40,6 +43,9 @@ func TestCreateContainer(t *testing.T) {
 }
 
 func TestStartContainer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	id, err := createContainer(submitTests[0].job)
 	assert.Nil(t, err, "Create: should not be error")
 
@@ -63,6 +69,9 @@ func TestStartContainer(t *testing.T) {
 }
 
 func TestDeleteContainer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	id, err := createContainer(submitTests[0].job)
 	assert.Nil(t, err, "Should not be error")
 
@@ -75,6 +84,9 @@ func TestDeleteContainer(t *testing.T) {
 }
 
 func TestWaitContainer(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 10s"}
 	id, err := createContainer(job)
 	assert.Nil(t, err, "Should not be error")
@@ -110,6 +122,9 @@ func TestWaitContainer(t *testing.T) {
 }
 
 func TestPrintLogs(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	job := structs.JobDescription{ImageName: "centos:7", Script: "echo hi"}
 	id, err := createContainer(job)
 

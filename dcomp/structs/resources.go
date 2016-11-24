@@ -1,15 +1,16 @@
 package structs
 
 import (
-	"sort"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"sort"
 )
 
 // Keeps resources and their priorities
 type ResourcePrio map[string]int
 
 type Resource struct {
-	Server server.Server
+	Server      server.Server
+	DataManager server.Server
 }
 
 type pair struct {

@@ -27,7 +27,11 @@ type localJobInfo struct {
 	Id          string
 }
 
-func (res *Resource) SubmitJob(job structs.JobInfo) error {
+func (res *Resource) SubmitJob(job structs.JobInfo, checkonly bool) error {
+	if checkonly {
+		return nil
+	}
+
 	li := localJobInfo{JobStatus: structs.JobStatus{}, Id: job.Id}
 	_, err := res.db.CreateRecord(job.Id, &li)
 	if err != nil {

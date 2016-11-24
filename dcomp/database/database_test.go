@@ -3,9 +3,9 @@ package database
 import (
 	"testing"
 
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2/bson"
-	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
 func TestCreateRecord(t *testing.T) {

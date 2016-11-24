@@ -31,13 +31,16 @@ type request struct {
 
 var submitTests = []request{
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
-		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusCreated, "12345", "submit job"},
+		Id: "578359205e935a20adb39a18"}, "jobs/", "POST", http.StatusCreated, "12345", "submit job"},
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
-		Id: "578359205e935a20adb39a18"}, "job", "POST", http.StatusNotFound, "12345", "wrong path"},
+		Id: "578359205e935a20adb39a18"}, "jobs/?checkonly=true", "POST", http.StatusOK, "12345", "submit job"},
+
+	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "image", Script: "script", NCPUs: 20},
+		Id: "578359205e935a20adb39a18"}, "job/", "POST", http.StatusNotFound, "12345", "wrong path"},
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "nil", Script: "script", NCPUs: 20},
-		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusBadRequest, "12345", "wrong input"},
+		Id: "578359205e935a20adb39a18"}, "jobs/", "POST", http.StatusBadRequest, "12345", "wrong input"},
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "errorsubmit", Script: "script", NCPUs: 20},
-		Id: "578359205e935a20adb39a18"}, "jobs", "POST", http.StatusInternalServerError, "error", "error from resource"},
+		Id: "578359205e935a20adb39a18"}, "jobs/", "POST", http.StatusInternalServerError, "error", "error from resource"},
 }
 
 func TestSubmitJob(t *testing.T) {
@@ -63,16 +66,13 @@ func TestSubmitJob(t *testing.T) {
 			reader = nil
 		}
 
-		req, err := http.NewRequest(test.cmd, "http://localhost:8002/"+test.path+"/", reader)
+		req, err := http.NewRequest(test.cmd, "http://localhost:8002/"+test.path, reader)
 
 		assert.Nil(t, err, "Should not be error")
 
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
 		assert.Equal(t, test.answercode, w.Code, test.message)
-		if w.Code == http.StatusOK {
-			assert.Contains(t, w.Body, test.answer, test.message)
-		}
 	}
 
 }

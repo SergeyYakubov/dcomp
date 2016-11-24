@@ -12,7 +12,7 @@ import (
 type MockResource struct {
 }
 
-func (res *MockResource) SubmitJob(job structs.JobInfo) error {
+func (res *MockResource) SubmitJob(job structs.JobInfo, checkonly bool) error {
 	if job.ImageName == "errorsubmit" {
 		return errors.New("error submitting job")
 	}

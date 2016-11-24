@@ -7,7 +7,7 @@ import (
 )
 
 type Resource interface {
-	SubmitJob(structs.JobInfo) error
+	SubmitJob(structs.JobInfo, bool) error
 	SetDb(database.Agent)
 	GetJob(string) (structs.JobStatus, error)
 	DeleteJob(string) error

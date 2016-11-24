@@ -4,10 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/stretchr/testify/assert"
 )
 
 type scriptRequest struct {
@@ -27,6 +27,9 @@ var runScriptTests = []scriptRequest{
 }
 
 func TestRunScript(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	var dbsrv server.Server
 	dbsrv.Host = "172.17.0.2"
 	dbsrv.Port = 27017
@@ -53,6 +56,9 @@ func TestRunScript(t *testing.T) {
 }
 
 func TestGetJob(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	var dbsrv server.Server
 	dbsrv.Host = "172.17.0.2"
 	dbsrv.Port = 27017
@@ -83,6 +89,9 @@ func TestGetJob(t *testing.T) {
 }
 
 func TestDeleteJob(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	var dbsrv server.Server
 	dbsrv.Host = "172.17.0.2"
 	dbsrv.Port = 27017
@@ -101,7 +110,7 @@ func TestDeleteJob(t *testing.T) {
 	ji := structs.JobInfo{JobDescription: job, Id: id}
 
 	res.Basedir = "/tmp"
-	res.SubmitJob(ji)
+	res.SubmitJob(ji, false)
 
 	time.Sleep(time.Second * 1)
 	err := res.DeleteJob(id)
@@ -110,5 +119,21 @@ func TestDeleteJob(t *testing.T) {
 
 	err = res.DeleteJob(id)
 	assert.NotNil(t, err)
+
+}
+
+func TestSubmitJob_Checkonly(t *testing.T) {
+
+	var res = new(Resource)
+
+	id := "578359205e935a20adb39a18"
+
+	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100"}
+
+	ji := structs.JobInfo{JobDescription: job, Id: id}
+
+	err := res.SubmitJob(ji, true)
+
+	assert.Nil(t, err)
 
 }

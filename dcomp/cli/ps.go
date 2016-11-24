@@ -11,8 +11,8 @@ import (
 
 	"bytes"
 
-	"gopkg.in/mgo.v2/bson"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type psFlags struct {

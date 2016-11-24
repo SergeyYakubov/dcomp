@@ -8,7 +8,6 @@ import (
 
 	"net/url"
 
-	"github.com/gorilla/mux"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
@@ -36,7 +35,7 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 
 func updateJobs(jobs []structs.JobInfo) {
 	for i, _ := range jobs {
-		if jobs[i].Status != structs.StatusFinished {
+		if jobs[i].Status != structs.StatusFinished && jobs[i].Status != structs.StatusWaitData {
 			updateJobsStatusFromResources(&jobs[i])
 		}
 	}
@@ -103,18 +102,17 @@ func getJobLog(job structs.JobInfo, u *url.URL) (*bytes.Buffer, error) {
 
 func routeGetJob(w http.ResponseWriter, r *http.Request) {
 
-	vars := mux.Vars(r)
-	jobID := vars["jobID"]
-	var jobs []structs.JobInfo
-	if err := db.GetRecordsByID(jobID, &jobs); err != nil {
-		http.Error(w, "cannot retrieve database job info: "+err.Error(), http.StatusNotFound)
+	job, err := GetJobFromDatabase(r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	jobLog := r.URL.Query().Get("log")
 
 	if jobLog == "true" {
-		b, err := getJobLog(jobs[0], r.URL)
+		b, err := getJobLog(job, r.URL)
 		if err != nil {
 			http.Error(w, "cannot retrieve job log: "+err.Error(), http.StatusNotFound)
 			return
@@ -124,6 +122,6 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateJobs(jobs)
-	sendJobs(w, jobs, false)
+	updateJobs([]structs.JobInfo{job})
+	sendJobs(w, []structs.JobInfo{job}, false)
 }

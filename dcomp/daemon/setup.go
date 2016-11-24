@@ -35,10 +35,15 @@ type config struct {
 	Authorization HostInfo
 
 	Plugins []struct {
-		Host string
-		Port int
-		Key  string
-		Name string
+		Host        string
+		Port        int
+		Key         string
+		Name        string
+		DataManager struct {
+			Host string
+			Port int
+			Key  string
+		}
 	}
 }
 
@@ -76,7 +81,10 @@ func setConfiguration() error {
 		s := server.Server{Host: p.Host, Port: p.Port}
 		auth := server.NewHMACAuth(p.Key)
 		s.SetAuth(auth)
-		resources[p.Name] = structs.Resource{Server: s}
+		dm := server.Server{Host: p.DataManager.Host, Port: p.DataManager.Port}
+		auth2 := server.NewJWTAuth(p.DataManager.Key)
+		dm.SetAuth(auth2)
+		resources[p.Name] = structs.Resource{Server: s, DataManager: dm}
 	}
 
 	return nil

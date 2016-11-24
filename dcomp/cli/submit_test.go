@@ -2,9 +2,10 @@ package cli
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"testing"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/stretchr/testify/assert"
 )
 
 var submitOtherTests = []struct {
@@ -55,4 +56,32 @@ func TestSubmitCommand(t *testing.T) {
 	ts.Close()
 	err = submitTests[0].CommandSubmit()
 	assert.NotNil(t, err, "Should be error")
+}
+
+var submitRequests = []struct {
+	cmd     command
+	answer  string
+	code    int
+	message string
+}{
+	{command{args: []string{"-upload", "/etc/passwd:", "-script", "-ncpus", "10", "aaa", "imagename"}}, "578359205e935a20adb39a18", 0, "submit with file"},
+	{command{args: []string{"-upload", "/etc/shadow:", "-script", "-ncpus", "10", "aaa", "imagename"}}, "denied", 0, "submit with denied file"},
+}
+
+func TestSubmitCommandWithFiles(t *testing.T) {
+	t.SkipNow()
+	outBuf = new(bytes.Buffer)
+	ts := server.CreateMockServer(&daemon)
+	defer ts.Close()
+
+	for _, test := range submitRequests {
+		err := test.cmd.CommandSubmit()
+		if test.code != 0 {
+			assert.NotNil(t, err)
+		} else {
+			assert.Nil(t, err)
+		}
+		assert.Contains(t, outBuf.(*bytes.Buffer).String(), test.answer, test.message)
+		outBuf.(*bytes.Buffer).Reset()
+	}
 }

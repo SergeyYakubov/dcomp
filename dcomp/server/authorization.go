@@ -13,7 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/context"
+	"context"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -29,7 +31,7 @@ type AuthorizationResponce struct {
 }
 
 type Auth interface {
-	GenerateToken(*http.Request) (string, error)
+	GenerateToken(*CustomClaims) (string, error)
 }
 
 type BasicAuth struct {
@@ -37,20 +39,20 @@ type BasicAuth struct {
 }
 
 type ExternalAuth struct {
-	token string
+	Token string
 }
 
 func NewExternalAuth(token string) *ExternalAuth {
 	a := ExternalAuth{}
-	a.token = token
+	a.Token = token
 	return &a
 }
 
-func (b ExternalAuth) GenerateToken(r *http.Request) (string, error) {
-	return b.token, nil
+func (b ExternalAuth) GenerateToken(*CustomClaims) (string, error) {
+	return b.Token, nil
 }
 
-func (b BasicAuth) GenerateToken(r *http.Request) (string, error) {
+func (b BasicAuth) GenerateToken(*CustomClaims) (string, error) {
 	if b.forcedUsername == "" {
 		user, err := user.Current()
 		if err != nil {
@@ -95,8 +97,9 @@ func generateHMACToken(r *http.Request, key string) string {
 	return base64.URLEncoding.EncodeToString(mac.Sum(nil))
 }
 
-func (h HMACAuth) GenerateToken(r *http.Request) (string, error) {
+func (h HMACAuth) GenerateToken(claims *CustomClaims) (string, error) {
 
+	r := claims.ExtraClaims.(*http.Request)
 	sha := generateHMACToken(r, h.Key)
 	return "HMAC-SHA-256 " + sha, nil
 }
@@ -166,25 +169,29 @@ func ProcessHMACAuth(fn http.HandlerFunc, key string) http.HandlerFunc {
 	}
 }
 
-type JWTAuth struct {
-	Key      string
-	User     string
-	Duration time.Duration
+type CustomClaims struct {
+	jwt.StandardClaims
+	Duration    time.Duration
+	ExtraClaims interface{}
 }
 
-func NewJWTAuth(key, user string, d time.Duration) *JWTAuth {
-	a := JWTAuth{key, user, d}
+type JobClaim struct {
+	AuthorizationResponce
+	JobInd string
+}
+
+type JWTAuth struct {
+	Key string
+}
+
+func NewJWTAuth(key string) *JWTAuth {
+	a := JWTAuth{key}
 	return &a
 }
 
-func (t JWTAuth) GenerateToken(r *http.Request) (string, error) {
-
-	claims := &jwt.StandardClaims{
-		Id: t.User,
-	}
-
-	if t.Duration > 0 {
-		claims.ExpiresAt = time.Now().Add(t.Duration).Unix()
+func (t JWTAuth) GenerateToken(claims *CustomClaims) (string, error) {
+	if claims.Duration > 0 {
+		claims.ExpiresAt = time.Now().Add(claims.Duration).Unix()
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -206,38 +213,48 @@ func ProcessJWTAuth(fn http.HandlerFunc, key string) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
+		ctx := r.Context()
 
 		if authType == "Bearer" {
-			if resp, ok := checkJWTToken(r, token, key); !ok {
+			if claims, ok := checkJWTToken(r, token, key); !ok {
 				http.Error(w, "Internal authorization error - tocken does not match", http.StatusUnauthorized)
 				return
 			} else {
-				context.Set(r, "authorizationResponce", &resp)
-				defer context.Clear(r)
+				ctx = context.WithValue(ctx, "JobClaim", claims)
 			}
 		} else {
 			http.Error(w, "Internal authorization error - wrong auth type", http.StatusUnauthorized)
 			return
 		}
-		fn(w, r)
+		fn(w, r.WithContext(ctx))
 	}
 }
 
-func checkJWTToken(r *http.Request, token, key string) (AuthorizationResponce, bool) {
+func checkJWTToken(r *http.Request, token, key string) (jwt.Claims, bool) {
 
-	var resp AuthorizationResponce
 	if token == "" {
-		return resp, false
+		return nil, false
 	}
 
-	t, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	t, err := jwt.ParseWithClaims(token, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(key), nil
 	})
 
 	if err == nil && t.Valid {
-		resp.UserName = t.Claims.(*jwt.StandardClaims).Id
-		return resp, true
+		return t.Claims, true
 	}
 
-	return resp, false
+	return nil, false
+}
+
+func JobClaimFromContext(r *http.Request, val interface{}) error {
+	c := r.Context().Value("JobClaim")
+
+	if c == nil {
+		return errors.New("Empty context")
+	}
+
+	claim := c.(*CustomClaims)
+
+	return utils.MapToStruct(claim.ExtraClaims.(map[string]interface{}), val)
 }

@@ -18,14 +18,15 @@ var userAuthtests = []struct {
 	Message    string
 }{
 	{"Basic wronguser", 401, "not", "user not allowed"},
-	{"Basic test", 200, "test", "correct auth"},
+	{"Basic user", 200, "user", "correct auth"},
 	{"", 401, "header", "auth no header"},
 	{"Wrong test", 401, "type", "wrong auth type"},
 }
 
 func ok(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, "test")
+	resp := r.Context().Value("authorizationResponce").(*server.AuthorizationResponce)
+	fmt.Fprintln(w, resp.UserName)
 }
 
 func TestProcessUserAuth(t *testing.T) {

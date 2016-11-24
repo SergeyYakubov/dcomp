@@ -8,12 +8,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/gorilla/mux"
-	//	"github.com/sergeyyakubov/dcomp/dcomp/structs"
-	"encoding/json"
-
 	"bytes"
+	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"io/ioutil"
+	"strings"
 )
 
 var listRoutes = utils.Routes{
@@ -63,8 +63,14 @@ var listRoutes = utils.Routes{
 }
 
 func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprintln(w, `{"ImageName":"submittedimage","Script":"aaa","NCPUs":1,"Id":"578359205e935a20adb39a18","Status":1}`)
+	b, _ := ioutil.ReadAll(r.Body)
+	if strings.Contains(string(b), "/etc") {
+		w.WriteHeader(http.StatusAccepted)
+	} else {
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintln(w, `{"ImageName":"submittedimage","Script":"aaa","NCPUs":1,"Id":"578359205e935a20adb39a18","Status":1}`)
+	}
+
 }
 
 func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {

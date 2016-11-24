@@ -19,5 +19,9 @@ plugins:
           host: localhost
           port: 8006
           key: lplgin12
+          datamanager:
+           host: localhost
+           port: 8008
+           key: dcompdmd45
 
 

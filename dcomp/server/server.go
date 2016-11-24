@@ -80,9 +80,10 @@ func (srv *Server) addAuthorizationHeader(r *http.Request) {
 		return
 	}
 
-	token, err := srv.auth.GenerateToken(r)
+	claims := CustomClaims{ExtraClaims: r}
+	token, err := srv.auth.GenerateToken(&claims)
 	if err != nil {
-		log.Print("cannot generat auth token " + err.Error())
+		log.Print("cannot generate auth token " + err.Error())
 		return
 	}
 
@@ -126,7 +127,8 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 	defer res.Body.Close()
 	io.Copy(b, res.Body)
 
-	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK {
+	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK &&
+		res.StatusCode != http.StatusAccepted {
 		err = errors.New(b.String())
 		return nil, err
 	}

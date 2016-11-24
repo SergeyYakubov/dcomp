@@ -18,6 +18,12 @@ var listRoutes = utils.Routes{
 		routeGetJob,
 	},
 	utils.Route{
+		"GetJob",
+		"POST",
+		"/jobs/{jobID}/",
+		routeReleaseJob,
+	},
+	utils.Route{
 		"SubmitJob",
 		"POST",
 		"/jobs/",

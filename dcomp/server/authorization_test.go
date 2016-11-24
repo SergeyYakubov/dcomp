@@ -10,7 +10,6 @@ import (
 
 	"time"
 
-	"github.com/gorilla/context"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,8 +29,10 @@ func ok(w http.ResponseWriter, r *http.Request) {
 
 func writeAuthResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	auth := context.Get(r, "authorizationResponce").(*AuthorizationResponce)
-	w.Write([]byte(auth.UserName))
+	var jc JobClaim
+	JobClaimFromContext(r, &jc)
+	w.Write([]byte(jc.UserName))
+	w.Write([]byte(jc.JobInd))
 }
 
 func TestProcessHMACAuth(t *testing.T) {
@@ -39,7 +40,7 @@ func TestProcessHMACAuth(t *testing.T) {
 	for _, test := range HMACAuthtests {
 		req, _ := http.NewRequest("POST", "http://blabla", nil)
 		a := NewHMACAuth(test.Key)
-		token, _ := a.GenerateToken(req)
+		token, _ := a.GenerateToken(&CustomClaims{ExtraClaims: req})
 		if test.Key != "" {
 			req.Header.Add("Authorization", token)
 		}
@@ -54,56 +55,70 @@ func TestGenerateToken(t *testing.T) {
 	req, _ := http.NewRequest("POST", "http://blabla", buf)
 	a := NewHMACAuth("hi")
 
-	token, _ := a.GenerateToken(req)
+	token, _ := a.GenerateToken(&CustomClaims{ExtraClaims: req})
 	assert.Equal(t, "HMAC-SHA-256 SXNIGkudNaJZdsY4zVCjFXwz7laxitp-ZsUgrvd5Acc=", token, "hmac token")
 
 	b := NewBasicAuth()
-	token, _ = b.GenerateToken(req)
+	token, _ = b.GenerateToken(&CustomClaims{ExtraClaims: req})
 
 	assert.Contains(t, token, "Basic", "basic token")
 
 	b = NewBasicAuth("test")
-	token, _ = b.GenerateToken(req)
+	token, _ = b.GenerateToken(&CustomClaims{ExtraClaims: req})
 
 	assert.Equal(t, token, "Basic test", "basic token")
 }
 
 func TestGenerateJWTToken(t *testing.T) {
 
-	a := NewJWTAuth("hi", "testuser", 0)
-	token, _ := a.GenerateToken(nil)
-	assert.Equal(t, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJ0ZXN0dXNlciJ9.uykaFwU8xMa2"+
-		"nXHkgniU5mHls9UvUk6njzzQ1DW5ekg", token, "jwt token")
+	a := NewJWTAuth("hi")
+	token, _ := a.GenerateToken((&CustomClaims{Duration: 0, ExtraClaims: nil}))
+	assert.Equal(t, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJEdXJhdGlvbiI"+
+		"6MCwiRXh0cmFDbGFpbXMiOm51bGx9.JJcqNZciIDILk-A2sJZCY1sND458bcjNv6tXC2jxric",
+		token, "jwt token")
 
 }
 
 var HJWTAuthtests = []struct {
 	Key        string
 	User       string
+	jobID      string
 	Duration   time.Duration
 	Answercode int
 	Message    string
 }{
-	{"hi", "yakubov", time.Hour, http.StatusOK, "correct auth"},
-	{"hi", "yakubov", time.Microsecond, http.StatusUnauthorized, "token expired"},
-	{"hih", "yakubov", 1, http.StatusUnauthorized, "wrong key"},
-	{"", "yakubov", 1, http.StatusUnauthorized, "auth no header"},
+	{"hi", "testuser", "123", time.Hour, http.StatusOK, "correct auth"},
+	{"hi", "testuser", "123", time.Microsecond, http.StatusUnauthorized, "token expired"},
+	{"hih", "testuser", "123", 1, http.StatusUnauthorized, "wrong key"},
+	{"", "testuser", "123", 1, http.StatusUnauthorized, "auth no header"},
 }
 
 func TestProcessJWTAuth(t *testing.T) {
 	for _, test := range HJWTAuthtests {
 		req, _ := http.NewRequest("POST", "http://blabla", nil)
-		a := NewJWTAuth(test.Key, test.User, test.Duration)
-		token, _ := a.GenerateToken(req)
+
+		var claim JobClaim
+		claim.UserName = test.User
+		claim.JobInd = test.jobID
+
+		a := NewJWTAuth(test.Key)
+
+		token, _ := a.GenerateToken((&CustomClaims{Duration: test.Duration, ExtraClaims: &claim}))
 		if test.Key != "" {
 			req.Header.Add("Authorization", token)
 		}
 		w := httptest.NewRecorder()
-		time.Sleep(time.Second)
+		if test.Duration == time.Microsecond {
+			if testing.Short() {
+				continue
+			}
+			time.Sleep(time.Second)
+		}
 		ProcessJWTAuth(http.HandlerFunc(writeAuthResponse), "hi")(w, req)
 		assert.Equal(t, test.Answercode, w.Code, test.Message)
 		if w.Code == http.StatusOK {
 			assert.Contains(t, w.Body.String(), test.User, test.Message)
+			assert.Contains(t, w.Body.String(), test.jobID, test.Message)
 		}
 	}
 }
