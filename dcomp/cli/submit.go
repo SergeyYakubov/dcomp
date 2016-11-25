@@ -8,6 +8,9 @@ import (
 
 	"bytes"
 
+	"path/filepath"
+	"strings"
+
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
@@ -29,10 +32,42 @@ func sendReleaseJobCommand(jobID string) (b *bytes.Buffer, err error) {
 	return daemon.CommandPost("jobs/"+jobID, nil)
 }
 
+func uploadFile(t structs.JobFilesTransfer, source, dest string) error {
+	token, _ := t.Srv.GetAuth().GenerateToken(nil)
+	fmt.Println(token, source, dest)
+	return nil
+}
+
 func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error {
 
-	token, _ := t.Srv.GetAuth().GenerateToken(nil)
-	fmt.Println("token: ", token)
+	for _, pair := range files {
+
+		var scan = func(path string, fi os.FileInfo, err error) (e error) {
+
+			if err != nil {
+				return err
+			}
+			if fi.IsDir() {
+				if strings.HasPrefix(fi.Name(), ".") {
+					return filepath.SkipDir
+				}
+			} else {
+				if strings.HasPrefix(fi.Name(), ".") {
+					return nil
+				}
+				if err := uploadFile(t, path, pair.Dest); err != nil {
+					return err
+				}
+
+			}
+			return nil
+		}
+
+		if err := filepath.Walk(pair.Source, scan); err != nil {
+			return err
+		}
+
+	}
 	return nil
 }
 
