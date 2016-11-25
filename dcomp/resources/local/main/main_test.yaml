@@ -4,4 +4,4 @@ database:
 daemon:
  addr: :8006
  key: 12345
-basedir: /home/yakubov/dcomp_test
+basedir: /etc

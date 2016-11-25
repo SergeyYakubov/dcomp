@@ -30,8 +30,10 @@ func TestRunScript(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
+
 	var dbsrv server.Server
-	dbsrv.Host = "172.17.0.2"
+	//todo: changethis
+	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
 	db := new(database.Mongodb)
 	db.SetServer(&dbsrv)
@@ -60,7 +62,7 @@ func TestGetJob(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	var dbsrv server.Server
-	dbsrv.Host = "172.17.0.2"
+	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
 	db := new(database.Mongodb)
 	db.SetServer(&dbsrv)
@@ -93,7 +95,7 @@ func TestDeleteJob(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	var dbsrv server.Server
-	dbsrv.Host = "172.17.0.2"
+	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
 	db := new(database.Mongodb)
 	db.SetServer(&dbsrv)

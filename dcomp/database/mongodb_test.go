@@ -11,6 +11,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+//todo change this
 //these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)
 
 func initdb() *Mongodb {
@@ -18,7 +19,7 @@ func initdb() *Mongodb {
 
 	var dbServer server.Server
 
-	dbServer.Host = "172.17.0.2"
+	dbServer.Host = "localhost"
 	dbServer.Port = 27017
 
 	db.SetServer(&dbServer)
@@ -39,7 +40,7 @@ func TestMdbConnect(t *testing.T) {
 	db.Close()
 
 	db.timeout = time.Second / 10
-	db.srv.Host = ""
+	db.srv.Host = "bla"
 	db.srv.Port = 27017
 	err = db.Connect()
 	assert.NotNil(t, err)

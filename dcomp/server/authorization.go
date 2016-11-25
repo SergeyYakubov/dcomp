@@ -213,6 +213,7 @@ func ProcessJWTAuth(fn http.HandlerFunc, key string) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
+
 		ctx := r.Context()
 
 		if authType == "Bearer" {

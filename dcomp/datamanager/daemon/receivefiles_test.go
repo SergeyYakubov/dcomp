@@ -43,6 +43,8 @@ var receiveFilesTests = []receiveFilesRequest{
 
 func TestReceiveFiles(t *testing.T) {
 
+	configFileName := `/etc/dcomp/plugins/local/local_dmd.yaml`
+	setDaemonConfiguration(configFileName)
 	mux := utils.NewRouter(listRoutes)
 
 	for _, test := range receiveFilesTests {
@@ -88,7 +90,6 @@ func TestReceiveFiles(t *testing.T) {
 		f(w, req)
 
 		assert.Equal(t, test.answercode, w.Code, test.message)
-
 	}
 
 }

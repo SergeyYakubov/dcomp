@@ -33,22 +33,20 @@ func sendReleaseJobCommand(jobID string) (b *bytes.Buffer, err error) {
 }
 
 func uploadFile(t structs.JobFilesTransfer, source, dest string) error {
-	token, _ := t.Srv.GetAuth().GenerateToken(nil)
-	fmt.Println(token, source, dest)
+//	token, _ := t.Srv.GetAuth().GenerateToken(nil)
 	return nil
 }
 
 func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error {
 
 	for _, pair := range files {
-
 		var scan = func(path string, fi os.FileInfo, err error) (e error) {
 
 			if err != nil {
 				return err
 			}
 			if fi.IsDir() {
-				if strings.HasPrefix(fi.Name(), ".") {
+				if strings.HasPrefix(fi.Name(), ".") && fi.Name() != "." && fi.Name() != ".." {
 					return filepath.SkipDir
 				}
 			} else {

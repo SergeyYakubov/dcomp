@@ -11,11 +11,12 @@ import (
 	"path/filepath"
 
 	"encoding/binary"
+	"os/user"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
-	"os/user"
 )
 
 func getFileName(r *http.Request) (string, error) {
@@ -114,6 +115,10 @@ func createFile(auth server.AuthorizationResponce, r *http.Request) (file *os.Fi
 	err = utils.MkdirAllWithCh(path, os.ModePerm, uid, gid)
 
 	file, err = os.Create(filename)
+	if err != nil {
+		errorcode = http.StatusBadRequest
+		return
+	}
 
 	mode, err := getFileMode(r)
 	if err != nil {
@@ -143,7 +148,6 @@ func routeReceiveJobFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
-
 	// create file and parent directories, when necessary
 	// set file ownership and permissions
 	file, err, code := createFile(auth, r)

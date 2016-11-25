@@ -36,10 +36,10 @@ func TestGetJobsFromResources(t *testing.T) {
 
 	db = new(database.Mongodb)
 
-	var dbServer server.Server
+	//var dbServer server.Server
 
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
+	//dbServer.Host = "172.17.0.2"
+	//dbServer.Port = 27017
 
 	db.SetServer(&dbServer)
 	db.SetDefaults("daemondbdtest")
@@ -84,10 +84,10 @@ func TestRouteGetJob(t *testing.T) {
 
 	db = new(database.Mongodb)
 
-	var dbServer server.Server
+//	var dbServer server.Server
 
-	dbServer.Host = "172.17.0.2"
-	dbServer.Port = 27017
+//	dbServer.Host = "172.17.0.2"
+//	dbServer.Port = 27017
 
 	db.SetServer(&dbServer)
 	db.SetDefaults("daemondbdtest")
