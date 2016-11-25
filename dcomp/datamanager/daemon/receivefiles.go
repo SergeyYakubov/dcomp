@@ -13,6 +13,8 @@ import (
 	"encoding/binary"
 	"os/user"
 
+	"bytes"
+
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
@@ -85,7 +87,15 @@ func extractUserInformation(auth server.AuthorizationResponce) (uid, gid int, er
 }
 
 func getFileMode(r *http.Request) (mode os.FileMode, err error) {
-	if err = binary.Read(r.Body, binary.LittleEndian, &mode); err != nil {
+
+	m, err := url.QueryUnescape(r.Header.Get("X-Content-Mode"))
+	if err != nil {
+		return
+	}
+
+	b := bytes.NewBufferString(m)
+
+	if err = binary.Read(b, binary.LittleEndian, &mode); err != nil {
 		return
 	}
 	mode |= utils.GroupRead | utils.GroupWrite | utils.OtherWrite | utils.OtherRead
@@ -93,6 +103,7 @@ func getFileMode(r *http.Request) (mode os.FileMode, err error) {
 	if mode&utils.UserExecute != 0 {
 		mode |= utils.GroupExecute | utils.OtherExecute
 	}
+
 	return
 
 }
@@ -112,7 +123,11 @@ func createFile(auth server.AuthorizationResponce, r *http.Request) (file *os.Fi
 	}
 
 	path := filepath.Dir(filename)
-	err = utils.MkdirAllWithCh(path, os.ModePerm, uid, gid)
+	err = utils.MkdirAllWithCh(path, 0777, uid, gid)
+	if err != nil {
+		errorcode = http.StatusBadRequest
+		return
+	}
 
 	file, err = os.Create(filename)
 	if err != nil {
@@ -148,6 +163,7 @@ func routeReceiveJobFile(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
+
 	// create file and parent directories, when necessary
 	// set file ownership and permissions
 	file, err, code := createFile(auth, r)
@@ -158,23 +174,11 @@ func routeReceiveJobFile(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	// copy request content to the file
-	l, err := io.Copy(file, r.Body)
+	_, err = io.Copy(file, r.Body)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// compare reieved file length with info in header
-	lexpect, err := strconv.ParseInt(r.Header.Get("Content-Length"), 10, 0)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	if l != lexpect {
-		http.Error(w, "File length does not match", http.StatusInternalServerError)
-		return
-
-	}
-
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 }

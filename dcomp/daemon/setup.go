@@ -84,6 +84,7 @@ func setConfiguration() error {
 		dm := server.Server{Host: p.DataManager.Host, Port: p.DataManager.Port}
 		auth2 := server.NewJWTAuth(p.DataManager.Key)
 		dm.SetAuth(auth2)
+		dm.Tls=true
 		resources[p.Name] = structs.Resource{Server: s, DataManager: dm}
 	}
 

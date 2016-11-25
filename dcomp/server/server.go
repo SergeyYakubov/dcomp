@@ -4,6 +4,7 @@ package server
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,6 +13,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -90,7 +92,57 @@ func (srv *Server) addAuthorizationHeader(r *http.Request) {
 	r.Header.Add("Authorization", token)
 }
 
-// CommandDelete issues the http command to srv. Returns response body or error
+func (srv *Server) newClient() (client *http.Client) {
+	if srv.Tls {
+		tr := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		}
+		client = &http.Client{Transport: tr}
+	} else {
+		client = http.DefaultClient
+	}
+
+	return
+}
+
+func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
+	size int64, mode os.FileMode) (b *bytes.Buffer, err error) {
+
+	req, err := http.NewRequest("POST", srv.url(urlpath), data)
+	if err != nil {
+		return nil, err
+	}
+
+	srv.addAuthorizationHeader(req)
+
+	cd := "attachment; filename=" + url.QueryEscape(destname)
+	req.Header.Set("Content-Disposition", cd)
+	req.Header.Set("Content-Type", "application/octet-stream")
+
+	m := new(bytes.Buffer)
+	binary.Write(m, binary.LittleEndian, mode)
+	req.Header.Set("X-Content-Mode", url.QueryEscape(m.String()))
+
+	client := srv.newClient()
+	res, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	b = new(bytes.Buffer)
+
+	defer res.Body.Close()
+
+	io.Copy(b, res.Body)
+
+	if res.StatusCode != http.StatusCreated {
+		err = errors.New(b.String())
+		return nil, err
+	}
+	return b, nil
+}
+
 func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 	if data != nil {
@@ -108,16 +160,7 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 
 	srv.addAuthorizationHeader(req)
 
-	var client *http.Client
-	if srv.Tls {
-		tr := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-		}
-		client = &http.Client{Transport: tr}
-	} else {
-		client = http.DefaultClient
-	}
-
+	client := srv.newClient()
 	res, err := client.Do(req)
 
 	if err != nil {

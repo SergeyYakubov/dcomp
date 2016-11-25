@@ -3,6 +3,8 @@ package server
 import (
 	"testing"
 
+	"bytes"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -130,4 +132,18 @@ func TestPatchcommand(t *testing.T) {
 		}
 
 	}
+}
+
+func TestUploadFile(t *testing.T) {
+	var srv Server
+	ts := CreateMockServer(&srv)
+
+	b := new(bytes.Buffer)
+	b.Write([]byte("Hello"))
+
+	defer ts.Close()
+	b, err := srv.UploadData("jobfile/578359205e935a20adb39a18", "dest.txt", b, 5, 0666)
+	assert.Nil(t, err)
+	assert.Contains(t, b.String(), "Hello", "upload file echo in result")
+
 }

@@ -85,3 +85,34 @@ func TestSubmitCommandWithFiles(t *testing.T) {
 		outBuf.(*bytes.Buffer).Reset()
 	}
 }
+
+var uploadData = []struct {
+	localname string
+	inipath   string
+	destdir   string
+	isdir     bool
+	result    string
+}{
+	{"file.txt",".","dest",false,"dest/file.txt"},
+	{"dir/file.txt","dir/file.txt","dest",false,"dest/file.txt"},
+	{"dir/file.txt","dir","dest",false,"dest/dir/file.txt"},
+	{"dir/dir2/file.txt","dir/dir2","dest",false,"dest/dir2/file.txt"},
+	{"dir",".","dest",true,"dest/dir"},
+	{"dir/dir2","dir","dest",true,"dest/dir/dir2"},
+	{"dir/dir2","dir","dest",true,"dest/dir/dir2"},
+	{"dir/dir2","dir/dir2","dest",true,"dest/dir2"},
+	{"dir/dir2","dir/dir2",".",true,"dir2"},
+	{"dir",".",".",true,"dir"},
+	{".",".",".",true,""},
+	{"/dir","/",".",true,"dir"},
+
+
+}
+
+func TestGetUploadName(t *testing.T) {
+	for _, test := range uploadData {
+		res := getUploadName(test.localname,test.inipath,test.destdir,test.isdir)
+		assert.Equal(t, test.result,res)
+	}
+
+}

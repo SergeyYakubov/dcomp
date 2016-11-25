@@ -10,10 +10,11 @@ import (
 
 	"bytes"
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"io/ioutil"
 	"strings"
+
+	"github.com/gorilla/mux"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 var listRoutes = utils.Routes{
@@ -60,6 +61,18 @@ var listRoutes = utils.Routes{
 		"/authorize/",
 		MockFuncAuthorize,
 	},
+	utils.Route{
+		"ReceiveFile",
+		"POST",
+		"/jobfile/{jobID}/",
+		MockFuncReceiveJobFile,
+	},
+}
+
+func MockFuncReceiveJobFile(w http.ResponseWriter, r *http.Request) {
+	b, _ := ioutil.ReadAll(r.Body)
+	w.WriteHeader(http.StatusCreated)
+	w.Write(b)
 }
 
 func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {

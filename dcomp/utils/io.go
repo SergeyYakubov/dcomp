@@ -89,7 +89,9 @@ func MkdirAllWithCh(path string, perm os.FileMode, uid, gid int) error {
 	}
 
 	// Parent now exists; invoke Mkdir and use its result.
+
 	err = os.Mkdir(path, perm)
+
 	if err != nil {
 		// Handle arguments like "foo/." by
 		// double-checking that directory doesn't exist.
@@ -104,7 +106,7 @@ func MkdirAllWithCh(path string, perm os.FileMode, uid, gid int) error {
 		return err
 	}
 	err = os.Chown(path, uid, gid)
-	if err != nil {
+	if err == nil {
 		return os.Chmod(path, perm)
 	}
 	return err

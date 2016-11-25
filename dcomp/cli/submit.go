@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"path"
+
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
@@ -32,8 +34,35 @@ func sendReleaseJobCommand(jobID string) (b *bytes.Buffer, err error) {
 	return daemon.CommandPost("jobs/"+jobID, nil)
 }
 
-func uploadFile(t structs.JobFilesTransfer, source, dest string) error {
-//	token, _ := t.Srv.GetAuth().GenerateToken(nil)
+func getUploadName(localname, inipath, destdir string, isdir bool) string {
+	// single file - replace its dir with destdir
+	if (localname == inipath) && !isdir {
+		return destdir + `/` + path.Base(localname)
+	}
+
+	// copy directory - basedir is copied as well
+	localname = `./` + localname
+	parent_ini := path.Dir(inipath)
+	s := strings.Replace(localname, parent_ini, destdir, 1)
+	s = strings.TrimLeft(s, `./`)
+	return s
+
+}
+
+func uploadFile(t structs.JobFilesTransfer, fi os.FileInfo, source, inipath, dest string) error {
+
+	f, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+
+	un := getUploadName(fi.Name(), inipath, dest, fi.IsDir())
+	_, err = t.Srv.UploadData("jobfile/"+t.JobID+"/", un, f, fi.Size(), fi.Mode())
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
 	return nil
 }
 
@@ -53,7 +82,8 @@ func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error 
 				if strings.HasPrefix(fi.Name(), ".") {
 					return nil
 				}
-				if err := uploadFile(t, path, pair.Dest); err != nil {
+
+				if err := uploadFile(t, fi, path, pair.Source, pair.Dest); err != nil {
 					return err
 				}
 
@@ -100,7 +130,9 @@ func (cmd *command) CommandSubmit() error {
 			return err
 		}
 
+	//	daemon.Tls=false
 		err = uploadFiles(t, flags.FilesToUpload)
+		//daemon.Tls=true
 
 		if err != nil {
 			// file upload failed, delete job from daemon database
