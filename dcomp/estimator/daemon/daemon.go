@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type config struct {
@@ -16,14 +16,14 @@ type config struct {
 	}
 }
 
+var configFile = `/etc/dcomp/dcompestd.yaml`
+
 // setDaemonConfiguration reads configuration file with daemon location
 func setDaemonConfiguration() (config, error) {
 
-	fname := `/etc/dcomp/dcompestd.yaml`
-
 	var c config
 
-	err := utils.ReadYaml(fname, &c)
+	err := utils.ReadYaml(configFile, &c)
 	return c, err
 
 }

@@ -14,13 +14,14 @@ type config struct {
 	}
 }
 
+var configFile = `/etc/dcomp/dcomp.yaml`
+
 // SetDaemonConfiguration reads configuration file with daemon location
 func SetDaemonConfiguration() error {
-	fname := `/etc/dcomp/dcomp.yaml`
 
 	var c config
 
-	err := utils.ReadYaml(fname, &c)
+	err := utils.ReadYaml(configFile, &c)
 
 	if err != nil {
 		return err

@@ -32,7 +32,6 @@ func TestRunScript(t *testing.T) {
 	}
 
 	var dbsrv server.Server
-	//todo: changethis
 	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
 	db := new(database.Mongodb)

@@ -11,8 +11,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-//todo change this
-//these tests assume that mongodb server is running on 172.17.0.2:27017 (best to use Docker container)
+//these tests assume that mongodb server is running on localhost:27017 (best to use Docker container)
 
 func initdb() *Mongodb {
 	db := new(Mongodb)

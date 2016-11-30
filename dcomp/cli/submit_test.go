@@ -68,24 +68,6 @@ var submitRequests = []struct {
 	{command{args: []string{"-upload", "/etc/shadow:", "-script", "-ncpus", "10", "aaa", "imagename"}}, "denied", 0, "submit with denied file"},
 }
 
-func TestSubmitCommandWithFiles(t *testing.T) {
-	t.SkipNow()
-	outBuf = new(bytes.Buffer)
-	ts := server.CreateMockServer(&daemon)
-	defer ts.Close()
-
-	for _, test := range submitRequests {
-		err := test.cmd.CommandSubmit()
-		if test.code != 0 {
-			assert.NotNil(t, err)
-		} else {
-			assert.Nil(t, err)
-		}
-		assert.Contains(t, outBuf.(*bytes.Buffer).String(), test.answer, test.message)
-		outBuf.(*bytes.Buffer).Reset()
-	}
-}
-
 var uploadData = []struct {
 	localname string
 	inipath   string
@@ -93,26 +75,24 @@ var uploadData = []struct {
 	isdir     bool
 	result    string
 }{
-	{"file.txt",".","dest",false,"dest/file.txt"},
-	{"dir/file.txt","dir/file.txt","dest",false,"dest/file.txt"},
-	{"dir/file.txt","dir","dest",false,"dest/dir/file.txt"},
-	{"dir/dir2/file.txt","dir/dir2","dest",false,"dest/dir2/file.txt"},
-	{"dir",".","dest",true,"dest/dir"},
-	{"dir/dir2","dir","dest",true,"dest/dir/dir2"},
-	{"dir/dir2","dir","dest",true,"dest/dir/dir2"},
-	{"dir/dir2","dir/dir2","dest",true,"dest/dir2"},
-	{"dir/dir2","dir/dir2",".",true,"dir2"},
-	{"dir",".",".",true,"dir"},
-	{".",".",".",true,""},
-	{"/dir","/",".",true,"dir"},
-
-
+	{"file.txt", ".", "dest", false, "dest/file.txt"},
+	{"dir/file.txt", "dir/file.txt", "dest", false, "dest/file.txt"},
+	{"dir/file.txt", "dir", "dest", false, "dest/dir/file.txt"},
+	{"dir/dir2/file.txt", "dir/dir2", "dest", false, "dest/dir2/file.txt"},
+	{"dir", ".", "dest", true, "dest/dir"},
+	{"dir/dir2", "dir", "dest", true, "dest/dir/dir2"},
+	{"dir/dir2", "dir", "dest", true, "dest/dir/dir2"},
+	{"dir/dir2", "dir/dir2", "dest", true, "dest/dir2"},
+	{"dir/dir2", "dir/dir2", ".", true, "dir2"},
+	{"dir", ".", ".", true, "dir"},
+	{".", ".", ".", true, ""},
+	{"/dir", "/", ".", true, "dir"},
 }
 
 func TestGetUploadName(t *testing.T) {
 	for _, test := range uploadData {
-		res := getUploadName(test.localname,test.inipath,test.destdir,test.isdir)
-		assert.Equal(t, test.result,res)
+		res := getUploadName(test.localname, test.inipath, test.destdir, test.isdir)
+		assert.Equal(t, test.result, res)
 	}
 
 }

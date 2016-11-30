@@ -55,12 +55,12 @@ func setHostInfo(srv *server.Server, h HostInfo) {
 
 }
 
+var configFile = `/etc/dcomp/dcompd.yaml`
+
 func setConfiguration() error {
 
-	fname := `/etc/dcomp/dcompd.yaml`
-
 	var c config
-	if err := utils.ReadYaml(fname, &c); err != nil {
+	if err := utils.ReadYaml(configFile, &c); err != nil {
 		fmt.Println(err)
 		return err
 	}
@@ -84,7 +84,7 @@ func setConfiguration() error {
 		dm := server.Server{Host: p.DataManager.Host, Port: p.DataManager.Port}
 		auth2 := server.NewJWTAuth(p.DataManager.Key)
 		dm.SetAuth(auth2)
-		dm.Tls=true
+		dm.Tls = true
 		resources[p.Name] = structs.Resource{Server: s, DataManager: dm}
 	}
 

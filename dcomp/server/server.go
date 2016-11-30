@@ -124,6 +124,7 @@ func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
 	req.Header.Set("X-Content-Mode", url.QueryEscape(m.String()))
 
 	client := srv.newClient()
+
 	res, err := client.Do(req)
 
 	if err != nil {

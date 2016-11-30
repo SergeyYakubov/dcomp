@@ -7,10 +7,12 @@ import (
 )
 
 func TestSetConfiguration(t *testing.T) {
+
+	tconf := configFile
+	configFile = "setup_test.yaml"
 	setConfiguration()
-	//todo: create test config file
-	//assert.Equal(t, "172.17.0.2", dbServer.Host, "Host")
-	//assert.Equal(t, 27017, dbServer.Port, "Port")
+	assert.Equal(t, "172.17.0.2", dbServer.Host, "Host")
+	assert.Equal(t, 27017, dbServer.Port, "Port")
 	assert.Equal(t, "db3415", dbServer.GetAuth().(*server.HMACAuth).Key, "Key")
 	assert.Equal(t, ":8001", settings.Addr, "addr")
 	assert.Equal(t, "/etc/dcomp/certd.pem", settings.Certfile, "certfile")
@@ -31,4 +33,8 @@ func TestSetConfiguration(t *testing.T) {
 	assert.Equal(t, "localhost", authServer.Host, "auth host")
 	assert.Equal(t, 8007, authServer.Port, "auth port")
 	assert.Equal(t, "auth14", authServer.GetAuth().(*server.HMACAuth).Key, "auth key")
+
+	configFile = tconf
+	setConfiguration()
+
 }

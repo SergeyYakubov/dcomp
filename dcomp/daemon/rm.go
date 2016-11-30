@@ -1,6 +1,21 @@
 package daemon
 
-import "net/http"
+import (
+	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"net/http"
+)
+
+func deleteJobInResourceIfNeeded(job structs.JobInfo) error {
+	if job.Status == structs.StatusWaitData {
+		return nil
+	}
+
+	res := resources[job.Resource]
+	_, err := res.Server.CommandDelete("jobs" + "/" + job.Id)
+
+	return err
+
+}
 
 func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 
@@ -11,10 +26,7 @@ func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res := resources[job.Resource]
-	_, err = res.Server.CommandDelete("jobs" + "/" + job.Id)
-
-	if err != nil {
+	if err := deleteJobInResourceIfNeeded(job); err != nil {
 		http.Error(w, "cannot delete job in resource: "+err.Error(), http.StatusNotFound)
 		return
 	}

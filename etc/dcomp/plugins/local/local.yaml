@@ -1,5 +1,5 @@
 database:
- host: 172.17.0.2
+ host: localhost
  port: 27017
 daemon:
  addr: :8006

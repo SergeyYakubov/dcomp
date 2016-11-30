@@ -19,9 +19,10 @@ import (
 
 	"os/user"
 
+	"io/ioutil"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
-	"fmt"
 )
 
 type receiveFilesRequest struct {
@@ -35,10 +36,10 @@ type receiveFilesRequest struct {
 
 var receiveFilesTests = []receiveFilesRequest{
 	{"test.txt", "5", "testuser", "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
-	/*{`blabla/test.txt`, "5", "testuser", "578359205e935a20adb39a18", http.StatusCreated, "receive file with dirname"},
+	{`blabla/test.txt`, "5", "testuser", "578359205e935a20adb39a18", http.StatusCreated, "receive file with dirname"},
 	{`blabla/test.txt`, "5", "testuser", "578359205e935a20adb39a19", http.StatusUnauthorized, "wrong job id"},
 	{`blabla/test.txt`, "5", "wronguser", "578359205e935a20adb39a18", http.StatusUnauthorized, "receive file with dirname"},
-	{"", "6", "testuser", "578359205e935a20adb39a18", http.StatusBadRequest, "empty filename"},*/
+	{"", "6", "testuser", "578359205e935a20adb39a18", http.StatusBadRequest, "empty filename"},
 }
 
 func TestReceiveFiles(t *testing.T) {
@@ -91,7 +92,23 @@ func TestReceiveFiles(t *testing.T) {
 		f(w, req)
 
 		assert.Equal(t, test.answercode, w.Code, test.message)
-		fmt.Println(w.Body)
+
+		if w.Code == http.StatusCreated {
+			fname := settings.Resource.BaseDir + "/" + test.jobID + "/" + test.filename
+			f, err := os.Open(fname)
+			assert.Nil(t, err, "Open file - Should not be error")
+			b, err := ioutil.ReadAll(f)
+			assert.Contains(t, string(b), "Hello")
+
+			info, err := os.Stat(fname)
+			assert.Nil(t, err, "stat file - Should not be error")
+			var mode os.FileMode = 0666
+
+			assert.Equal(t, mode, info.Mode())
+			os.RemoveAll(settings.Resource.BaseDir + "/" + test.jobID)
+
+		}
+
 	}
 
 }

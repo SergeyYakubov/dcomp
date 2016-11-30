@@ -49,24 +49,37 @@ func getUploadName(localname, inipath, destdir string, isdir bool) string {
 
 }
 
-func uploadFile(t structs.JobFilesTransfer, fi os.FileInfo, source, inipath, dest string) error {
+func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan error) {
 
-	f, err := os.Open(source)
+	f, err := os.Open(fileInfo.Path)
 	if err != nil {
-		return err
-	}
-
-	un := getUploadName(fi.Name(), inipath, dest, fi.IsDir())
-	_, err = t.Srv.UploadData("jobfile/"+t.JobID+"/", un, f, fi.Size(), fi.Mode())
-	if err != nil {
-		return err
+		errchan <- err
+		return
 	}
 
 	defer f.Close()
-	return nil
+
+	un := getUploadName(fileInfo.Fi.Name(), fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
+	_, err = t.Srv.UploadData("jobfile/"+t.JobID+"/", un, f, fileInfo.Fi.Size(), fileInfo.Fi.Mode())
+	if err != nil {
+		errchan <- err
+		return
+	}
+
+	errchan <- nil
+	return
+
 }
 
-func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error {
+type uploadInfo struct {
+	Fi     os.FileInfo
+	Path   string
+	Source string
+	Dest   string
+}
+
+func getFilesToUpload(files structs.TransferFiles) (listFiles []uploadInfo, err error) {
+	listFiles = make([]uploadInfo, 0)
 
 	for _, pair := range files {
 		var scan = func(path string, fi os.FileInfo, err error) (e error) {
@@ -83,20 +96,61 @@ func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error 
 					return nil
 				}
 
-				if err := uploadFile(t, fi, path, pair.Source, pair.Dest); err != nil {
-					return err
-				}
+				listFiles = append(listFiles, uploadInfo{fi, path, pair.Source, pair.Dest})
 
 			}
 			return nil
 		}
 
-		if err := filepath.Walk(pair.Source, scan); err != nil {
-			return err
+		if err = filepath.Walk(pair.Source, scan); err != nil {
+			return
 		}
 
 	}
-	return nil
+
+	return
+
+}
+
+func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error {
+
+	listFiles, err := getFilesToUpload(files)
+
+	errchan := make(chan error)
+
+	if err != nil {
+		return err
+	}
+
+	maxParallelRequests := 5
+
+	nrequests := 0
+	for _, fileInfo := range listFiles {
+		if nrequests < maxParallelRequests {
+			go uploadFile(t, fileInfo, errchan)
+			nrequests++
+		}
+		if nrequests == maxParallelRequests {
+			err := <-errchan
+			nrequests--
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for i := 0; i < nrequests; i++ {
+		err1 := <-errchan
+		if err1 != nil {
+			if err == nil {
+				err = err1
+			} else {
+				err = errors.New(err.Error() + err1.Error())
+			}
+		}
+	}
+	return err
+
 }
 
 // CommandSubmit sends damon a command to submit a new job. Job id is printed on success, error message otherwise.
@@ -130,10 +184,7 @@ func (cmd *command) CommandSubmit() error {
 			return err
 		}
 
-	//	daemon.Tls=false
 		err = uploadFiles(t, flags.FilesToUpload)
-		//daemon.Tls=true
-
 		if err != nil {
 			// file upload failed, delete job from daemon database
 			daemon.CommandDelete("jobs" + "/" + t.JobID)

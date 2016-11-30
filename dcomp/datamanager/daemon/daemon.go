@@ -41,11 +41,7 @@ func Start(configFile string) {
 		log.Fatal(err)
 	}
 
-		log.Fatal(http.ListenAndServeTLS(settings.Daemon.Addr,
-			settings.Daemon.Certfile, settings.Daemon.Keyfile,
-			server.ProcessJWTAuth(mux.ServeHTTP, settings.Daemon.Key)))
-
-//	log.Fatal(http.ListenAndServe(settings.Daemon.Addr,
-//		server.ProcessJWTAuth(mux.ServeHTTP, settings.Daemon.Key)))
-
+	log.Fatal(http.ListenAndServeTLS(settings.Daemon.Addr,
+		settings.Daemon.Certfile, settings.Daemon.Keyfile,
+		server.ProcessJWTAuth(mux.ServeHTTP, settings.Daemon.Key)))
 }
