@@ -14,7 +14,7 @@ type config struct {
 	}
 }
 
-var configFile = `/etc/dcomp/dcomp.yaml`
+var configFile = `/etc/dcomp/conf/dcomp.yaml`
 
 // SetDaemonConfiguration reads configuration file with daemon location
 func SetDaemonConfiguration() error {

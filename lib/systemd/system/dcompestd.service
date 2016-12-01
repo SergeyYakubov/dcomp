@@ -1,0 +1,11 @@
+[Unit]
+Description=dComp estimation daemon
+PartOf=dcomp.service
+
+[Service]
+ExecStart=/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/bin/dcompestd
+
+
+
+[Install]
+WantedBy=multi-user.target

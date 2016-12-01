@@ -17,6 +17,17 @@ type scriptRequest struct {
 	message string
 }
 
+func createdb() *database.Mongodb {
+	var dbsrv server.Server
+	dbsrv.Host = "172.18.0.2"
+	dbsrv.Port = 27017
+	db := new(database.Mongodb)
+	db.SetServer(&dbsrv)
+	db.SetDefaults("localplugintest")
+	return db
+
+}
+
 var runScriptTests = []scriptRequest{
 	{structs.JobDescription{ImageName: "centos:7", Script: "echo hi"},
 		"hi", structs.StatusFinished, "submit echo script"},
@@ -30,13 +41,7 @@ func TestRunScript(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-
-	var dbsrv server.Server
-	dbsrv.Host = "localhost"
-	dbsrv.Port = 27017
-	db := new(database.Mongodb)
-	db.SetServer(&dbsrv)
-	db.SetDefaults("localplugintest")
+	db := createdb()
 	var res = new(Resource)
 	res.SetDb(db)
 	db.Connect()
@@ -60,12 +65,7 @@ func TestGetJob(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	var dbsrv server.Server
-	dbsrv.Host = "localhost"
-	dbsrv.Port = 27017
-	db := new(database.Mongodb)
-	db.SetServer(&dbsrv)
-	db.SetDefaults("localplugintest")
+	db := createdb()
 	var res = new(Resource)
 	res.SetDb(db)
 	db.Connect()
@@ -93,12 +93,7 @@ func TestDeleteJob(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	var dbsrv server.Server
-	dbsrv.Host = "localhost"
-	dbsrv.Port = 27017
-	db := new(database.Mongodb)
-	db.SetServer(&dbsrv)
-	db.SetDefaults("localplugintest")
+	db := createdb()
 	var res = new(Resource)
 	res.SetDb(db)
 	db.Connect()

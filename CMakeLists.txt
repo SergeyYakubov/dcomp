@@ -2,6 +2,14 @@ cmake_minimum_required (VERSION 2.8)
 
 project (DCOMP)
 
+option (DISABLE_CGO "Disable CGo" OFF)
+
+if (DISABLE_CGO)
+    set (GO_ENABLED "CGO_ENABLED=0")
+endif()
+
+
+
 
 set (DCOMP_CMAKE_DIR "${DCOMP_SOURCE_DIR}/CMake")
 
@@ -12,28 +20,28 @@ add_custom_target(make_version ALL
   VERBATIM)
 
 add_custom_target(dcomp ALL
-				  COMMAND go build -o bin/dcomp -tags release ./dcomp/main
+				  COMMAND  ${GO_ENABLED} go build ${GO_OPTS} -o bin/dcomp -tags release ./dcomp/main
 				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
 				  VERBATIM)
 
 add_custom_target(dcompestd ALL
-        				  COMMAND go build -o bin/dcompestd ./dcomp/estimator/main
+        				  COMMAND ${GO_ENABLED} go build ${GO_OPTS} -o bin/dcompestd ./dcomp/estimator/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
 add_custom_target(dcompauthd ALL
-        				  COMMAND go build -o bin/dcompauthd ./dcomp/authorizer/main
+        				  COMMAND ${GO_ENABLED} go build ${GO_OPTS} -o bin/dcompauthd ./dcomp/authorizer/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
 
 add_custom_target(dcomplocalpd ALL
-        				  COMMAND go build -o bin/dcomplocalpd ./dcomp/resources/local/main
+        				  COMMAND ${GO_ENABLED} go build ${GO_OPTS} -o bin/dcomplocalpd ./dcomp/resources/local/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
 add_custom_target(dcompdmd ALL
-        				  COMMAND go build -o bin/dcompdmd ./dcomp/datamanager/main
+        				  go build ${GO_OPTS}  -o bin/dcompdmd ./dcomp/datamanager/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 

@@ -4,6 +4,6 @@ database:
 daemon:
  addr: :8006
  key: lplgin12
-basedir: /home/yakubov/dcomp_test
+basedir: /dcompdata
 
 

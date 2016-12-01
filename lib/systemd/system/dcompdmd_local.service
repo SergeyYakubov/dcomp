@@ -1,0 +1,11 @@
+[Unit]
+Description=dComp datamanager daemon (local resource)
+PartOf=dcomp_local.service
+
+[Service]
+ExecStart=/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/bin/dcompdmd /etc/dcomp/plugins/local/dmd.yaml
+
+
+
+[Install]
+WantedBy=multi-user.target

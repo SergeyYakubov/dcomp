@@ -21,7 +21,7 @@ type config struct {
 // setDaemonConfiguration reads configuration file with daemon location
 func setDaemonConfiguration() (config, error) {
 
-	fname := `/etc/dcomp/dcompauthd.yaml`
+	fname := `/etc/dcomp/conf/dcompauthd.yaml`
 
 	var c config
 

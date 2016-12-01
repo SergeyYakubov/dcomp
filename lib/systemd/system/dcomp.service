@@ -1,0 +1,11 @@
+[Unit]
+Description=dComp daemon
+Requires=dcompauthd.service
+Requires=dcomp_local.service
+Requires=dcompestd.service
+
+[Service]
+ExecStart=/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/bin/dcomp daemon
+
+[Install]
+WantedBy=multi-user.target

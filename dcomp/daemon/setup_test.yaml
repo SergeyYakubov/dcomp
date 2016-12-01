@@ -12,8 +12,8 @@ authorization:
  key: auth14
 daemon:
  addr: :8001
- certfile: /etc/dcomp/certd.pem
- keyfile: /etc/dcomp/keyd.pem
+ certfile: /etc/dcomp/cert/certd.pem
+ keyfile: /etc/dcomp/cert/keyd.pem
 plugins:
         - name: Local
           host: localhost

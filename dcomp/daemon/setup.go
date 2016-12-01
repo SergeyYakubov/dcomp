@@ -55,7 +55,7 @@ func setHostInfo(srv *server.Server, h HostInfo) {
 
 }
 
-var configFile = `/etc/dcomp/dcompd.yaml`
+var configFile = `/etc/dcomp/conf/dcompd.yaml`
 
 func setConfiguration() error {
 

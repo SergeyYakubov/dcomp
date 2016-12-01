@@ -1,0 +1,12 @@
+[Unit]
+Description=dComp local resource daemon
+Requires=dcompdmd_local.service
+PartOf=dcomp.service
+
+
+[Service]
+ExecStart=/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/bin/dcomplocalpd
+
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,11 @@
+[Unit]
+Description=dComp authentification daemon
+PartOf=dcomp.service
+
+[Service]
+ExecStart=/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/bin/dcompauthd
+
+
+
+[Install]
+WantedBy=multi-user.target
