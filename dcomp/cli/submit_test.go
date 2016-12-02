@@ -58,16 +58,6 @@ func TestSubmitCommand(t *testing.T) {
 	assert.NotNil(t, err, "Should be error")
 }
 
-var submitRequests = []struct {
-	cmd     command
-	answer  string
-	code    int
-	message string
-}{
-	{command{args: []string{"-upload", "/etc/passwd:", "-script", "-ncpus", "10", "aaa", "imagename"}}, "578359205e935a20adb39a18", 0, "submit with file"},
-	{command{args: []string{"-upload", "/etc/shadow:", "-script", "-ncpus", "10", "aaa", "imagename"}}, "denied", 0, "submit with denied file"},
-}
-
 var uploadData = []struct {
 	localname string
 	inipath   string

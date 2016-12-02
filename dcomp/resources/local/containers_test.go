@@ -6,8 +6,8 @@ import (
 
 	"bytes"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/stretchr/testify/assert"
 )
 
 type request struct {
@@ -23,6 +23,11 @@ var submitTests = []request{
 		"hi", "bad command"},
 	{structs.JobDescription{ImageName: "max-adm01:0000/nosuchcontainer", Script: "echo hi"},
 		"hi", "container not exist"},
+	{structs.JobDescription{ImageName: "centos:7", Script: "echo hi",
+		FilesToUpload: structs.TransferFiles{
+			{"/tmp", "/tmp"},
+			{"/aaa", "/aaa"},
+		}}, "hi", "submit echo script"},
 }
 
 func TestCreateContainer(t *testing.T) {
@@ -31,7 +36,7 @@ func TestCreateContainer(t *testing.T) {
 	}
 	for _, test := range submitTests {
 
-		id, err := createContainer(test.job)
+		id, err := createContainer(test.job, "/tmp")
 		if test.job.ImageName == "max-adm01:0000/nosuchcontainer" {
 			assert.NotNil(t, err, test.message)
 			continue
@@ -46,7 +51,7 @@ func TestStartContainer(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	id, err := createContainer(submitTests[0].job)
+	id, err := createContainer(submitTests[0].job, "/tmp")
 	assert.Nil(t, err, "Create: should not be error")
 
 	err = startContainer(id)
@@ -55,24 +60,34 @@ func TestStartContainer(t *testing.T) {
 	err = deleteContainer(id)
 	assert.Nil(t, err, "Delete :should not be error")
 
-	id, err = createContainer(submitTests[1].job)
+	id, err = createContainer(submitTests[1].job, "/tmp")
 	assert.Nil(t, err, "Create: should not be error")
 
 	err = startContainer(id)
-	assert.NotNil(t, err, "Start: should be  be error")
+	assert.NotNil(t, err, "Start: should be error")
 
 	err = deleteContainer(id)
 	assert.Nil(t, err, "Delete :should not be error")
 
 	err = startContainer(id)
 	assert.NotNil(t, err, "Second start: Should be error")
+
+	id, err = createContainer(submitTests[3].job, "/tmp")
+	assert.Nil(t, err, "Create: should not be error")
+
+	err = startContainer(id)
+	assert.Nil(t, err, "Start: not be error")
+
+	err = deleteContainer(id)
+	assert.Nil(t, err, "Delete :should not be error")
+
 }
 
 func TestDeleteContainer(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
-	id, err := createContainer(submitTests[0].job)
+	id, err := createContainer(submitTests[0].job, "/tmp")
 	assert.Nil(t, err, "Should not be error")
 
 	err = deleteContainer(id)
@@ -88,7 +103,7 @@ func TestWaitContainer(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 10s"}
-	id, err := createContainer(job)
+	id, err := createContainer(job, "/tmp")
 	assert.Nil(t, err, "Should not be error")
 
 	err = startContainer(id)
@@ -111,7 +126,7 @@ func TestWaitContainer(t *testing.T) {
 	assert.NotNil(t, err, "Second wait: Should be error")
 
 	job.Script = "sleep 0.1s"
-	id, _ = createContainer(job)
+	id, _ = createContainer(job, "/tmp")
 	startContainer(id)
 
 	res, err = waitContainer(id, 10*time.Second)
@@ -126,7 +141,7 @@ func TestPrintLogs(t *testing.T) {
 		t.Skip("skipping test in short mode.")
 	}
 	job := structs.JobDescription{ImageName: "centos:7", Script: "echo hi"}
-	id, err := createContainer(job)
+	id, err := createContainer(job, "/tmp")
 
 	err = startContainer(id)
 
@@ -141,7 +156,7 @@ func TestPrintLogs(t *testing.T) {
 
 	// long command, exit due to timeout
 	job.Script = "sleep 10"
-	id, _ = createContainer(job)
+	id, _ = createContainer(job, "/tmp")
 
 	startContainer(id)
 

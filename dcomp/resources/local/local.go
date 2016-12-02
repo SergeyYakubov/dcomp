@@ -75,7 +75,8 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 	defer fout.Close()
 
 	res.updateJobInfo(li, structs.StatusCreatingContainer, "")
-	id, err := createContainer(job)
+	basedir := res.Basedir + "/" + li.Id + "/"
+	id, err := createContainer(job, basedir)
 	if err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		return

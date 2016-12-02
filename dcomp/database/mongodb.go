@@ -5,10 +5,9 @@ import (
 
 	"errors"
 
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"io"
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
 type Mongodb struct {
@@ -19,10 +18,27 @@ type Mongodb struct {
 	srv     *server.Server
 }
 
+func (db *Mongodb) updateSession() error {
+	if db.session == nil {
+		return db.Connect()
+	}
+
+	if err := db.session.Ping(); err == nil {
+		// nothing more to do
+		return nil
+	}
+	db.Close()
+	return db.Connect()
+}
+
 // CreateRecord changes a database record with given id. s should be is an object that
 // mgo understands (go struct is OK)
 func (db *Mongodb) PatchRecord(id string, s interface{}) error {
 	if err := checkID(id); err != nil {
+		return err
+	}
+
+	if err := db.updateSession(); err != nil {
 		return err
 	}
 
@@ -36,6 +52,10 @@ func (db *Mongodb) CreateRecord(given_id string, s interface{}) (string, error) 
 
 	if db.session == nil {
 		return "", errors.New("database session not created")
+	}
+
+	if err := db.updateSession(); err != nil {
+		return "", err
 	}
 	c := db.session.DB(db.name).C(db.col)
 
@@ -54,13 +74,13 @@ func (db *Mongodb) CreateRecord(given_id string, s interface{}) (string, error) 
 	_, err := c.UpsertId(id, s)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("Cannot add record to database: " + err.Error())
 	}
 	// we keep both object id for faster search and its hex representation which can be passed to clients
 	// within JSON struct
 	err = c.UpdateId(id, bson.M{"$set": bson.M{"_hex_id": id.Hex()}})
 	if err != nil {
-		return "", err
+		return "", errors.New("Cannot update record in database: " + err.Error())
 	}
 
 	return id.Hex(), nil
@@ -77,6 +97,10 @@ func (db *Mongodb) Connect() error {
 }
 
 func (db *Mongodb) Close() {
+	if db.session == nil {
+		return
+	}
+
 	db.session.Close()
 	db.session = nil
 }
@@ -91,22 +115,15 @@ func (db *Mongodb) SetDefaults(name ...interface{}) {
 
 // GetRecords issues a request to mongodb. q should be a bson.M object or go struct with fields to match
 // returns
-func (db *Mongodb) GetRecords(q interface{}, res interface{}) (err error) {
+func (db *Mongodb) GetRecords(q interface{}, res interface{}) error {
 
-	c := db.session.DB(db.name).C(db.col)
-	query := c.Find(q)
-
-	n, err := query.Count()
-
-	if err != nil && err != io.EOF {
+	if err := db.updateSession(); err != nil {
 		return err
 	}
+	c := db.session.DB(db.name).C(db.col)
 
-	if n == 0 {
-		return nil
-	}
-	err = query.All(res)
-	return err
+	return c.Find(q).All(res)
+
 }
 
 // GetAllRecords returns all records
@@ -130,6 +147,11 @@ func (db *Mongodb) GetRecordsByID(id string, res interface{}) error {
 }
 
 func (db *Mongodb) DeleteRecordByID(id string) error {
+
+	if err := db.updateSession(); err != nil {
+		return err
+	}
+
 	if err := checkID(id); err != nil {
 		return err
 	}

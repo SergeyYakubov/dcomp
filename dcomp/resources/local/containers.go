@@ -13,8 +13,8 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
-	"golang.org/x/net/context"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"golang.org/x/net/context"
 )
 
 var cli *client.Client
@@ -28,12 +28,25 @@ func init() {
 	}
 }
 
-func createContainer(job structs.JobDescription) (string, error) {
+func prepareBinds(job structs.JobDescription, basedir string) []string {
+
+	binds := make([]string, len(job.FilesToUpload))
+	for i, pair := range job.FilesToUpload {
+		if !strings.HasPrefix(pair.Dest, "/") {
+			pair.Dest = "/" + pair.Dest
+		}
+		binds[i] = basedir + pair.Dest + ":" + pair.Dest
+	}
+	return binds
+}
+
+func createContainer(job structs.JobDescription, basedir string) (string, error) {
 
 	cmd := strings.Fields(job.Script)
 	config := container.Config{Image: job.ImageName, AttachStdout: false,
 		AttachStderr: false, Cmd: cmd}
-	resp, err := cli.ContainerCreate(context.Background(), &config, nil, nil, "")
+	hostConfig := container.HostConfig{Binds: prepareBinds(job, basedir)}
+	resp, err := cli.ContainerCreate(context.Background(), &config, &hostConfig, nil, "")
 	if err != nil {
 		if client.IsErrImageNotFound(err) {
 			options := types.ImageCreateOptions{}

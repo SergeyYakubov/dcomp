@@ -35,8 +35,14 @@ func (f *TransferFiles) Set(value string) error {
 		if len(pair) != 2 {
 			return errors.New("use for <source>:<dest> format for uploading files")
 		}
-
-		*f = append(*f, transferFile{Source: path.Clean(pair[0]), Dest: path.Clean(pair[1])})
+		dest := path.Clean(pair[1])
+		if dest == "" || strings.HasPrefix(dest, ".") {
+			return errors.New("destination should be absolute")
+		}
+		if dest == "/" {
+			return errors.New("cannot use root destination")
+		}
+		*f = append(*f, transferFile{Source: path.Clean(pair[0]), Dest: dest})
 	}
 	return nil
 }

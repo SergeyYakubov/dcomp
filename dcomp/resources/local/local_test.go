@@ -19,7 +19,7 @@ type scriptRequest struct {
 
 func createdb() *database.Mongodb {
 	var dbsrv server.Server
-	dbsrv.Host = "172.18.0.2"
+	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
 	db := new(database.Mongodb)
 	db.SetServer(&dbsrv)
