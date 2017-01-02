@@ -24,6 +24,12 @@ var listRoutes = utils.Routes{
 		routeReleaseJob,
 	},
 	utils.Route{
+		"GetJobFiles",
+		"GET",
+		"/jobfile/{jobID}/",
+		SendJWTToken,
+	},
+	utils.Route{
 		"SubmitJob",
 		"POST",
 		"/jobs/",

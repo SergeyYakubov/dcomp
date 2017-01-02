@@ -11,4 +11,10 @@ var listRoutes = utils.Routes{
 		"/jobfile/{jobID}/",
 		routeReceiveJobFile,
 	},
+	utils.Route{
+		"SendFile",
+		"GET",
+		"/jobfile/{jobID}/",
+		routeSendJobFile,
+	},
 }

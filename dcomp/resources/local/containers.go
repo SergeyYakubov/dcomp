@@ -9,20 +9,47 @@ import (
 
 	"io/ioutil"
 
+	"fmt"
+
+	"os/user"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
+	"github.com/fsouza/go-dockerclient"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"golang.org/x/net/context"
 )
 
 var cli *client.Client
 
+func createTCPClient() *docker.Client {
+	endpoint := "tcp://localhost:2376"
+	curUser, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	path := curUser.HomeDir + "/.docker"
+	ca := fmt.Sprintf("%s/ca.pem", path)
+	cert := fmt.Sprintf("%s/cert.pem", path)
+	key := fmt.Sprintf("%s/key.pem", path)
+	client, err := docker.NewTLSClient(endpoint, cert, key, ca)
+	if err != nil {
+		panic(err)
+	}
+	return client
+}
+
 func init() {
 	var err error
 	defaultHeaders := map[string]string{"User-Agent": "dComp"}
-	cli, err = client.NewClient("unix:///var/run/docker.sock", "v1.24", nil, defaultHeaders)
+
+	dockerHost := "tcp://localhost:2376"
+
+	//	cli, err = client.NewClient("unix:///var/run/docker.sock", "v1.24", nil, defaultHeaders)
+	cli, err = client.NewClient(dockerHost, "v1.24", createTCPClient().HTTPClient, defaultHeaders)
+
 	if err != nil {
 		panic(err)
 	}

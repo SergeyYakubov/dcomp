@@ -2,55 +2,13 @@ package daemon
 
 import (
 	"net/http"
-	"time"
 
 	"encoding/json"
 
 	"errors"
 
-	"bytes"
-	"io"
-
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
-
-func createJWT(job structs.JobInfo, r *http.Request) (token string, err error) {
-	srv := resources[job.Resource].DataManager
-	val := r.Context().Value("authorizationResponce")
-
-	if val == nil {
-		err = errors.New("No authorization context")
-		return
-	}
-
-	auth, ok := val.(*server.AuthorizationResponce)
-	if !ok {
-		err = errors.New("Bad authorization context")
-		return
-	}
-
-	var claim server.JobClaim
-	claim.UserName = auth.UserName
-	claim.JobInd = job.Id
-
-	var c server.CustomClaims
-	c.ExtraClaims = &claim
-	c.Duration = time.Hour * 2
-	token, err = srv.GetAuth().GenerateToken(&c)
-	return
-}
-
-func encodeJobFilesTransferInfo(job structs.JobInfo, token string) (b *bytes.Buffer, err error) {
-	var s structs.JobFilesTransfer
-	s.JobID = job.Id
-	s.Srv = resources[job.Resource].DataManager
-	s.Token = token
-
-	b = new(bytes.Buffer)
-	err = json.NewEncoder(b).Encode(&s)
-	return
-}
 
 func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.JobInfo) {
 	if job.Status == structs.StatusSubmitted {
@@ -60,21 +18,13 @@ func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.Job
 	}
 	if job.Status == structs.StatusWaitData {
 
-		token, err := createJWT(job, r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		b, err := encodeJobFilesTransferInfo(job, token)
+		err := writeJWTToken(w, r, job)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
 		w.WriteHeader(http.StatusAccepted)
-		io.Copy(w, b)
-
 		return
 	}
 
