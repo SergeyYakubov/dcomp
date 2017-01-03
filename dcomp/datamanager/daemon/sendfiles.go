@@ -7,8 +7,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"archive/tar"
+	"compress/gzip"
+	"io"
 	"net/url"
+
+	"github.com/gorilla/mux"
 )
 
 func getFilesToSend(inipath string, recursive bool) (listFiles []string, err error) {
@@ -61,13 +65,17 @@ func routeSendJobFile(w http.ResponseWriter, r *http.Request) {
 	relpath, _ := url.QueryUnescape(r.URL.Query().Get("path"))
 	nameonly := r.URL.Query().Get("nameonly")
 	recursive := r.URL.Query().Get("recursive")
+	if nameonly == "false" {
+		recursive = "true"
+	}
 
-	path := settings.Resource.BaseDir + `/` + jobID + `/` + relpath
+	basepath := settings.Resource.BaseDir + `/` + jobID + `/`
+	path := basepath + relpath
 
 	files, err := getFilesToSend(path, recursive == "true")
 
 	if err != nil {
-		errstring := strings.Replace(err.Error(), settings.Resource.BaseDir+`/`+jobID+`/`, "", 1)
+		errstring := strings.Replace(err.Error(), basepath, "", 1)
 		http.Error(w, errstring, http.StatusNotFound)
 		return
 	}
@@ -75,11 +83,63 @@ func routeSendJobFile(w http.ResponseWriter, r *http.Request) {
 	if nameonly == "true" {
 		w.WriteHeader(http.StatusOK)
 		for _, f := range files {
-			f = strings.Replace(f, settings.Resource.BaseDir+`/`+jobID+`/`, "", 1)
+			f = strings.Replace(f, basepath, "", 1)
 			fmt.Fprintln(w, f)
 		}
 		return
+	} else {
+		err := sendTGZ(w, basepath, files)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 
 	return
+}
+
+func sendTGZ(w http.ResponseWriter, basepath string, files []string) error {
+	gw := gzip.NewWriter(w)
+	defer gw.Close()
+	tw := tar.NewWriter(gw)
+	defer tw.Close()
+	for _, file := range files {
+		if err := addPathToTar(tw, basepath, file); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func addPathToTar(tw *tar.Writer, basepath, path string) error {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+
+	header, err := tar.FileInfoHeader(fi, "")
+	if err != nil {
+		return err
+	}
+
+	header.Name = strings.Replace(path, basepath, "", 1)
+
+	if err := tw.WriteHeader(header); err != nil {
+		return err
+	}
+
+	if !fi.IsDir() {
+		file, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+
+		if _, err := io.Copy(tw, file); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
 }

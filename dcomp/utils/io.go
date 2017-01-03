@@ -9,6 +9,10 @@ import (
 	"os"
 	"syscall"
 
+	"archive/tar"
+	"fmt"
+	"io"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -110,4 +114,75 @@ func MkdirAllWithCh(path string, perm os.FileMode, uid, gid int) error {
 		return os.Chmod(path, perm)
 	}
 	return err
+}
+
+func WriteFile(fname string, b *bytes.Buffer) error {
+	file, err := os.Create(fname)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	_, err = io.Copy(file, b)
+	return err
+}
+
+func WriteUnpackedTGZ(dest string, b *bytes.Buffer) error {
+
+	gzf, err := gzip.NewReader(b)
+	if err != nil {
+		return err
+	}
+
+	tarReader := tar.NewReader(gzf)
+	for true {
+
+		header, err := tarReader.Next()
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return err
+		}
+
+		name := header.Name
+
+		switch header.Typeflag {
+		case tar.TypeDir: // = directory
+			os.MkdirAll(dest+name, os.FileMode(header.Mode))
+		case tar.TypeReg: // = regular file
+			file, err := os.Create(dest + name)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			err = file.Chmod(os.FileMode(header.Mode))
+			if err != nil {
+				return err
+			}
+
+			_, err = io.CopyN(file, tarReader, header.Size)
+			if err != nil {
+				return err
+			}
+
+			/*			data := make([]byte, header.Size)
+						_, err := tarReader.Read(data)
+						if err != nil {
+							return err
+						}
+						ioutil.WriteFile(dest+name, data, header.Mode)*/
+		default:
+			fmt.Printf("%s : %c %s %s\n",
+				"Yikes! Unable to figure out type",
+				header.Typeflag,
+				"in file",
+				name,
+			)
+		}
+	}
+	return nil
 }

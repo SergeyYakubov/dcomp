@@ -62,7 +62,7 @@ func (cmd *command) CommandLs() error {
 }
 
 func createLsFlags(flagset *flag.FlagSet, flags *lsFlags) {
-	flagset.BoolVar(&flags.Recursive, "R", false, "list subdirectories recursively")
+	flagset.BoolVar(&flags.Recursive, "r", false, "list subdirectories recursively")
 }
 
 func (cmd *command) parseLsFlags(d string) (lsFlags, error) {
