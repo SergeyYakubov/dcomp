@@ -1,0 +1,4 @@
+exit_code: 0
+output:
+        file: output_orig
+        exactly: false

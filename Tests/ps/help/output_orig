@@ -1,0 +1,13 @@
+Usage:	
+dcomp ps [OPTIONS]
+
+Show job information
+  -a	Show all jobs includng finished
+  -compress
+    	get log file compressed
+  -help
+    	Print usage
+  -id string
+    	Job Id
+  -log
+    	Get log file for a specified job
