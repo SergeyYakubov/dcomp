@@ -5,5 +5,6 @@ daemon:
  addr: :8006
  key: lplgin12
 basedir: /dcompdata
+dockerhost: tcp://localhost:2376
 
 

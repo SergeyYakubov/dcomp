@@ -24,8 +24,7 @@ import (
 
 var cli *client.Client
 
-func createTCPClient() *docker.Client {
-	endpoint := "tcp://localhost:2376"
+func createTCPClient(host string) *docker.Client {
 	curUser, err := user.Current()
 	if err != nil {
 		panic(err)
@@ -34,21 +33,22 @@ func createTCPClient() *docker.Client {
 	ca := fmt.Sprintf("%s/ca.pem", path)
 	cert := fmt.Sprintf("%s/cert.pem", path)
 	key := fmt.Sprintf("%s/key.pem", path)
-	client, err := docker.NewTLSClient(endpoint, cert, key, ca)
+	client, err := docker.NewTLSClient(host, cert, key, ca)
 	if err != nil {
 		panic(err)
 	}
 	return client
 }
 
-func init() {
+func InitDockerClient(host string) {
 	var err error
 	defaultHeaders := map[string]string{"User-Agent": "dComp"}
 
-	dockerHost := "tcp://localhost:2376"
-
-	//	cli, err = client.NewClient("unix:///var/run/docker.sock", "v1.24", nil, defaultHeaders)
-	cli, err = client.NewClient(dockerHost, "v1.24", createTCPClient().HTTPClient, defaultHeaders)
+	if strings.Contains(host, "tcp") {
+		cli, err = client.NewClient(host, "v1.24", createTCPClient(host).HTTPClient, defaultHeaders)
+	} else {
+		cli, err = client.NewClient(host, "v1.24", nil, defaultHeaders)
+	}
 
 	if err != nil {
 		panic(err)

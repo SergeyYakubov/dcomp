@@ -16,7 +16,7 @@ var lsTests = []struct {
 	{command{args: []string{}}, "wrong job id"},
 	{command{args: []string{"1"}}, "wrong job id"},
 	{command{args: []string{"578359205e935a20adb39a18", "."}}, "absolute"},
-	{command{args: []string{"-R", "578359205e935a20adb39a18", "."}}, "absolute"},
+	{command{args: []string{"-r", "578359205e935a20adb39a18", "."}}, "absolute"},
 }
 
 func TestCommandLs(t *testing.T) {

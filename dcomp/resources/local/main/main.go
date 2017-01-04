@@ -23,7 +23,8 @@ type config struct {
 		Host string
 		Port int
 	}
-	BaseDir string
+	BaseDir    string
+	DockerHost string
 }
 
 func (c *config) check() error {
@@ -78,6 +79,9 @@ func main() {
 	var res = new(local.Resource)
 
 	res.Basedir = c.BaseDir
+
+	local.InitDockerClient(c.DockerHost)
+
 	daemon.Start(res, db, addr, key)
 	return
 }

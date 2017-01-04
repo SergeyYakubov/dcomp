@@ -7,6 +7,7 @@ import (
 	"bytes"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,6 +15,18 @@ type request struct {
 	job     structs.JobDescription
 	answer  string
 	message string
+}
+
+func init() {
+	var c struct {
+		DockerHost string
+	}
+
+	var configFileName = `/etc/dcomp/plugins/local/local.yaml`
+
+	utils.ReadYaml(configFileName, &c)
+
+	InitDockerClient(c.DockerHost)
 }
 
 var submitTests = []request{
