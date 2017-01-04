@@ -6,5 +6,5 @@ dcomp daemon &
 dcompestd &
 dcompauthd &
 dcomplocalpd &
-dcompdmd /etc/dcomp/plugins/local/local_dmd.yaml &
+dcompdmd /etc/dcomp/plugins/local/dmd.yaml &
 

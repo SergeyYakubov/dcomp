@@ -13,10 +13,11 @@ import (
 
 	"os/user"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
-	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"net/url"
 	"os"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type sendFileNamesRequest struct {
@@ -44,7 +45,7 @@ var sendFilesTests = []sendFileNamesRequest{
 
 func TestSendFiles(t *testing.T) {
 
-	configFileName := `/etc/dcomp/plugins/local/local_dmd.yaml`
+	configFileName := `/etc/dcomp/plugins/local/dmd.yaml`
 	setDaemonConfiguration(configFileName)
 	mux := utils.NewRouter(listRoutes)
 

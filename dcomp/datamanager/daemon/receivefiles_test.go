@@ -44,7 +44,7 @@ var receiveFilesTests = []receiveFilesRequest{
 
 func TestReceiveFiles(t *testing.T) {
 
-	configFileName := `/etc/dcomp/plugins/local/local_dmd.yaml`
+	configFileName := `/etc/dcomp/plugins/local/dmd.yaml`
 	setDaemonConfiguration(configFileName)
 	mux := utils.NewRouter(listRoutes)
 

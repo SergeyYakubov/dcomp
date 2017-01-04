@@ -5,3 +5,5 @@ daemon:
  addr: :8006
  key: 12345
 basedir: /etc
+dockerhost: tcp://localhost:2376
+

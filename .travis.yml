@@ -1,0 +1,35 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+before_install:
+- sudo apt-get update
+- sudo apt-get install python2.7
+- pip2 install pyyaml
+- docker pull mongo
+
+
+install:
+- git fetch --unshallow --tags
+- export PATH=$PATH:$TRAVIS_BUILD_DIR/bin/:$TRAVIS_BUILD_DIR/scripts
+- go get ./...
+- go get github.com/stretchr/testify/assert
+- cmake .
+- make
+- start_db.sh
+- sudo ln -s $TRAVIS_BUILD_DIR/etc/dcomp /etc/dcomp
+- sudo ln -s $TRAVIS_BUILD_DIR /dcompdata
+- sudo $TRAVIS_BUILD_DIR/bin/dcomp daemon &
+- sudo $TRAVIS_BUILD_DIR/bin/dcompestd  &
+- sudo $TRAVIS_BUILD_DIR/bin/dcompauthd &
+- |-
+  sed "s#^dockerhost:.*#dockerhost: unix:///var/run/docker.sock#" -i /etc/dcomp/plugins/local/local.yaml
+- sudo $TRAVIS_BUILD_DIR/bin/dcomplocalpd &
+- sudo $TRAVIS_BUILD_DIR/bin/dcompdmd /etc/dcomp/plugins/local/dmd.yaml &
+
+script:
+- go test ./...
+- python Tests/test.py

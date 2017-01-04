@@ -33,6 +33,8 @@ func TestSetConfiguration(t *testing.T) {
 
 	assert.Equal(t, c.Database.Port, 27017, "port")
 
+	assert.Equal(t, c.DockerHost, "tcp://localhost:2376", "dockerhost")
+
 	configFileName = `aaa`
 
 	c, err = setConfiguration()

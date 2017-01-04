@@ -27,6 +27,6 @@ func TestSetDaemonConfiguration(t *testing.T) {
 	err = setDaemonConfiguration(configFileName)
 	assert.NotNil(t, err, "Should be error")
 
-	configFileName = `/etc/dcomp/plugins/local/local_dmd.yaml`
+	configFileName = `/etc/dcomp/plugins/local/dmd.yaml`
 	setDaemonConfiguration(configFileName)
 }
