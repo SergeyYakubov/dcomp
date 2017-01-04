@@ -109,7 +109,7 @@ func startContainer(id string) error {
 	return cli.ContainerStart(context.Background(), id, types.ContainerStartOptions{})
 }
 
-func waitContainer(id string, d time.Duration) (int, error) {
+func waitContainer(id string, d time.Duration) (int64, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), d)
 	defer cancel()
 	return cli.ContainerWait(ctx, id)

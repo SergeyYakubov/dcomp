@@ -15,7 +15,7 @@ set (DCOMP_CMAKE_DIR "${DCOMP_SOURCE_DIR}/CMake")
 
 #set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${DCOMP_CMAKE_DIR})
 
-add_custom_target(make_version ALL
+add_custom_target(version ALL
   COMMAND ${CMAKE_COMMAND} -P ${DCOMP_CMAKE_DIR}/PrepareVersion.cmake
   VERBATIM)
 
@@ -47,8 +47,8 @@ add_custom_target(dcompdmd ALL
 
 
 
-add_dependencies (dcomp make_version)
-add_dependencies (dcompestd make_version)
-add_dependencies (dcompauthd make_version)
-add_dependencies (dcomplocalpd make_version)
-add_dependencies (dcompdmd make_version)
+add_dependencies (dcomp version)
+add_dependencies (dcompestd version)
+add_dependencies (dcompauthd version)
+add_dependencies (dcomplocalpd version)
+add_dependencies (dcompdmd version)

@@ -125,7 +125,7 @@ func TestWaitContainer(t *testing.T) {
 	t1 := time.Now()
 	res, err := waitContainer(id, 10*time.Millisecond)
 	assert.NotNil(t, err, "Wait: Should be error")
-	assert.Equal(t, -1, res, "Wait: return value should be -1")
+	assert.Equal(t, int64(-1), res, "Wait: return value should be -1")
 	t2 := time.Since(t1)
 
 	if t2.Seconds() > 20*time.Millisecond.Seconds() {
@@ -144,7 +144,7 @@ func TestWaitContainer(t *testing.T) {
 
 	res, err = waitContainer(id, 10*time.Second)
 	assert.Nil(t, err, "Wait: Should not be error")
-	assert.Equal(t, 0, res, "Wait: return value should be 0")
+	assert.Equal(t, int64(0), res, "Wait: return value should be 0")
 	err = deleteContainer(id)
 
 }

@@ -13,8 +13,9 @@ before_install:
 install:
 - cd $TRAVIS_BUILD_DIR
 - export PATH=$PATH:$TRAVIS_BUILD_DIR/bin/
-- go get ./...
 - cmake .
+- make version
+- go get ./...
 - make
 - scripts/start_db.sh
 - sudo ln -s $TRAVIS_BUILD_DIR/etc/dcomp /etc/dcomp
