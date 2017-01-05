@@ -5,6 +5,7 @@ import subprocess
 from subprocess import Popen, PIPE
 
 import yaml
+import re
 
 DEVNULL = open(os.devnull, 'wb')
 
@@ -41,7 +42,12 @@ def check_test(path,fname,exit_code,output):
     with open(fullname, 'r') as stream:
             struct=yaml.load(stream)
 
+    output_verbose = output
+
+
     if struct['exit_code'] !=  exit_code:
+        print "\nexit_code: " ,  exit_code,
+        print output_verbose
         return False
 
     exactly=True
@@ -57,12 +63,20 @@ def check_test(path,fname,exit_code,output):
             data=myfile.read()
 
     data=data.lower().replace(" ", "").replace('\n','')
+
+    output=re.sub(r'^\+.*\n?', '', output, flags=re.MULTILINE)
+
     output=output.lower().replace(" ", "").replace('\n','')
 
     if exactly:
         ok = data == output
     else:
         ok = output in data or data in output
+
+    if not ok:
+        print "\nexpected: " +  data
+        print "got: " +  output
+        print output_verbose
 
     return ok
 
@@ -72,22 +86,23 @@ for dirpath, dirs, files in os.walk("."):
     if len(include)>0 and dirpath not in include:
         continue
 
+    path=os.path.abspath(dirpath)
+
 
     if "run.sh" in files:
         print "Testing " + dirpath + "...",
         if "init.sh" in files:
-            fname = os.path.join(dirpath,"init.sh")
-            subprocess.call([fname],stdout=DEVNULL)
-        fname = os.path.join(dirpath,"run.sh")
-
-        p = Popen([fname], stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT)
+            fname = os.path.join(path,"init.sh")
+            subprocess.call([fname],stdout=DEVNULL,cwd=path)
+        fname = os.path.join(path,"run.sh")
+        p = Popen([fname], stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT,cwd=path)
         output, err = p.communicate()
         exit_code = p.returncode
 
-        result=check_test(dirpath,"check.yaml",exit_code,output)
+        result=check_test(path,"check.yaml",exit_code,output)
         if "cleanup.sh" in files:
-            fname = os.path.join(dirpath,"cleanup.sh")
-            subprocess.call([fname])
+            fname = os.path.join(path,"cleanup.sh")
+            subprocess.call([fname],cwd=path)
         if result:
             print bcolors.OKGREEN + "OK" + bcolors.ENDC
         else:

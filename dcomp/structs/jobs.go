@@ -67,6 +67,7 @@ const (
 	StatusWaitData          = 106
 
 	//error codes
+	ErrorCode               = 2
 	StatusError             = 201
 	StatusSubmissionFailed  = 201
 	StatusErrorFromResource = 202

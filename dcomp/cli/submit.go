@@ -59,7 +59,8 @@ func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan er
 
 	defer f.Close()
 
-	un := getUploadName(fileInfo.Fi.Name(), fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
+	un := getUploadName(fileInfo.Path, fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
+
 	_, err = t.Srv.UploadData("jobfile/"+t.JobID+"/", un, f, fileInfo.Fi.Size(), fileInfo.Fi.Mode())
 	if err != nil {
 		errchan <- err

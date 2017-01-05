@@ -116,6 +116,7 @@ func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
 	srv.addAuthorizationHeader(req)
 
 	cd := "attachment; filename=" + url.QueryEscape(destname)
+
 	req.Header.Set("Content-Disposition", cd)
 	req.Header.Set("Content-Type", "application/octet-stream")
 
