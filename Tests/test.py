@@ -25,13 +25,19 @@ exclude=[]
 
 try:
     with open("./include", 'r') as f:
-        include=f.read().splitlines()
+        for line in f.readlines():
+            if line.startswith('#'):
+                continue
+        include.append(line.strip())
 except:
     pass
 
 try:
     with open("./exclude", 'r') as f:
-        exclude=f.read().splitlines()
+        for line in f.readlines():
+            if line.startswith('#'):
+                continue
+        exclude.append(line.strip())
 except:
     pass
 
