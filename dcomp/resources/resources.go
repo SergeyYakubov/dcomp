@@ -9,7 +9,7 @@ import (
 type Resource interface {
 	SubmitJob(structs.JobInfo, bool) error
 	SetDb(database.Agent)
-	GetJob(string) (structs.JobStatus, error)
+	GetJobStatus(string) (structs.JobStatus, error)
 	DeleteJob(string) error
 	GetLogs(string, bool) (*bytes.Buffer, error)
 }

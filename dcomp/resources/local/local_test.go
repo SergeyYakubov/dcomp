@@ -77,14 +77,14 @@ func TestGetJob(t *testing.T) {
 
 	res.db.CreateRecord(id, &li)
 
-	status, err := res.GetJob(id)
+	status, err := res.GetJobStatus(id)
 
 	assert.Nil(t, err)
 	assert.Equal(t, structs.StatusRunning, status.Status)
 
 	res.db.DeleteRecordByID(id)
 
-	status, err = res.GetJob(id)
+	status, err = res.GetJobStatus(id)
 	assert.NotNil(t, err)
 
 }

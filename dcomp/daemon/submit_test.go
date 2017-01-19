@@ -128,7 +128,7 @@ func TestSubmitJob(t *testing.T) {
 			ts3.Close()
 		}
 
-		job, err := trySubmitJob(test.job)
+		job, err := trySubmitJob("", test.job)
 		if test.job.Script == "nil" || test.job.ImageName == "nil" {
 			assert.NotNil(t, err, "Should be error")
 			assert.Contains(t, err.Error(), test.answer, test.message)

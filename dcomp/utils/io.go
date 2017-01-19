@@ -186,3 +186,30 @@ func WriteUnpackedTGZ(dest string, b *bytes.Buffer) error {
 	}
 	return nil
 }
+
+func ReadFile(fname string, compressed bool) (b *bytes.Buffer, err error) {
+	b = new(bytes.Buffer)
+
+	f, err := os.Open(fname)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	//select whether to write via compressor or not
+	var w io.Writer
+	if compressed {
+		gz := gzip.NewWriter(b)
+		w = gz
+		defer gz.Close()
+	} else {
+		w = b
+	}
+
+	_, err = io.Copy(w, f)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
+}

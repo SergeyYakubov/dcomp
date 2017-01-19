@@ -1,0 +1,10 @@
+pluginname: aaa
+database:
+ host: 172.17.0.2
+ port: 27017
+daemon:
+ addr: :8006
+ key: 12345
+basedir: /etc
+templatedir: /etc/dcomp/plugins/cluster
+

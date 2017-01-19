@@ -8,11 +8,12 @@ import (
 	"io"
 
 	"bytes"
-	"compress/gzip"
 	"errors"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"path/filepath"
 )
 
 type Resource struct {
@@ -51,12 +52,18 @@ func (res *Resource) updateJobInfo(li localJobInfo, status int, message string) 
 }
 
 func (res *Resource) logFileName(id string) string {
-	return res.Basedir + `/` + id + `.log`
+	return res.Basedir + `/` + id + `/job.log`
 }
 
 func (res *Resource) createLogFile(id string, job structs.JobDescription) (flog *os.File, err error) {
 
 	fname := res.logFileName(id)
+
+	path := filepath.Dir(fname)
+	if err = os.MkdirAll(path, 0777); err != nil {
+		return
+	}
+
 	flog, err = os.Create(fname)
 
 	return
@@ -111,7 +118,7 @@ func (res *Resource) SetDb(db database.Agent) {
 	res.db = db
 }
 
-func (res *Resource) GetJob(id string) (status structs.JobStatus, err error) {
+func (res *Resource) GetJobStatus(id string) (status structs.JobStatus, err error) {
 
 	li, err := res.findJob(id)
 	if err != nil {
@@ -165,26 +172,6 @@ func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err e
 
 	fname := res.logFileName(li.Id)
 
-	f, err := os.Open(fname)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
+	return utils.ReadFile(fname, compressed)
 
-	//select whether to write via compressor or not
-	var w io.Writer
-	if compressed {
-		gz := gzip.NewWriter(b)
-		w = gz
-		defer gz.Close()
-	} else {
-		w = b
-	}
-
-	_, err = io.Copy(w, f)
-	if err != nil {
-		return nil, err
-	}
-
-	return b, nil
 }

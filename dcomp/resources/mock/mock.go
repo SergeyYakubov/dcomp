@@ -23,7 +23,7 @@ func (res *MockResource) SetDb(database.Agent) {
 
 }
 
-func (res *MockResource) GetJob(id string) (status structs.JobStatus, err error) {
+func (res *MockResource) GetJobStatus(id string) (status structs.JobStatus, err error) {
 	if id == "578359205e935a20adb39a18" {
 		status.Status = structs.StatusFinished
 		return

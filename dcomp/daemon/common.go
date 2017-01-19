@@ -105,3 +105,20 @@ func SendJWTToken(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func getUser(r *http.Request) (user string, err error) {
+	val := r.Context().Value("authorizationResponce")
+
+	if val == nil {
+		err = errors.New("No authorization context")
+		return
+	}
+
+	auth, ok := val.(*server.AuthorizationResponce)
+	if !ok {
+		err = errors.New("Bad authorization context")
+		return
+	}
+	user = auth.UserName
+	return
+}

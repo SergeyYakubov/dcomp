@@ -36,7 +36,7 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 
-	status, err := resource.GetJob(jobID)
+	status, err := resource.GetJobStatus(jobID)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

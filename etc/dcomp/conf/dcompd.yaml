@@ -23,5 +23,21 @@ plugins:
            host: localhost
            port: 8008
            key: dcompdmd45
+        - name: Slurm
+          host: localhost
+          port: 8009
+          key: slurmplgin34
+          datamanager:
+           host: localhost
+           port: 8008
+           key: dcompdmd45
+        - name: Slurm_Test
+          host: localhost
+          port: 8010
+          key: slurmplgintest67
+          datamanager:
+           host: localhost
+           port: 8008
+           key: dcompdmd45
 
 

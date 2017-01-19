@@ -43,7 +43,13 @@ func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job, err := trySubmitJob(t)
+	user, err := getUser(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusUnauthorized)
+		return
+	}
+
+	job, err := trySubmitJob(user, t)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -80,8 +86,9 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func trySubmitJob(t structs.JobDescription) (job structs.JobInfo, err error) {
+func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, err error) {
 
+	job.JobUser = user
 	job, err = addJobToDatabase(t)
 	if err != nil {
 		return

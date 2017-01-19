@@ -1,0 +1,11 @@
+pluginname: slurm
+database:
+ host: localhost
+ port: 27017
+daemon:
+ addr: :8009
+ key: slurmplgin34
+basedir: /dcompdata
+templatedir: /etc/dcomp/plugins/slurm
+
+

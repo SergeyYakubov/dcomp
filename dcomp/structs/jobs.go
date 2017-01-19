@@ -52,6 +52,7 @@ type JobDescription struct {
 	ImageName     string
 	Script        string
 	NCPUs         int
+	NNodes        int
 	Local         bool
 	FilesToUpload TransferFiles
 }
@@ -90,6 +91,7 @@ type JobFilesTransfer struct {
 type JobInfo struct {
 	JobDescription
 	JobStatus
+	JobUser  string
 	Id       string `bson:"_hex_id"`
 	Resource string
 }
@@ -99,8 +101,20 @@ func (d *JobDescription) NeedData() bool {
 }
 
 func (d *JobDescription) Check() error {
-	if d.NCPUs <= 0 {
+	if d.NCPUs < 0 {
 		return errors.New("number of cpus should be > 0")
+	}
+
+	if d.NNodes < 0 {
+		return errors.New("number of nodes should be > 0")
+	}
+
+	if d.NCPUs == 0 && d.NNodes == 0 {
+		return errors.New("set number of cpus or number of nodes")
+	}
+
+	if d.NCPUs > 0 && d.NNodes > 0 {
+		return errors.New("cannot set both number of cpus and number of nodes")
 	}
 
 	if d.ImageName == "" {
@@ -140,6 +154,7 @@ var jobStatusExplained = map[int]string{
 
 func (d *JobInfo) PrintFull(w io.Writer) {
 	fmt.Fprintf(w, "%-40s: %s\n", "Job", d.Id)
+	fmt.Fprintf(w, "%-40s: %s\n", "User", d.JobUser)
 	fmt.Fprintf(w, "%-40s: %s\n", "Image name", d.ImageName)
 	fmt.Fprintf(w, "%-40s: %s\n", "Script", d.Script)
 	fmt.Fprintf(w, "%-40s: %d\n", "Number of CPUs", d.NCPUs)

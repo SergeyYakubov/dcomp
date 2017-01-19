@@ -1,0 +1,11 @@
+pluginname: slurm
+database:
+ host: localhost
+ port: 27017
+daemon:
+ addr: :8010
+ key: slurmplgintest67
+basedir: /dcompdata
+templatedir: /etc/dcomp/plugins/slurm_test
+
+
