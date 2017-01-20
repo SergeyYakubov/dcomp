@@ -76,7 +76,7 @@ func setConfiguration(res *Resource) {
 
 	var c config
 
-	utils.ReadYaml(`/home/yakubov/gopath/src/github.com/sergeyyakubov/dcomp/etc/dcomp/plugins/slurm_test/slurm.yaml`, &c)
+	utils.ReadYaml(`/etc/dcomp/plugins/slurm_test/slurm.yaml`, &c)
 
 	res.TemplateDir = c.TemplateDir
 	res.Basedir = c.BaseDir
