@@ -76,7 +76,7 @@ func setConfiguration(res *Resource) {
 
 	var c config
 
-	utils.ReadYaml(`/etc/dcomp/plugins/slurm_test/slurm.yaml`, &c)
+	utils.ReadYaml(`/etc/dcomp/plugins/slurm/slurm.yaml`, &c)
 
 	res.TemplateDir = c.TemplateDir
 	res.Basedir = c.BaseDir
@@ -165,44 +165,15 @@ func TestSubmitJob_Checkonly(t *testing.T) {
 }
 
 type submitRequest struct {
-	job     structs.JobInfo
-	answer  string
-	status  int
-	message string
+	job          structs.JobInfo
+	clusterJobID string
+	answer       string
+	status       int
+	message      string
 }
 
 var SubmitTests = []submitRequest{
 	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "centos:7",
-		Script: "echo hi", NCPUs: 1}, JobUser: "test", Id: "578359205e935a20adb39a18"},
+		Script: "echo hi", NCPUs: 1}, JobUser: "test", Id: "578359205e935a20adb39a18"}, "submit.sh",
 		"", structs.StatusSubmitted, "submit echo script"},
-}
-
-func TestSubmitJob(t *testing.T) {
-
-	db := createdb()
-	var res = new(Resource)
-	res.SetDb(db)
-	db.Connect()
-	defer db.Close()
-
-	setConfiguration(res)
-
-	for _, test := range SubmitTests {
-		li := localJobInfo{JobStatus: structs.JobStatus{}, Id: test.job.Id}
-
-		res.db.CreateRecord(test.job.Id, &li)
-
-		u, _ := user.Current()
-		test.job.JobUser = u.Username
-
-		err := res.SubmitJob(test.job, false)
-		assert.Nil(t, err, "")
-
-		var li_res []localJobInfo
-		res.db.GetRecordsByID(test.job.Id, &li_res)
-		li_res[0].Status = structs.StatusSubmitted
-		assert.Equal(t, test.status, li_res[0].Status)
-		res.db.DeleteRecordByID(test.job.Id)
-	}
-
 }

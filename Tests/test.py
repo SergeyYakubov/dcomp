@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import os
+from os import path
 import subprocess
 from subprocess import Popen, PIPE
 
@@ -44,7 +45,7 @@ except:
     pass
 
 
-def check_test(path, fname, exit_code, output):
+def check_test(dirpath, fname, exit_code, output):
     fullname = os.path.join(dirpath, fname)
     with open(fullname, 'r') as stream:
         struct = yaml.load(stream)
@@ -87,7 +88,48 @@ def check_test(path, fname, exit_code, output):
     return ok
 
 
-for dirpath, dirs, files in os.walk("."):
+def cleanup(dirpath, files):
+    if "cleanup.sh" in files:
+        print "cleanup ",dirpath
+        fname = os.path.join(os.path.abspath(dirpath), "cleanup.sh")
+        subprocess.call([fname], stdout=DEVNULL, cwd=dirpath)
+
+
+def init(dirpath, files):
+    if "init.sh" in files:
+        print "init ",dirpath
+        fname = os.path.join(os.path.abspath(dirpath), "init.sh")
+        subprocess.call([fname], stdout=DEVNULL, cwd=dirpath)
+
+
+#modified os.walk
+def walk(top,init,cleanup):
+    islink, join, isdir = os.path.islink, os.path.join, os.path.isdir
+
+    try:
+        names = os.listdir(top)
+    except os.error:
+        return
+
+    dirs, nondirs = [], []
+    for name in names:
+        if isdir(join(top, name)):
+            dirs.append(name)
+        else:
+            nondirs.append(name)
+
+    init(top,nondirs)
+    yield top, dirs, nondirs
+
+    for name in dirs:
+        new_path = join(top, name)
+        if not islink(new_path):
+            for x in walk(new_path,init,cleanup):
+                yield x
+
+    cleanup(top,nondirs)
+
+for dirpath, dirs, files in walk(".",init,cleanup):
     if dirpath in exclude:
         continue
     if len(include) > 0 and dirpath not in include:
@@ -97,18 +139,11 @@ for dirpath, dirs, files in os.walk("."):
 
     if "run.sh" in files:
         print "Testing " + dirpath + "...",
-        if "init.sh" in files:
-            fname = os.path.join(path, "init.sh")
-            subprocess.call([fname], stdout=DEVNULL, cwd=path)
         fname = os.path.join(path, "run.sh")
         p = Popen([fname], stdin=PIPE, stdout=PIPE, stderr=subprocess.STDOUT, cwd=path)
         output, err = p.communicate()
         exit_code = p.returncode
-
         result = check_test(path, "check.yaml", exit_code, output)
-        if "cleanup.sh" in files:
-            fname = os.path.join(path, "cleanup.sh")
-            subprocess.call([fname], cwd=path)
         if result:
             print bcolors.OKGREEN + "OK" + bcolors.ENDC
         else:

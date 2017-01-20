@@ -40,6 +40,13 @@ add_custom_target(dcomplocalpd ALL
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
         				  VERBATIM)
 
+add_custom_target(dcompclusterpd ALL
+        				  COMMAND ${GO_ENABLED} go build ${GO_OPTS} -o bin/dcompclusterpd ./dcomp/resources/cluster/main
+        				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}
+        				  VERBATIM)
+
+
+
 add_custom_target(dcompdmd ALL
         				  go build ${GO_OPTS}  -o bin/dcompdmd ./dcomp/datamanager/main
         				  WORKING_DIRECTORY ${DCOMP_SOURCE_DIR}

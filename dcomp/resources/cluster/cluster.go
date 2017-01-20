@@ -46,12 +46,9 @@ func (res *Resource) executeSubmitCommand(script string) (string, error) {
 	if err != nil {
 		return "", errors.New(err.Error() + " " + string(out))
 	}
-	words := strings.Split(strings.TrimSpace(string(out)), " ")
-	if len(words) != 4 {
-		return "", errors.New("Cannot extract slurm job id " + string(out))
-	}
-	id := words[3]
-	return strings.TrimSpace(id), nil
+
+	id := strings.TrimSpace(string(out))
+	return id, nil
 }
 
 func (res *Resource) SubmitJob(job structs.JobInfo, checkonly bool) error {
@@ -80,7 +77,6 @@ func (res *Resource) SubmitJob(job structs.JobInfo, checkonly bool) error {
 	}
 
 	li.ClusterJobId, err = res.executeSubmitCommand(fname)
-
 	if err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 	} else {
