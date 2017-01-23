@@ -1,0 +1,2 @@
+#SBATCH --nodes=2
+#SBATCH --cpus-per-task=1

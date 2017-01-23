@@ -9,7 +9,9 @@
 #SBATCH --uid=${DCOMP_UID}
 #SBATCH --gid=${DCOMP_GID}
 
-if [ "0${DCOMP_NNODES}" -gt "1" ] || [ "0${DCOMP_NCPUS}" -gt "1" ] ; then
+if [ ${DCOMP_IMAGE_NAME}  == "none" ] ; then
+    ${DCOMP_SCRIPT}
+elif [ "0${DCOMP_NNODES}" -gt "1" ] || [ "0${DCOMP_NCPUS}" -gt "1" ] ; then
     dockercluster -u ${DCOMP_IMAGE_NAME} ${DCOMP_DOCKER_ARGS}
     dockerexec ${DCOMP_SCRIPT}
 else

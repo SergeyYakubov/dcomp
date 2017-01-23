@@ -1,0 +1,8 @@
+exit_code: 0
+output:
+  - outfile: slurm.out
+    file: slurm.out.orig
+    exactly: true
+  - outfile: job.sh
+    file: job.sh.orig
+    exactly: false

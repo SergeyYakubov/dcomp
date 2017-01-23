@@ -13,7 +13,7 @@ var CommandTests = []struct {
 	answer string
 }{
 	{command{"submit", []string{"description"}}, "Submit"},
-	{command{"submit", []string{"-script", "-ncpus", "10", "aaa", "imagename"}}, "578359205e935a20adb39a18\n"},
+	{command{"submit", []string{"-ncpus", "10", "-script", "aaa", "imagename"}}, "578359205e935a20adb39a18\n"},
 }
 
 var CommandFailingTests = []struct {

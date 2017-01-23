@@ -16,9 +16,9 @@ var submitOtherTests = []struct {
 }
 
 var submitTests = []command{
-	{args: []string{"-script", "aaa", "imagename"}},
-	{args: []string{"-script", "-ncpus", "10", "aaa", "imagename"}},
-	{args: []string{"-script", "-nnodes", "10", "aaa", "imagename"}},
+	{args: []string{"-ncpus", "1", "-script", "aaa", "imagename"}},
+	{args: []string{"-ncpus", "10", "-script", "aaa", "imagename"}},
+	{args: []string{"-nnodes", "10", "-script", "aaa", "imagename"}},
 }
 
 var submitFailingTests = []command{
@@ -28,7 +28,6 @@ var submitFailingTests = []command{
 	{args: []string{"-script", "aaa", "-ncpus", "-10", "imagename"}},
 	{args: []string{"-script", "aaa", "-ncpus", "0", "-nnodes", "0", "imagename"}},
 	{args: []string{"-script", "aaa", "-ncpus", "10", "-nnodes", "10", "imagename"}},
-
 }
 
 func TestSubmitCommand(t *testing.T) {

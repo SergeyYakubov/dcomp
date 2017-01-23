@@ -57,9 +57,32 @@ def check_test(dirpath, fname, exit_code, output):
         print output_verbose
         return False
 
+    output_orig=output
+    stdoutput = re.sub(r'^\+.*\n?', '', output, flags=re.MULTILINE)
+
+    stdoutput = stdoutput.lower().replace(" ", "").replace('\n', '')
+
+
     if 'output' in  struct:
         exactly = True
         for output_field in struct['output']:
+            if 'outfile' in output_field:
+                fullname = os.path.join(dirpath, output_field['outfile'])
+                try:
+                    with open(fullname, 'r') as myfile:
+                        outdata = myfile.read()
+                except:
+                    print "File not found:",fullname
+                    print output_verbose
+                    return False
+
+                output_orig=outdata
+                outdata = outdata.lower().replace(" ", "").replace('\n', '')
+                output=outdata
+            else:
+                output=stdoutput
+
+
             if 'exactly' in output_field:
                 exactly = output_field['exactly']
             data = ""
@@ -70,11 +93,9 @@ def check_test(dirpath, fname, exit_code, output):
                 with open(fullname, 'r') as myfile:
                     data = myfile.read()
 
+            data_orig=data
             data = data.lower().replace(" ", "").replace('\n', '')
 
-            output = re.sub(r'^\+.*\n?', '', output, flags=re.MULTILINE)
-
-            output = output.lower().replace(" ", "").replace('\n', '')
 
             if exactly:
                 ok = data == output
@@ -82,8 +103,8 @@ def check_test(dirpath, fname, exit_code, output):
                 ok = output in data or data in output
 
             if not ok:
-                print "\nexpected: " + data
-                print "got: " + output
+                print "\nexpected: " + data_orig
+                print "got: " + output_orig
                 print output_verbose
                 return False
 
