@@ -4,6 +4,7 @@ docker run -d --name slurm -h slurmhost -p 8010:8010  -p 8009:8009 -v `pwd`/extr
   -v $DCOMP_BASEDIR/bin:/dcomp/bin -v $DCOMP_BASEDIR/etc/dcomp/:/etc/dcomp/ -v /dcompdata \
   --add-host=daemonhost:`ip route show | grep docker0 | awk '{print \$9}'` \
   --add-host=databasehost:`ip route show | grep docker0 | awk '{print \$9}'` \
+  --env DOCKERUSER=`id -un` \
   yakser/centos_slurm
 
 # wait for initialization

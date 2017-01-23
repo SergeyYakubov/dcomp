@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-useradd yakubov
+useradd $DOCKERUSER
 ln -s /bin/echo /usr/bin/dockerrun
 ln -s /bin/echo /usr/bin/dockercluster
 ln -s /bin/echo /usr/bin/dockerexec
