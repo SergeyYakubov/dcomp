@@ -57,36 +57,37 @@ def check_test(dirpath, fname, exit_code, output):
         print output_verbose
         return False
 
-    exactly = True
-    if 'exactly' in struct['output']:
-        exactly = struct['output']['exactly']
+    if 'output' in  struct:
+        exactly = True
+        for output_field in struct['output']:
+            if 'exactly' in output_field:
+                exactly = output_field['exactly']
+            data = ""
+            if 'string' in output_field:
+                data = output_field['string']
+            elif 'file' in output_field:
+                fullname = os.path.join(dirpath, output_field['file'])
+                with open(fullname, 'r') as myfile:
+                    data = myfile.read()
 
-    data = ""
-    if 'string' in struct['output']:
-        data = struct['output']['string']
-    elif 'file' in struct['output']:
-        fullname = os.path.join(dirpath, struct['output']['file'])
-        with open(fullname, 'r') as myfile:
-            data = myfile.read()
+            data = data.lower().replace(" ", "").replace('\n', '')
 
-    data = data.lower().replace(" ", "").replace('\n', '')
+            output = re.sub(r'^\+.*\n?', '', output, flags=re.MULTILINE)
 
-    output = re.sub(r'^\+.*\n?', '', output, flags=re.MULTILINE)
+            output = output.lower().replace(" ", "").replace('\n', '')
 
-    output = output.lower().replace(" ", "").replace('\n', '')
+            if exactly:
+                ok = data == output
+            else:
+                ok = output in data or data in output
 
-    if exactly:
-        ok = data == output
-    else:
-        ok = output in data or data in output
+            if not ok:
+                print "\nexpected: " + data
+                print "got: " + output
+                print output_verbose
+                return False
 
-    if not ok:
-        print "\nexpected: " + data
-        print "got: " + output
-        print output_verbose
-
-    return ok
-
+    return True
 
 def cleanup(dirpath, files):
     if "cleanup.sh" in files:
@@ -105,7 +106,6 @@ def init(dirpath, files):
 #modified os.walk
 def walk(top,init,cleanup):
     islink, join, isdir = os.path.islink, os.path.join, os.path.isdir
-
     try:
         names = os.listdir(top)
     except os.error:
@@ -119,6 +119,7 @@ def walk(top,init,cleanup):
             nondirs.append(name)
 
     init(top,nondirs)
+
     yield top, dirs, nondirs
 
     for name in dirs:

@@ -9,6 +9,7 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
+	"os"
 )
 
 type request struct {
@@ -47,6 +48,10 @@ func TestCreateContainer(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
 	}
+
+	os.Mkdir("/tmp/tmp", 0777)
+	os.Mkdir("/tmp/aaa", 0777)
+
 	for _, test := range submitTests {
 
 		id, err := createContainer(test.job, "/tmp")
@@ -58,6 +63,9 @@ func TestCreateContainer(t *testing.T) {
 
 		deleteContainer(id)
 	}
+	os.RemoveAll("/tmp/aaa/")
+	os.RemoveAll("/tmp/tmp/")
+
 }
 
 func TestStartContainer(t *testing.T) {
@@ -85,6 +93,8 @@ func TestStartContainer(t *testing.T) {
 	err = startContainer(id)
 	assert.NotNil(t, err, "Second start: Should be error")
 
+	os.Mkdir("/tmp/tmp", 0777)
+	os.Mkdir("/tmp/aaa", 0777)
 	id, err = createContainer(submitTests[3].job, "/tmp")
 	assert.Nil(t, err, "Create: should not be error")
 
@@ -93,6 +103,8 @@ func TestStartContainer(t *testing.T) {
 
 	err = deleteContainer(id)
 	assert.Nil(t, err, "Delete :should not be error")
+	os.RemoveAll("/tmp/aaa/")
+	os.RemoveAll("/tmp/tmp/")
 
 }
 

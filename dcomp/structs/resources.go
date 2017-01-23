@@ -25,7 +25,7 @@ func (p pairList) Len() int           { return len(p) }
 func (p pairList) Less(i, j int) bool { return p[i].Value < p[j].Value }
 
 // A function to turn a map into a PairList, then sort and return it.
-func sortMapByValue(m ResourcePrio) pairList {
+func sortMapByValue(m ResourcePrio, reverse bool) pairList {
 	p := make(pairList, len(m))
 	i := 0
 	for k, v := range m {
@@ -33,13 +33,18 @@ func sortMapByValue(m ResourcePrio) pairList {
 		i++
 
 	}
-	sort.Sort(p)
+	if reverse {
+		sort.Sort(sort.Reverse(p))
+	} else {
+		sort.Sort(p)
+	}
+
 	return p
 }
 
 func (prio ResourcePrio) Sort() (sorted []string) {
 	sorted = make([]string, len(prio))
-	p := sortMapByValue(prio)
+	p := sortMapByValue(prio, true)
 	for i := range p {
 		sorted[i] = p[i].Key
 	}

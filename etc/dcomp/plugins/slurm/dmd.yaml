@@ -1,9 +1,9 @@
 dcompd:
- host: localhost
+ host: daemonhost
  port: 8001
  key:  dcompd18
 daemon:
- addr: :8008
+ addr: :8010
  key: dcompdmd45
  certfile: /etc/dcomp/cert/certdmd.pem
  keyfile: /etc/dcomp/cert/keydmd.pem

@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 type request struct {
@@ -25,11 +25,11 @@ type request struct {
 
 var estimateTests = []request{
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "estimations", "POST", http.StatusOK, "estimations job batch",
-		structs.ResourcePrio{"Local": 100, "HPC": 1, "Batch": 10, "Cloud": 0}},
+		structs.ResourcePrio{"Local": 100, "Slurm": 1, "Batch": 10, "Cloud": 0}},
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 8}, "estimations", "POST", http.StatusOK, "estimations job batch/hpc",
-		structs.ResourcePrio{"HPC": 5, "Batch": 5, "Cloud": 0}},
+		structs.ResourcePrio{"Slurm": 5, "Batch": 5, "Cloud": 0}},
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 80}, "estimations", "POST", http.StatusOK, "estimations job hpc",
-		structs.ResourcePrio{"HPC": 10, "Batch": 0, "Cloud": 0}},
+		structs.ResourcePrio{"Slurm": 10, "Batch": 0, "Cloud": 0}},
 	{structs.JobDescription{}, "estimations", "POST", http.StatusBadRequest, "estimations job - empty struct",
 		structs.ResourcePrio{}},
 	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "estimations", "POST", http.StatusBadRequest, "create job - nil struct",

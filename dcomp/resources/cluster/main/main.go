@@ -62,6 +62,8 @@ func main() {
 		return
 	}
 
+	flag.Parse()
+
 	if flag.NArg() == 0 {
 		log.Fatal("configuration file not set. Usage: dcompclusterpd <config file name>")
 	}

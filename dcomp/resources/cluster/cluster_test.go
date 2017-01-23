@@ -163,17 +163,3 @@ func TestSubmitJob_Checkonly(t *testing.T) {
 	assert.Nil(t, err)
 
 }
-
-type submitRequest struct {
-	job          structs.JobInfo
-	clusterJobID string
-	answer       string
-	status       int
-	message      string
-}
-
-var SubmitTests = []submitRequest{
-	{structs.JobInfo{JobDescription: structs.JobDescription{ImageName: "centos:7",
-		Script: "echo hi", NCPUs: 1}, JobUser: "test", Id: "578359205e935a20adb39a18"}, "submit.sh",
-		"", structs.StatusSubmitted, "submit echo script"},
-}

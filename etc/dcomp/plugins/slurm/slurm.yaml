@@ -1,6 +1,6 @@
 pluginname: slurm
 database:
- host: localhost
+ host: databasehost
  port: 27017
 daemon:
  addr: :8009

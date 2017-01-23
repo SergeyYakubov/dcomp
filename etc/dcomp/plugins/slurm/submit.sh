@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
+sbatch job.sh
 
-exit 0

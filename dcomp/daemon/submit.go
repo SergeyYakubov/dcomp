@@ -88,8 +88,9 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 
 func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, err error) {
 
-	job.JobUser = user
 	job, err = addJobToDatabase(t)
+	job.JobUser = user
+
 	if err != nil {
 		return
 	}

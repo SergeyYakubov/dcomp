@@ -9,7 +9,6 @@ import (
 	"errors"
 
 	"io/ioutil"
-	"os"
 
 	"os/exec"
 	"os/user"
@@ -51,6 +50,26 @@ func (res *Resource) executeSubmitCommand(script string) (string, error) {
 	return id, nil
 }
 
+func extractUserInformation(job structs.JobInfo) (uid, gid int, err error) {
+	var u *user.User
+	u, err = user.Lookup(job.JobUser)
+	if err != nil {
+		return
+	}
+
+	uid, err = strconv.Atoi(u.Uid)
+	if err != nil {
+		return
+	}
+
+	gid, err = strconv.Atoi(u.Gid)
+	if err != nil {
+		return
+	}
+	return
+
+}
+
 func (res *Resource) SubmitJob(job structs.JobInfo, checkonly bool) error {
 	if checkonly {
 		return nil
@@ -62,7 +81,12 @@ func (res *Resource) SubmitJob(job structs.JobInfo, checkonly bool) error {
 		return err
 	}
 
-	if err := res.createJobDir(job.Id); err != nil {
+	uid, gid, err := extractUserInformation(job)
+	if err != nil {
+		return err
+	}
+
+	if err := res.createJobDir(job.Id, uid, gid); err != nil {
 		return err
 	}
 
@@ -107,7 +131,7 @@ func (res *Resource) createMap(job structs.JobInfo) (map[string]string, error) {
 	}
 
 	if job.NNodes > 0 {
-		m[`${DCOMP_NNODES}`] = strconv.Itoa(job.NCPUs)
+		m[`${DCOMP_NNODES}`] = strconv.Itoa(job.NNodes)
 	} else {
 		m[`${DCOMP_NNODES}`] = ""
 	}
@@ -217,10 +241,10 @@ func (res *Resource) jobDir(id string) string {
 	return res.Basedir + `/` + id
 }
 
-func (res *Resource) createJobDir(id string) error {
+func (res *Resource) createJobDir(id string, uid, gid int) error {
 
 	path := res.jobDir(id)
-	if err := os.MkdirAll(path, 0777); err != nil {
+	if err := utils.MkdirAllWithCh(path, 0777, uid, gid); err != nil {
 		return err
 	}
 
