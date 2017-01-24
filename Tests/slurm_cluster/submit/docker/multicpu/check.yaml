@@ -1,4 +1,4 @@
 exit_code: 0
 output:
-  - file: slurm.out.orig
+  - file: job.log.orig
     exactly: true

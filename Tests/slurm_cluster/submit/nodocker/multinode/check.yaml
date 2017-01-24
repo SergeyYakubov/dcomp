@@ -1,7 +1,7 @@
 exit_code: 0
 output:
-  - outfile: slurm.out
-    file: slurm.out.orig
+  - outfile: job.log
+    file: job.log.orig
     exactly: true
   - outfile: job.sh
     file: job.sh.orig

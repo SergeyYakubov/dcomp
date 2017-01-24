@@ -36,19 +36,19 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	jobID := vars["jobID"]
 
-	status, err := resource.GetJobStatus(jobID)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
 	jobLog := r.URL.Query().Get("log")
 
 	if jobLog == "true" {
 		logCompress := r.URL.Query().Get("compress")
 		writeLogs(w, jobID, logCompress == "true")
 	} else {
+		status, err := resource.GetJobStatus(jobID)
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
 		writeStatus(w, status)
 	}
 

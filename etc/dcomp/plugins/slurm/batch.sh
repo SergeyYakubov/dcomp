@@ -8,6 +8,7 @@
 #SBATCH --workdir=${DCOMP_WORKDIR}
 #SBATCH --uid=${DCOMP_UID}
 #SBATCH --gid=${DCOMP_GID}
+#SBATCH --output=job.log
 
 if [ ${DCOMP_IMAGE_NAME}  == "none" ] ; then
     ${DCOMP_SCRIPT}

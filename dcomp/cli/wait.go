@@ -12,8 +12,9 @@ import (
 )
 
 type waitFlags struct {
-	Id      string
-	TimeOut time.Duration
+	Id           string
+	StatusChange bool
+	TimeOut      time.Duration
 }
 
 // CommandPs retrieves jobs info from daemon and prints info
@@ -31,15 +32,27 @@ func (cmd *command) CommandWait() error {
 	}
 
 	start := time.Now()
+	first := true
+	var ini_stat int
 	for time.Since(start) < flags.TimeOut {
-
 		jobInfo, err := getJobInfo(flags.Id)
+		if flags.StatusChange && first {
+			first = false
+			ini_stat = jobInfo.Status
+		}
+
 		if err != nil {
 			return err
 		}
 
-		if jobInfo.Status == structs.StatusFinished || jobInfo.Status%100 == structs.ErrorCode {
-			return nil
+		if flags.StatusChange {
+			if ini_stat != jobInfo.Status {
+				return nil
+			}
+		} else {
+			if jobInfo.Status == structs.StatusFinished || jobInfo.Status/100 == structs.ErrorCode {
+				return nil
+			}
 		}
 		time.Sleep(time.Second)
 
@@ -50,6 +63,8 @@ func (cmd *command) CommandWait() error {
 
 func createWaitFlags(flagset *flag.FlagSet, flags *waitFlags) {
 	flagset.DurationVar(&flags.TimeOut, "timeout", time.Second*60, "Timeout")
+	flagset.BoolVar(&flags.StatusChange, "wait-changes", false, "Wait until status changes")
+
 }
 
 func (cmd *command) parseWaitFlags(d string) (waitFlags, error) {

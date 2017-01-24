@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rm -rf job.sh slurm.out
+rm -rf job.sh job.log

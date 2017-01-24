@@ -2,15 +2,15 @@ package cluster
 
 import (
 	"testing"
-	"time"
+
+	"os/user"
+	"strconv"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
-	"os/user"
-	"strconv"
 )
 
 type scriptRequest struct {
@@ -90,63 +90,6 @@ func createdb() *database.Mongodb {
 	db.SetServer(&dbsrv)
 	db.SetDefaults("localplugintest")
 	return db
-
-}
-
-func TestGetJob(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	db := createdb()
-	var res = new(Resource)
-	res.SetDb(db)
-	db.Connect()
-	defer db.Close()
-
-	id := "578359205e935a20adb39a18"
-
-	li := localJobInfo{JobStatus: structs.JobStatus{Status: structs.StatusRunning}, Id: id}
-
-	res.db.CreateRecord(id, &li)
-
-	status, err := res.GetJobStatus(id)
-
-	assert.Nil(t, err)
-	assert.Equal(t, structs.StatusRunning, status.Status)
-
-	res.db.DeleteRecordByID(id)
-
-	status, err = res.GetJobStatus(id)
-	assert.NotNil(t, err)
-
-}
-
-func TestDeleteJob(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	db := createdb()
-	var res = new(Resource)
-	res.SetDb(db)
-	db.Connect()
-	defer db.Close()
-
-	id := "578359205e935a20adb39a18"
-
-	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100"}
-
-	ji := structs.JobInfo{JobDescription: job, Id: id}
-
-	res.Basedir = "/tmp"
-	res.SubmitJob(ji, false)
-
-	time.Sleep(time.Second * 1)
-	err := res.DeleteJob(id)
-
-	assert.Nil(t, err)
-
-	err = res.DeleteJob(id)
-	assert.NotNil(t, err)
 
 }
 

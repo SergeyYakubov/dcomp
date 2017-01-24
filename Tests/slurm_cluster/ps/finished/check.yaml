@@ -1,0 +1,8 @@
+exit_code: 0
+output:
+  - outfile: output_log
+    file: output_log.orig
+    exactly: true
+  - outfile: output_psid
+    file: output_psid.orig
+    exactly: false

@@ -200,15 +200,44 @@ func (res *Resource) DeleteJob(id string) error {
 	return nil
 }
 
-func (res *Resource) GetJobStatus(id string) (status structs.JobStatus, err error) {
+func (res *Resource) executeGetJobStatusCommand(jobid, localid string) (string, error) {
+	f := res.TemplateDir + `/status.sh`
+
+	cmd := exec.Command(f, localid)
+	cmd.Dir = path.Dir(res.jobDir(jobid))
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", errors.New(err.Error() + " " + string(out))
+	}
+
+	status := strings.TrimSpace(string(out))
+	return status, nil
+}
+
+func (res *Resource) GetJobStatus(id string) (structs.JobStatus, error) {
 
 	li, err := res.findJob(id)
 	if err != nil {
-		return status, err
+		return structs.JobStatus{}, err
 	}
 
-	status = li.JobStatus
-	return
+	status, err := res.executeGetJobStatusCommand(id, li.ClusterJobId)
+	if err != nil {
+		return structs.JobStatus{}, err
+	}
+
+	// data not in database yet, status unchanged
+	if status == "" {
+		return li.JobStatus, nil
+	}
+
+	if err := li.JobStatus.UpdateFromOutput(status); err != nil {
+		return structs.JobStatus{}, err
+	}
+
+	res.db.PatchRecord(li.Id, li)
+	return li.JobStatus, nil
 }
 
 func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err error) {
@@ -234,7 +263,7 @@ func (res *Resource) updateJobInfo(li localJobInfo, status int, message string) 
 }
 
 func (res *Resource) logFileName(id string) string {
-	return res.Basedir + `/` + id + `/job.log`
+	return res.jobDir(id) + `/job.log`
 }
 
 func (res *Resource) jobDir(id string) string {

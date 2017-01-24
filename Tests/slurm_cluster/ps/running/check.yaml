@@ -1,0 +1,5 @@
+exit_code: 0
+output:
+  - outfile: output_psid
+    file: output_psid.orig
+    exactly: false

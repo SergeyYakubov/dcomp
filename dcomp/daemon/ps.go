@@ -122,6 +122,7 @@ func routeGetJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	updateJobs([]structs.JobInfo{job})
-	sendJobs(w, []structs.JobInfo{job}, false)
+	jobs := []structs.JobInfo{job}
+	updateJobs(jobs)
+	sendJobs(w, jobs, false)
 }

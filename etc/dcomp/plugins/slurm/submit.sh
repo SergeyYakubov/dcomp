@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
 
-sbatch job.sh
+set -e
 
+out=`sbatch $1`
+
+#extract job id
+echo $out | cut -d ' ' -f4

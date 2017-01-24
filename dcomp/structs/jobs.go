@@ -9,6 +9,7 @@ import (
 	"io"
 	"path"
 	"strings"
+	"time"
 )
 
 type jobs interface {
@@ -66,12 +67,15 @@ const (
 	StatusCreatingContainer = 104
 	StatusStartingContainer = 105
 	StatusWaitData          = 106
+	StatusPending           = 107
 
 	//error codes
 	ErrorCode               = 2
 	StatusError             = 201
 	StatusSubmissionFailed  = 201
 	StatusErrorFromResource = 202
+	StatusFailed            = 203
+	StatusUnknown           = 204
 )
 
 type JobStatus struct {
@@ -79,6 +83,60 @@ type JobStatus struct {
 	StartTime string
 	EndTime   string
 	Message   string
+}
+
+// UpdateFromOutput updates status by output from an external program
+func (s *JobStatus) UpdateFromOutput(status string) error {
+	// output has format given by slurm or other programs:
+	// elapsed_time status
+	// 00:02:36   COMPLETED
+	vals := strings.Fields(status)
+
+	if len(vals) != 3 {
+		return errors.New("Job not in database " + status)
+	}
+
+	timestart := vals[0]
+	timeend := vals[1]
+	statusstr := vals[2]
+
+	if timestart != "Unknown" {
+		ftmstring := "2006-01-02T15:04:05"
+		time, err := time.Parse(ftmstring, timestart)
+		if err != nil {
+			return errors.New("Wrong JobStatus output: " + err.Error())
+		}
+		s.StartTime = time.String()
+	}
+
+	if timeend != "Unknown" {
+		ftmstring := "2006-01-02T15:04:05"
+		time, err := time.Parse(ftmstring, timeend)
+		if err != nil {
+			return errors.New("Wrong JobStatus output: " + err.Error())
+		}
+		s.EndTime = time.String()
+	}
+
+	switch statusstr {
+	case "COMPLETED":
+		s.Status = StatusFinished
+	case "PENDING":
+		s.Status = StatusPending
+	case "FAILED":
+		s.Status = StatusFailed
+	case "TIMEOUT":
+		s.Status = StatusFailed
+		s.Message = "Job terminated due to timeout"
+	case "RUNNING":
+		s.Status = StatusRunning
+	default:
+		s.Status = StatusUnknown
+		s.Message = "Status: " + vals[1]
+
+	}
+
+	return nil
 }
 
 type JobFilesTransfer struct {
@@ -150,6 +208,8 @@ var jobStatusExplained = map[int]string{
 	StatusSubmissionFailed:  "Submission failed",
 	StatusErrorFromResource: "Error from resource",
 	StatusWaitData:          "Waiting data",
+	StatusPending:           "Pending",
+	StatusFailed:            "Failed",
 }
 
 func (d *JobInfo) PrintFull(w io.Writer) {
