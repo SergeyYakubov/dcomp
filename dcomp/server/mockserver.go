@@ -161,6 +161,14 @@ func MockFuncGet(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, `{"Status":102}`)
 		return
+	} else if jobID == "878359205e935a20adb39a18" {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `[{"Status":102}]`)
+		return
+	} else if jobID == "778359205e935a20adb39a18" {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `[{"Status":103}]`)
+		return
 	} else if jobID != "578359205e935a20adb39a18" {
 		http.Error(w, "job not found", http.StatusNotFound)
 		return

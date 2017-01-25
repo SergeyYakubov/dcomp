@@ -9,10 +9,12 @@ import (
 
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"gopkg.in/mgo.v2/bson"
+	"strings"
 )
 
 type waitFlags struct {
 	Id           string
+	WaitStatus   string
 	StatusChange bool
 	TimeOut      time.Duration
 }
@@ -32,30 +34,36 @@ func (cmd *command) CommandWait() error {
 	}
 
 	start := time.Now()
-	first := true
-	var ini_stat int
+	var ini_stat = structs.StatusSubmitted
+
+	if flags.WaitStatus == "" {
+		flags.WaitStatus = "COMPLETED"
+	}
+
+	flags.WaitStatus = strings.ToUpper(flags.WaitStatus)
+
+	status, message := structs.ExplainStatus(flags.WaitStatus)
+	if status == structs.StatusUnknown {
+		return errors.New(message + " unknonwn")
+	}
+
 	for time.Since(start) < flags.TimeOut {
 		jobInfo, err := getJobInfo(flags.Id)
-		if flags.StatusChange && first {
-			first = false
-			ini_stat = jobInfo.Status
-		}
 
 		if err != nil {
 			return err
 		}
 
 		if flags.StatusChange {
-			if ini_stat != jobInfo.Status {
+			if jobInfo.Status != ini_stat {
 				return nil
 			}
 		} else {
-			if jobInfo.Status == structs.StatusFinished || jobInfo.Status/100 == structs.ErrorCode {
+			if jobInfo.Status == status || jobInfo.Status/100 == structs.ErrorCode {
 				return nil
 			}
 		}
 		time.Sleep(time.Second)
-
 	}
 
 	return errors.New("Timeout, job status undefined")
@@ -64,6 +72,7 @@ func (cmd *command) CommandWait() error {
 func createWaitFlags(flagset *flag.FlagSet, flags *waitFlags) {
 	flagset.DurationVar(&flags.TimeOut, "timeout", time.Second*60, "Timeout")
 	flagset.BoolVar(&flags.StatusChange, "wait-changes", false, "Wait until status changes")
+	flagset.StringVar(&flags.WaitStatus, "status", "", "Specify status to wait for")
 
 }
 

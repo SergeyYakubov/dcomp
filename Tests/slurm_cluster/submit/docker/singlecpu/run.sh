@@ -2,7 +2,7 @@
 set -o xtrace
 
 id=`dcomp submit -ncpus=1 -script "echo hello" centos:7`
-sleep 3
+dcomp wait $id
 dcomp cp -u $id / .
 cat job.log
 

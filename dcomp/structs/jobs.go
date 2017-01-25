@@ -85,6 +85,27 @@ type JobStatus struct {
 	Message   string
 }
 
+func ExplainStatus(statusstr string) (status int, message string) {
+	switch statusstr {
+	case "COMPLETED":
+		status = StatusFinished
+	case "PENDING":
+		status = StatusPending
+	case "FAILED":
+		status = StatusFailed
+	case "TIMEOUT":
+		status = StatusFailed
+		message = "Job terminated due to timeout"
+	case "RUNNING":
+		status = StatusRunning
+	default:
+		status = StatusUnknown
+		message = "Status: " + statusstr
+
+	}
+	return
+}
+
 // UpdateFromOutput updates status by output from an external program
 func (s *JobStatus) UpdateFromOutput(status string) error {
 	// output has format given by slurm or other programs:
@@ -118,23 +139,7 @@ func (s *JobStatus) UpdateFromOutput(status string) error {
 		s.EndTime = time.String()
 	}
 
-	switch statusstr {
-	case "COMPLETED":
-		s.Status = StatusFinished
-	case "PENDING":
-		s.Status = StatusPending
-	case "FAILED":
-		s.Status = StatusFailed
-	case "TIMEOUT":
-		s.Status = StatusFailed
-		s.Message = "Job terminated due to timeout"
-	case "RUNNING":
-		s.Status = StatusRunning
-	default:
-		s.Status = StatusUnknown
-		s.Message = "Status: " + vals[1]
-
-	}
+	s.Status, s.Message = ExplainStatus(statusstr)
 
 	return nil
 }
