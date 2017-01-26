@@ -17,6 +17,8 @@ import (
 
 	"path"
 
+	"os"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -185,16 +187,50 @@ func (res *Resource) ProcessSubmitTemplate(job structs.JobInfo) (b *bytes.Buffer
 
 func (res *Resource) DeleteJob(id string) error {
 
+	_, err := res.findJob(id)
+	if err != nil {
+		return err
+	}
+
+	status, err := res.GetJobStatus(id)
+	if err != nil {
+		return err
+	}
+
+	if status.Status/100 != structs.FinishCode {
+		return errors.New("Can only remove finished jobs")
+	}
+
+	if err := res.db.DeleteRecordByID(id); err != nil {
+		return err
+	}
+
+	return os.RemoveAll(res.jobDir(id))
+
+	return nil
+}
+
+func (res *Resource) executeGetKillJobCommand(li localJobInfo) error {
+	f := res.TemplateDir + `/cancel.sh`
+	cmd := exec.Command(f, li.ClusterJobId)
+
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return errors.New(err.Error() + " " + string(out))
+	}
+
+	return nil
+}
+
+func (res *Resource) PatchJob(id string, patch structs.PatchJob) error {
+
 	li, err := res.findJob(id)
 	if err != nil {
 		return err
 	}
 
-	if li.Status == structs.StatusRunning {
-	}
-
-	if err := res.db.DeleteRecordByID(id); err != nil {
-		return err
+	if patch.Status == structs.StatusFinished {
+		return res.executeGetKillJobCommand(li)
 	}
 
 	return nil

@@ -58,24 +58,46 @@ type JobDescription struct {
 	FilesToUpload TransferFiles
 }
 
+type PatchJob struct {
+	Status int
+}
+
+func (p *PatchJob) Decode(r io.Reader) error {
+
+	if r == nil {
+		return errors.New("empty body")
+	}
+
+	return json.NewDecoder(r).Decode(p)
+}
+
 // Job status
 const (
-	// good codes
-	StatusSubmitted         = 101
-	StatusRunning           = 102
-	StatusFinished          = 103
-	StatusCreatingContainer = 104
-	StatusStartingContainer = 105
-	StatusWaitData          = 106
-	StatusPending           = 107
+	// finshed codes
+	FinishCode      = 1
+	StatusCancelled = FinishCode*100 + iota
+	StatusFinished
+
+	// pending codes
+	PendingCode     = 2
+	StatusSubmitted = PendingCode*100 + iota
+	StatusCreatingContainer
+	StatusStartingContainer
+	StatusWaitData
+	StatusPending
+
+	// running codes
+	RunningCode   = 3
+	StatusRunning = RunningCode*100 + iota
+	StatusFinishing
 
 	//error codes
-	ErrorCode               = 2
-	StatusError             = 201
-	StatusSubmissionFailed  = 201
-	StatusErrorFromResource = 202
-	StatusFailed            = 203
-	StatusUnknown           = 204
+	ErrorCode   = 4
+	StatusError = ErrorCode*100 + iota
+	StatusSubmissionFailed
+	StatusErrorFromResource
+	StatusFailed
+	StatusUnknown
 )
 
 type JobStatus struct {
@@ -89,6 +111,10 @@ func ExplainStatus(statusstr string) (status int, message string) {
 	switch statusstr {
 	case "COMPLETED":
 		status = StatusFinished
+	case "CANCELLED":
+		status = StatusCancelled
+	case "COMPLETING":
+		status = StatusFinishing
 	case "PENDING":
 		status = StatusPending
 	case "FAILED":
@@ -204,10 +230,11 @@ func Decode(r io.Reader, t jobs) bool {
 	return true
 }
 
-var jobStatusExplained = map[int]string{
+var JobStatusExplained = map[int]string{
 	StatusSubmitted:         "Submitted",
 	StatusRunning:           "Running",
 	StatusFinished:          "Finished",
+	StatusCancelled:         "Cancelled",
 	StatusCreatingContainer: "Creating Docker container",
 	StatusStartingContainer: "Starting Docker container",
 	StatusSubmissionFailed:  "Submission failed",
@@ -215,6 +242,7 @@ var jobStatusExplained = map[int]string{
 	StatusWaitData:          "Waiting data",
 	StatusPending:           "Pending",
 	StatusFailed:            "Failed",
+	StatusFinishing:         "Finishing",
 }
 
 func (d *JobInfo) PrintFull(w io.Writer) {
@@ -224,12 +252,12 @@ func (d *JobInfo) PrintFull(w io.Writer) {
 	fmt.Fprintf(w, "%-40s: %s\n", "Script", d.Script)
 	fmt.Fprintf(w, "%-40s: %d\n", "Number of CPUs", d.NCPUs)
 	fmt.Fprintf(w, "%-40s: %s\n", "Allocated resource", d.Resource)
-	fmt.Fprintf(w, "%-40s: %s\n", "Status", jobStatusExplained[d.Status])
+	fmt.Fprintf(w, "%-40s: %s\n", "Status", JobStatusExplained[d.Status])
 	if d.Status >= StatusError {
 		fmt.Fprintf(w, "%-40s: %s\n", "Message", d.Message)
 	}
 }
 
 func (d *JobInfo) PrintShort(w io.Writer) {
-	fmt.Fprintf(w, "%-40s: %s\n", d.Id, jobStatusExplained[d.Status])
+	fmt.Fprintf(w, "%-40s: %s\n", d.Id, JobStatusExplained[d.Status])
 }

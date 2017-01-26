@@ -5,11 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 type request struct {
@@ -39,6 +39,7 @@ func TestRouteDeleteJob(t *testing.T) {
 	var srv server.Server
 	ts3 := server.CreateMockServer(&srv)
 	defer ts3.Close()
+	resources = make(map[string]structs.Resource)
 	resources["mock"] = structs.Resource{Server: srv}
 
 	for _, test := range getdeleteTests {

@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 type testsPS struct {
@@ -68,7 +68,7 @@ type getJobRequest struct {
 }
 
 var getJobTests = []getJobRequest{
-	{"jobs/578359205e935a20adb39a18", "", "103", "get job info"},
+	{"jobs/578359205e935a20adb39a18", "", "102", "get job info"},
 	{"jobs/578359205e935a20adb39a18", "?log=true", "hello", "get log"},
 	{"jobs/578359205e935a20adb39a18", "?log=true&compress=true", utils.CompressString("hello"), "get compressed log"},
 }
@@ -84,10 +84,10 @@ func TestRouteGetJob(t *testing.T) {
 
 	db = new(database.Mongodb)
 
-//	var dbServer server.Server
+	//	var dbServer server.Server
 
-//	dbServer.Host = "172.17.0.2"
-//	dbServer.Port = 27017
+	//	dbServer.Host = "172.17.0.2"
+	//	dbServer.Port = 27017
 
 	db.SetServer(&dbServer)
 	db.SetDefaults("daemondbdtest")

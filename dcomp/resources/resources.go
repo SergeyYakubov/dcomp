@@ -11,5 +11,6 @@ type Resource interface {
 	SetDb(database.Agent)
 	GetJobStatus(string) (structs.JobStatus, error)
 	DeleteJob(string) error
+	PatchJob(string, structs.PatchJob) error
 	GetLogs(string, bool) (*bytes.Buffer, error)
 }

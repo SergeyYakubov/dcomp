@@ -18,6 +18,13 @@ var listRoutes = utils.Routes{
 		routeGetJob,
 	},
 	utils.Route{
+		"PatchJob",
+		"PATCH",
+		"/jobs/{jobID}/",
+		routePatchJob,
+	},
+
+	utils.Route{
 		"DeleteJob",
 		"DELETE",
 		"/jobs/{jobID}/",

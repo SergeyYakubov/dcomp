@@ -101,15 +101,12 @@ func TestDeleteJob(t *testing.T) {
 
 	id := "578359205e935a20adb39a18"
 
-	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 100"}
-
-	ji := structs.JobInfo{JobDescription: job, Id: id}
-
 	res.Basedir = "/tmp"
-	res.SubmitJob(ji, false)
 
-	time.Sleep(time.Second * 1)
-	err := res.DeleteJob(id)
+	li := localJobInfo{JobStatus: structs.JobStatus{}, Id: id}
+	_, err := res.db.CreateRecord(id, &li)
+
+	err = res.DeleteJob(id)
 
 	assert.Nil(t, err)
 

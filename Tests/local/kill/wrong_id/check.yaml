@@ -1,0 +1,6 @@
+exit_code: 1
+output:
+        - string: 'cannot'
+          exactly: false
+        - string: '5889d8595e935a579fe8f421'
+          exactly: false

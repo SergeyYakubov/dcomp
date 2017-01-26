@@ -1,0 +1,8 @@
+exit_code: 0
+output:
+  - outfile: 'output_cancelled'
+    string: 'Cancelled'
+    exactly: false
+  - outfile: 'output_running'
+    string: 'Running'
+    exactly: false

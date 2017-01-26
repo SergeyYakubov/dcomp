@@ -27,7 +27,7 @@ func GetJobFromDatabase(r *http.Request) (structs.JobInfo, error) {
 	}
 
 	if len(jobs) != 1 {
-		return job, errors.New("cannot fin job: " + jobID)
+		return job, errors.New("cannot find job: " + jobID)
 	}
 
 	return jobs[0], nil

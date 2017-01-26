@@ -2,8 +2,8 @@ package cli
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
@@ -12,7 +12,7 @@ var rmTests = []struct {
 	answer string
 	msg    string
 }{
-	{command{args: []string{"description"}}, "Cancel", "job description"},
+	{command{args: []string{"description"}}, "remove", "job description"},
 	{command{args: []string{"-id", "578359205e935a20adb39a18"}}, "", "job removed"},
 	{command{args: []string{"-id", "578359205e935a20adb39a19"}}, "not found", "job not found"},
 	{command{args: []string{"-id", "1"}}, "wrong", "wrong path"},

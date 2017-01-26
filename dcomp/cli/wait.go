@@ -7,9 +7,10 @@ import (
 
 	"time"
 
+	"strings"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"gopkg.in/mgo.v2/bson"
-	"strings"
 )
 
 type waitFlags struct {
@@ -36,8 +37,10 @@ func (cmd *command) CommandWait() error {
 	start := time.Now()
 	var ini_stat = structs.StatusSubmitted
 
+	anyfinish := false
 	if flags.WaitStatus == "" {
 		flags.WaitStatus = "COMPLETED"
+		anyfinish = true
 	}
 
 	flags.WaitStatus = strings.ToUpper(flags.WaitStatus)
@@ -49,7 +52,6 @@ func (cmd *command) CommandWait() error {
 
 	for time.Since(start) < flags.TimeOut {
 		jobInfo, err := getJobInfo(flags.Id)
-
 		if err != nil {
 			return err
 		}
@@ -59,9 +61,24 @@ func (cmd *command) CommandWait() error {
 				return nil
 			}
 		} else {
-			if jobInfo.Status == status || jobInfo.Status/100 == structs.ErrorCode {
+
+			if status == jobInfo.Status {
 				return nil
 			}
+
+			if jobInfo.Status/100 == structs.ErrorCode {
+				return errors.New("Exit on error, status: " +
+					structs.JobStatusExplained[jobInfo.Status])
+			}
+
+			if jobInfo.Status/100 == structs.FinishCode {
+				if anyfinish {
+					return nil
+				}
+				return errors.New("Exit on job complete, status: " +
+					structs.JobStatusExplained[jobInfo.Status])
+			}
+
 		}
 		time.Sleep(time.Second)
 	}

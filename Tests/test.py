@@ -125,7 +125,12 @@ def init(dirpath, files):
 
 
 #modified os.walk
-def walk(top,init,cleanup):
+def walk(top,init,cleanup,include,exclude):
+    if top in exclude:
+        return
+    if len(include) > 0 and top not in include:
+        return
+
     islink, join, isdir = os.path.islink, os.path.join, os.path.isdir
     try:
         names = os.listdir(top)
@@ -145,13 +150,18 @@ def walk(top,init,cleanup):
 
     for name in dirs:
         new_path = join(top, name)
+        if new_path in exclude:
+            continue
+        if len(include) > 0 and new_path not in include:
+            continue
+
         if not islink(new_path):
-            for x in walk(new_path,init,cleanup):
+            for x in walk(new_path,init,cleanup,include,exclude):
                 yield x
 
     cleanup(top,nondirs)
 
-for dirpath, dirs, files in walk(".",init,cleanup):
+for dirpath, dirs, files in walk(".",init,cleanup,include,exclude):
     if dirpath in exclude:
         continue
     if len(include) > 0 and dirpath not in include:

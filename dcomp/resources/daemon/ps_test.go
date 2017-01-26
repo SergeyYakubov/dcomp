@@ -24,7 +24,7 @@ type jobInfoRequest struct {
 }
 
 var JobInfoTests = []jobInfoRequest{
-	{"jobs/578359205e935a20adb39a18", "", "GET", http.StatusOK, "103", "get job info "},
+	{"jobs/578359205e935a20adb39a18", "", "GET", http.StatusOK, "102", "get job info "},
 	{"jobs/578359205e935a20adb39a18", "?log=true", "GET", http.StatusOK, "hello", "get job info "},
 	{"jobs/578359205e935a20adb39a18", "?log=true&compress=true", "GET", http.StatusOK,
 		utils.CompressString("hello"), "get job info "},

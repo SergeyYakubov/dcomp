@@ -6,14 +6,14 @@ import (
 	"os"
 
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // CommandRm removes job with given id from all places (computation queue, database, etc.)
 func (cmd *command) CommandRm() error {
 
-	d := "Cancel job"
+	d := "Delete job files and remove from database"
 
 	if cmd.description(d) {
 		return nil
@@ -29,7 +29,7 @@ func (cmd *command) CommandRm() error {
 		return err
 	}
 
-	fmt.Fprintf(outBuf, "Job deleted: %s\n", flags.Id)
+	fmt.Fprintf(outBuf, "Job removed: %s\n", flags.Id)
 
 	return nil
 }

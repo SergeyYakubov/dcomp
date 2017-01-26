@@ -17,7 +17,6 @@ var waitTests = []command{
 var waitFailingTests = []command{
 	{args: []string{}},
 	{args: []string{"-status", "bla", "578359205e935a20adb39a20"}},
-	{args: []string{"-bla", "778359205e935a20adb39a18"}},
 }
 
 func TestWaitCommand(t *testing.T) {

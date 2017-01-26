@@ -10,10 +10,11 @@ import (
 	"bytes"
 	"errors"
 
+	"path/filepath"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/database"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
-	"path/filepath"
 )
 
 type Resource struct {
@@ -106,9 +107,17 @@ func (res *Resource) runScript(li localJobInfo, job structs.JobDescription, d ti
 		return
 	}
 
-	if err := deleteContainer(id); err != nil {
+	l, err := res.findJob(li.Id)
+	if err != nil {
 		res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
 		return
+	}
+	// only if container was not already stopped by user
+	if l.Status != structs.StatusFinished {
+		if err := deleteContainer(id); err != nil {
+			res.updateJobInfo(li, structs.StatusErrorFromResource, err.Error())
+			return
+		}
 	}
 
 	res.updateJobInfo(li, structs.StatusFinished, "")
@@ -142,6 +151,27 @@ func (res *Resource) findJob(id string) (li localJobInfo, err error) {
 	return listjobs[0], nil
 }
 
+func (res *Resource) PatchJob(id string, patch structs.PatchJob) error {
+
+	li, err := res.findJob(id)
+	if err != nil {
+		return err
+	}
+
+	if li.Status == structs.StatusCreatingContainer || li.Status == structs.StatusStartingContainer {
+		return errors.New("Job is being initialized, cannot stop now. Try later.")
+	}
+
+	if li.Status == structs.StatusRunning {
+		if err := deleteContainer(li.ContainerId); err != nil {
+			return err
+		}
+		res.updateJobInfo(li, structs.StatusFinished, "")
+	}
+
+	return nil
+}
+
 func (res *Resource) DeleteJob(id string) error {
 
 	li, err := res.findJob(id)
@@ -149,17 +179,22 @@ func (res *Resource) DeleteJob(id string) error {
 		return err
 	}
 
+	if li.Status == structs.StatusCreatingContainer || li.Status == structs.StatusStartingContainer {
+		return errors.New("Job is being initialized, cannot delete now. Try later.")
+	}
+
 	if li.Status == structs.StatusRunning {
-		if err := deleteContainer(li.ContainerId); err != nil {
-			return err
-		}
+
+		return errors.New("job is still running")
 	}
 
 	if err := res.db.DeleteRecordByID(id); err != nil {
 		return err
 	}
 
-	return nil
+	fname := res.logFileName(id)
+	path := filepath.Dir(fname)
+	return os.RemoveAll(path)
 }
 
 func (res *Resource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err error) {

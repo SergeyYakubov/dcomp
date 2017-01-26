@@ -39,6 +39,18 @@ func (res *MockResource) DeleteJob(id string) error {
 	return errors.New("Job not found")
 }
 
+func (res *MockResource) PatchJob(id string, patch structs.PatchJob) error {
+	if patch.Status != structs.StatusFinished {
+		return errors.New("wrong status")
+	}
+
+	if id == "578359205e935a20adb39a18" {
+		return nil
+	}
+
+	return errors.New("Job not found")
+}
+
 func (res *MockResource) GetLogs(id string, compressed bool) (b *bytes.Buffer, err error) {
 	b = new(bytes.Buffer)
 	if compressed {
