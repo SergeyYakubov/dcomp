@@ -88,7 +88,7 @@ func MockFuncSubmit(w http.ResponseWriter, r *http.Request) {
 
 func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, `{"Local":100,"HPC":0,"Cloud":10,"Batch":0}`)
+	fmt.Fprintln(w, `{"local":100,"slurm":0,"cloud":10,"batch":0}`)
 }
 
 func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {

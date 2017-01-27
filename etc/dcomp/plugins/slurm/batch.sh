@@ -9,6 +9,7 @@
 #SBATCH --uid=${DCOMP_UID}
 #SBATCH --gid=${DCOMP_GID}
 #SBATCH --output=job.log
+#SBATCH --get-user-env
 
 if [ ${DCOMP_IMAGE_NAME}  == "none" ] ; then
     ${DCOMP_SCRIPT}

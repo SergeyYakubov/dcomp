@@ -7,6 +7,8 @@ import (
 
 	"errors"
 
+	"strings"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
@@ -160,7 +162,11 @@ func submitToResource(job structs.JobInfo) (err error) {
 }
 
 func findResources(t structs.JobDescription) (prio structs.ResourcePrio, err error) {
-
+	if t.Resource != "" {
+		prio = make(structs.ResourcePrio)
+		prio[strings.ToLower(t.Resource)] = 100
+		return
+	}
 	b, err := estimatorServer.CommandPost("estimations", &t)
 	if err != nil {
 		return

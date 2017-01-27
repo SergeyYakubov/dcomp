@@ -31,19 +31,21 @@ func routeEstimateJob(w http.ResponseWriter, r *http.Request) {
 // estimate uses very simple algorithm to assign priorities based on CPU number required for the job
 func estimate(job structs.JobDescription) (prio structs.ResourcePrio) {
 	prio = make(structs.ResourcePrio)
-	prio["Cloud"] = 0
-	prio["Slurm"] = 10
-	prio["Batch"] = 0
-	if job.Local {
-		prio["Local"] = 100
-	}
+	prio["cloud"] = 0
+	prio["slurm"] = 10
+	prio["batch"] = 0
 	switch {
 	case job.NCPUs == 1:
-		prio["Slurm"] = 1
-		prio["Batch"] = 10
+		prio["slurm"] = 1
+		prio["batch"] = 10
 	case job.NCPUs <= 8:
-		prio["Slurm"] = 5
-		prio["Batch"] = 5
+		prio["slurm"] = 5
+		prio["batch"] = 5
 	}
+	if job.Resource != "" {
+		prio[job.Resource] = 100
+	}
+
 	return prio
+
 }

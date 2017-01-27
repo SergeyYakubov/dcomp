@@ -17,8 +17,8 @@ func TestSetConfiguration(t *testing.T) {
 	assert.Equal(t, ":8001", settings.Addr, "addr")
 	assert.Equal(t, "/etc/dcomp/cert/certd.pem", settings.Certfile, "certfile")
 	assert.Equal(t, "/etc/dcomp/cert/keyd.pem", settings.Keyfile, "certfile")
-	s := resources["Local"].Server
-	dm := resources["Local"].DataManager
+	s := resources["local"].Server
+	dm := resources["local"].DataManager
 	assert.Equal(t, "localhost", s.Host, "local res host")
 	assert.Equal(t, 8006, s.Port, "local res port")
 

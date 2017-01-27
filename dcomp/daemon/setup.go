@@ -6,6 +6,7 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"strings"
 )
 
 var estimatorServer server.Server
@@ -85,7 +86,7 @@ func setConfiguration() error {
 		auth2 := server.NewJWTAuth(p.DataManager.Key)
 		dm.SetAuth(auth2)
 		dm.Tls = true
-		resources[p.Name] = structs.Resource{Server: s, DataManager: dm}
+		resources[strings.ToLower(p.Name)] = structs.Resource{Server: s, DataManager: dm}
 	}
 
 	return nil

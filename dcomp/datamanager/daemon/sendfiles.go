@@ -130,6 +130,7 @@ func addPathToTar(tw *tar.Writer, basepath, path string) error {
 
 	if !fi.IsDir() {
 		file, err := os.Open(path)
+		defer file.Close()
 		if err != nil {
 			return err
 		}

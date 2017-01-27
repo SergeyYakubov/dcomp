@@ -54,7 +54,7 @@ type JobDescription struct {
 	Script        string
 	NCPUs         int
 	NNodes        int
-	Local         bool
+	Resource      string
 	FilesToUpload TransferFiles
 }
 

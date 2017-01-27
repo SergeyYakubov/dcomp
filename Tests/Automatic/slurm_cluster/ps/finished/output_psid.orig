@@ -1,0 +1,5 @@
+Image name                              : none
+Script                                  : srun -n 2 echo hello
+Number of CPUs                          : 0
+Allocated resource                      : slurmdocker
+Status                                  : Finished

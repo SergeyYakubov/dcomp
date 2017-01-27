@@ -17,22 +17,7 @@ import (
 )
 
 var submitRouteTests = []request{
-	/*{structs.JobDescription{ImageName: "ttt", Script: "bbb", NCPUs: 1, Local: true}, "jobs", "POST", http.StatusCreated, "Create job"},
-	{structs.JobDescription{ImageName: "ttt", Script: "bbb", NCPUs: 1, Local: true,
-		FilesToUpload: structs.TransferFiles{
-			{"jhjh", "assd"},
-			{"jhjh", "assd"}},
-	}, "jobs", "POST", http.StatusAccepted, "Create job,wait files"},
-	{structs.JobDescription{ImageName: "noauth", Script: "bbb", NCPUs: 1, Local: true,
-		FilesToUpload: structs.TransferFiles{
-			{"jhjh", "assd"},
-			{"jhjh", "assd"}},
-	}, "jobs", "POST", http.StatusInternalServerError, "Create job,wait files, no auth context"},
-
-	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "jobs", "POST", http.StatusBadRequest, "create job - nil struct"},
-	{structs.JobDescription{}, "jobs", "POST", http.StatusBadRequest, "create job - empty struct"},
-	{structs.JobDescription{}, "jobs/1", "POST", http.StatusBadRequest, "create job - wrong path"},*/
-	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Local: true},
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Resource: "local"},
 		"jobs/578359205e935a20adb39a18", "POST", http.StatusCreated, "Create job"},
 }
 
@@ -48,9 +33,9 @@ func TestRouteSubmitReleaseJob(t *testing.T) {
 
 		var srv server.Server
 		ts3 := server.CreateMockServer(&srv)
-		r := resources["Local"]
+		r := resources["local"]
 		r.Server = srv
-		resources["Local"] = r
+		resources["local"] = r
 		resources["mock"] = r
 
 		defer ts2.Close()
@@ -98,14 +83,16 @@ type submitRequest struct {
 }
 
 var submitTests = []submitRequest{
-	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true}, "578359205e935a20adb39a18",
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Resource: "local"}, "578359205e935a20adb39a18",
 		structs.StatusSubmitted, "Create job"},
-	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Local: true,
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Resource: ""}, "578359205e935a20adb39a18",
+		structs.StatusSubmitted, "Create job"},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Resource: "local",
 		FilesToUpload: structs.TransferFiles{
 			{"jhjh", "assd"},
 			{"jhjh", "assd"},
 		}}, "578359205e935a20adb39a18", structs.StatusWaitData, "Wait for files"},
-	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Local: true}, "available",
+	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Resource: "local"}, "available",
 		structs.StatusError, "Create job"},
 }
 
@@ -120,7 +107,7 @@ func TestSubmitJob(t *testing.T) {
 
 		var srv server.Server
 		ts3 := server.CreateMockServer(&srv)
-		resources["Local"] = structs.Resource{Server: srv}
+		resources["local"] = structs.Resource{Server: srv}
 
 		defer ts2.Close()
 
@@ -158,8 +145,11 @@ func TestFindResource(t *testing.T) {
 		}
 
 		assert.Nil(t, err, "Should not be error")
-
-		assert.Equal(t, 10, prio["Cloud"], test.message)
+		if test.job.Resource != "" {
+			assert.Equal(t, 100, prio[test.job.Resource], test.message)
+		} else {
+			assert.Equal(t, 10, prio["cloud"], test.message)
+		}
 		ts.Close()
 	}
 }

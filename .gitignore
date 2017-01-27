@@ -9,5 +9,5 @@ coverage.html
 Makefile
 version_lib.go
 test
-
+bigfile
 

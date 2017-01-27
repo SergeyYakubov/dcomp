@@ -43,6 +43,7 @@ func (res *Resource) executeSubmitCommand(script string) (string, error) {
 
 	cmd := exec.Command(f, script)
 	cmd.Dir = path.Dir(script)
+
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", errors.New(err.Error() + " " + string(out))
@@ -206,8 +207,6 @@ func (res *Resource) DeleteJob(id string) error {
 	}
 
 	return os.RemoveAll(res.jobDir(id))
-
-	return nil
 }
 
 func (res *Resource) executeGetKillJobCommand(li localJobInfo) error {

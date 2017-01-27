@@ -15,7 +15,7 @@ daemon:
  certfile: /etc/dcomp/cert/certd.pem
  keyfile: /etc/dcomp/cert/keyd.pem
 plugins:
-        - name: Local
+        - name: local
           host: localhost
           port: 8006
           key: lplgin12

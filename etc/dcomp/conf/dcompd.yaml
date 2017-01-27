@@ -15,7 +15,7 @@ daemon:
  certfile: /etc/dcomp/cert/certd.pem
  keyfile: /etc/dcomp/cert/keyd.pem
 plugins:
-        - name: Local
+        - name: local
           host: localhost
           port: 8006
           key: lplgin12
@@ -23,11 +23,27 @@ plugins:
            host: localhost
            port: 8008
            key: dcompdmd45
-        - name: Slurm
+        - name: SlurmDocker
           host: localhost
           port: 8009
           key: slurmplgin34
           datamanager:
            host: localhost
+           port: 8010
+           key: dcompdmd45
+        - name: SlurmInDocker
+          host: localhost
+          port: 8009
+          key: slurmplgin34
+          datamanager:
+           host: localhost
+           port: 8010
+           key: dcompdmd45
+        - name: Maxwell
+          host: max-wgs001
+          port: 8009
+          key: slurmplgin34
+          datamanager:
+           host: max-wgs001
            port: 8010
            key: dcompdmd45

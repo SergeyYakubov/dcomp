@@ -1,0 +1,5 @@
+Image name                              : none
+Script                                  : sleep 20
+Number of CPUs                          : 0
+Allocated resource                      : slurmdocker
+Status                                  : Running

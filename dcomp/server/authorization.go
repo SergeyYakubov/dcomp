@@ -62,7 +62,6 @@ func (b BasicAuth) GenerateToken(*CustomClaims) (string, error) {
 	} else {
 		return "Basic " + b.forcedUsername, nil
 	}
-
 }
 
 type HMACAuth struct {

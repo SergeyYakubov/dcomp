@@ -1,0 +1,10 @@
+[Unit]
+Description=dComp datamanager daemon (maxwell resource)
+PartOf=dcomp_maxwell.service
+
+[Service]
+ExecStart=/root/bin/dcompdmd /etc/dcomp/plugins/slurm/dmd.yaml
+
+
+[Install]
+WantedBy=multi-user.target

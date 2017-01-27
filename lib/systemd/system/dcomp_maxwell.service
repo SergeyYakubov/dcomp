@@ -1,0 +1,11 @@
+[Unit]
+Description=dComp maxwell resource daemon
+Requires=dcompdmd_maxwell.service
+
+
+[Service]
+ExecStart=/root/bin/dcompclusterpd /etc/dcomp/plugins/slurm/slurm.yaml
+
+
+[Install]
+WantedBy=multi-user.target
