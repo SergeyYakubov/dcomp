@@ -33,4 +33,5 @@ install:
 
 script:
 - go test ./...
-- python Tests/Automatic/test.py
+- cd Tests/Automatic  
+- python test.py
