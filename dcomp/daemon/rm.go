@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"net/http"
 )
@@ -11,9 +12,17 @@ func deleteJobInResourceIfNeeded(job structs.JobInfo) error {
 	}
 
 	res := resources[job.Resource]
-	_, err := res.Server.CommandDelete("jobs" + "/" + job.Id)
+	b, status, err := res.Server.CommandDelete("jobs" + "/" + job.Id)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	if status != http.StatusOK {
+		return errors.New(b.String())
+	}
+
+	return nil
 
 }
 

@@ -26,7 +26,7 @@ func routePatchJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = res.Server.CommandPatch("jobs"+"/"+job.Id, &patch)
+	_, _, err = res.Server.CommandPatch("jobs"+"/"+job.Id, &patch)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

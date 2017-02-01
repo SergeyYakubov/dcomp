@@ -1,11 +1,10 @@
 daemon:
  addr: :8007
- key: auth14
+ key: blabla
  certfile: /etc/dcomp/cert/certauth.pem
  keyfile: /etc/dcomp/cert/keyauth.pem
 authorization:
   - Basic
-#  - Negotiate
-
+  - Negotiate
 
 

@@ -5,6 +5,8 @@ import (
 
 	"bytes"
 
+	"net/http"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,35 +33,35 @@ func TestPostcommand(t *testing.T) {
 	var srv Server
 	srv.SetAuth(NewHMACAuth("1234"))
 	srv.Port = -4
-	b, err := srv.CommandPost("jobs", nil)
+	b, _, err := srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "Should be error in http.post")
 
 	ts := CreateMockServer(&srv)
 	defer ts.Close()
 
-	b, err = srv.CommandPost("jobs", ts)
+	b, _, err = srv.CommandPost("jobs", ts)
 	assert.NotNil(t, err, "Should be error in json encoder")
 
 	// nil is actually a bad option but since we use mock server we cannot check it
-	b, err = srv.CommandPost("jobs", nil)
+	b, _, err = srv.CommandPost("jobs", nil)
 	assert.Equal(t, "{\"ImageName\":\"submittedimage\",\"Script\":\"aaa\",\"NCPUs\":1,\"Id\":\"578359205e935a20adb39a18\",\"Status\":1}\n",
 		b.String(), "")
 
 	srv.SetAuth(NewHMACAuth("123"))
 
-	b, err = srv.CommandPost("jobs", nil)
-	assert.NotNil(t, err, "authorization should fail")
+	b, status, err := srv.CommandPost("jobs", nil)
+	assert.Equal(t, http.StatusUnauthorized, status, "authorization should fail")
 
 	srv.SetAuth(NewHMACAuth("1234"))
 	srv.Port = 10000
-	b, err = srv.CommandPost("jobs", nil)
+	b, _, err = srv.CommandPost("jobs", nil)
 	assert.Contains(t, err.Error(), "connection refused", "")
 
 	//	srv.Host = "aaa"
 	//	b, err = srv.CommandPost("jobs", nil)
 	//	assert.Contains(t, err.Error(), "lookup", "")
 
-	b, err = srv.CommandPost("jobs", nil)
+	b, _, err = srv.CommandPost("jobs", nil)
 	assert.NotNil(t, err, "Should be error in responce")
 
 }
@@ -89,7 +91,7 @@ func TestGetcommand(t *testing.T) {
 	defer ts.Close()
 	for _, test := range getTests {
 		srv.SetAuth(NewHMACAuth(test.key))
-		b, err := srv.CommandGet(test.path)
+		b, _, err := srv.CommandGet(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)
 		} else {
@@ -104,7 +106,7 @@ func TestDeletecommand(t *testing.T) {
 	defer ts.Close()
 	for _, test := range rmTests {
 		srv.SetAuth(NewHMACAuth(test.key))
-		b, err := srv.CommandDelete(test.path)
+		b, _, err := srv.CommandDelete(test.path)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)
 		} else {
@@ -126,7 +128,7 @@ func TestPatchcommand(t *testing.T) {
 	defer ts.Close()
 	for _, test := range patchTests {
 		srv.SetAuth(NewHMACAuth(test.key))
-		err := srv.CommandPatch(test.path, nil)
+		_, _, err := srv.CommandPatch(test.path, nil)
 		if err != nil {
 			assert.Contains(t, err.Error(), test.body, test.msg)
 		}

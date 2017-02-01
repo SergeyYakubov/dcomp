@@ -3,6 +3,8 @@ package cli
 import (
 	"errors"
 
+	"net/http"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
@@ -11,9 +13,13 @@ func getJobInfo(id string) (structs.JobInfo, error) {
 
 	cmdstr := "jobs" + "/" + id
 
-	b, err := daemon.CommandGet(cmdstr)
+	b, status, err := daemon.CommandGet(cmdstr)
 	if err != nil {
 		return structs.JobInfo{}, err
+	}
+
+	if status != http.StatusOK {
+		return structs.JobInfo{}, errors.New(b.String())
 	}
 
 	// jobs are returned as json string containing []structs.JobInfo

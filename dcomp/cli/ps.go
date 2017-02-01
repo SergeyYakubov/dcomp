@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/http"
 	"os"
 
 	"encoding/json"
@@ -49,9 +50,13 @@ func (cmd *command) CommandPs() error {
 		}
 	}
 
-	b, err := daemon.CommandGet(cmdstr)
+	b, status, err := daemon.CommandGet(cmdstr)
 	if err != nil {
 		return err
+	}
+
+	if status != http.StatusOK {
+		return errors.New(b.String())
 	}
 
 	if flags.ShowLog {

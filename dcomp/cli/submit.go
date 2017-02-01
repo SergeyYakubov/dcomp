@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"net/http"
 )
 
 func readJobFilesTransferInfo(bIn *bytes.Buffer) (t structs.JobFilesTransfer, err error) {
@@ -31,7 +32,8 @@ func readJobFilesTransferInfo(bIn *bytes.Buffer) (t structs.JobFilesTransfer, er
 }
 
 func sendReleaseJobCommand(jobID string) (b *bytes.Buffer, err error) {
-	return daemon.CommandPost("jobs/"+jobID, nil)
+	b, _, err = daemon.CommandPost("jobs/"+jobID, nil)
+	return
 }
 
 func getUploadName(localname, inipath, destdir string, isdir bool) string {
@@ -173,10 +175,15 @@ func (cmd *command) CommandSubmit() error {
 		return err
 	}
 
-	b, err := daemon.CommandPost("jobs", &flags)
+	b, status, err := daemon.CommandPost("jobs", &flags)
 
 	if err != nil {
 		return err
+	}
+
+	if status != http.StatusCreated && status != http.StatusOK {
+		fmt.Println(status)
+		return errors.New(b.String())
 	}
 
 	if len(flags.FilesToUpload) > 0 {

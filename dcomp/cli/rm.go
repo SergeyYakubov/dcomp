@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 // CommandRm removes job with given id from all places (computation queue, database, etc.)
@@ -24,9 +25,13 @@ func (cmd *command) CommandRm() error {
 		return err
 	}
 
-	_, err = daemon.CommandDelete("jobs" + "/" + flags.Id)
+	b, status, err := daemon.CommandDelete("jobs" + "/" + flags.Id)
 	if err != nil {
 		return err
+	}
+
+	if status != http.StatusOK {
+		return errors.New(b.String())
 	}
 
 	fmt.Fprintf(outBuf, "Job removed: %s\n", flags.Id)

@@ -1,4 +1,4 @@
-// Package for estimator daemon
+// Package for authorizer daemon
 package daemon
 
 import (
@@ -16,30 +16,46 @@ type config struct {
 		Certfile string
 		Keyfile  string
 	}
+	Authorization []string
 }
+
+func (c *config) authorizationAllowed(atype string) bool {
+	for _, val := range c.Authorization {
+		if val == atype {
+			return true
+		}
+	}
+	return false
+}
+
+var configFile = `/etc/dcomp/conf/dcompauthd.yaml`
+var c config
 
 // setDaemonConfiguration reads configuration file with daemon location
-func setDaemonConfiguration() (config, error) {
+func setDaemonConfiguration() error {
 
-	fname := `/etc/dcomp/conf/dcompauthd.yaml`
-
-	var c config
-
-	err := utils.ReadYaml(fname, &c)
-	return c, err
+	err := utils.ReadYaml(configFile, &c)
+	return err
 
 }
 
-var c config
+var gssAPIContext *utils.Context
 
 func Start() {
 
 	mux := utils.NewRouter(listRoutes)
 	var err error
-	c, err = setDaemonConfiguration()
+	err = setDaemonConfiguration()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	gssAPIContext, err = utils.PrepareSeverGSSAPIContext("dcomp")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	log.Fatal(http.ListenAndServeTLS(c.Daemon.Addr, c.Daemon.Certfile, c.Daemon.Keyfile,
 		server.ProcessHMACAuth(mux.ServeHTTP, c.Daemon.Key)))
 

@@ -47,7 +47,7 @@ func updateJobsStatusFromResources(job *structs.JobInfo) {
 	// update database
 	defer db.PatchRecord(job.Id, job)
 
-	b, err := res.Server.CommandGet("jobs" + "/" + job.Id)
+	b, _, err := res.Server.CommandGet("jobs" + "/" + job.Id)
 
 	if err != nil {
 		job.Status = structs.StatusErrorFromResource
@@ -94,10 +94,11 @@ func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 	sendJobs(w, jobs, true)
 }
 
-func getJobLog(job structs.JobInfo, u *url.URL) (*bytes.Buffer, error) {
+func getJobLog(job structs.JobInfo, u *url.URL) (b *bytes.Buffer, err error) {
 	res := resources[job.Resource]
 	cmd := u.Path + "?" + u.RawQuery
-	return res.Server.CommandGet(cmd)
+	b, _, err = res.Server.CommandGet(cmd)
+	return
 }
 
 func routeGetJob(w http.ResponseWriter, r *http.Request) {

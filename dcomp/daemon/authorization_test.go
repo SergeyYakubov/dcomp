@@ -19,7 +19,6 @@ var userAuthtests = []struct {
 }{
 	{"Basic wronguser", 401, "not", "user not allowed"},
 	{"Basic user", 200, "user", "correct auth"},
-	{"", 401, "header", "auth no header"},
 	{"Wrong test", 401, "type", "wrong auth type"},
 }
 

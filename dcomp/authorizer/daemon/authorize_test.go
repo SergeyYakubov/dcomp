@@ -22,15 +22,20 @@ type request struct {
 }
 
 var authorizeTests = []request{
-	{server.AuthorizationRequest{Token: "Basic test"}, http.StatusOK, "test", "correct auth"},
+	{server.AuthorizationRequest{Token: "Basic test"}, http.StatusOK, "test", "correct basic auth"},
+	{server.AuthorizationRequest{Token: "Negotiate test"}, http.StatusUnauthorized, "not defined", "kerb auth, not defined context"},
 	{server.AuthorizationRequest{Token: "Basic"}, http.StatusUnauthorized, "token", "wrong token"},
 	{server.AuthorizationRequest{Token: "BlaBla test"}, http.StatusUnauthorized, "type", "wrong token type"},
 	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "token", "empty token"},
 	{server.AuthorizationRequest{Token: "nil"}, http.StatusUnauthorized, "bad", "no request body"},
+	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "Negotiate", "empty token"},
 }
 
 func TestAuthorizeJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
+	tconf := configFile
+	configFile = "config_test.yaml"
+	setDaemonConfiguration()
 
 	for _, test := range authorizeTests {
 
@@ -51,6 +56,10 @@ func TestAuthorizeJob(t *testing.T) {
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
 		assert.Equal(t, test.answerCode, w.Code, test.message)
+
 		assert.Contains(t, w.Body.String(), test.answerMessage, test.message)
 	}
+	configFile = tconf
+	setDaemonConfiguration()
+
 }

@@ -37,7 +37,7 @@ func (cmd *command) CommandCp() error {
 
 	dataTransferInfo, err := getDataTransferInfo(cmdstr)
 
-	b, err := dataTransferInfo.Srv.CommandGet(cmdstr)
+	b, _, err := dataTransferInfo.Srv.CommandGet(cmdstr)
 	if err != nil {
 		return err
 	}

@@ -110,17 +110,17 @@ func MockFuncAuthorize(w http.ResponseWriter, r *http.Request) {
 	authType, user, err := SplitAuthToken(t.Token)
 
 	if err != nil {
-		http.Error(w, "cannot split token", http.StatusUnauthorized)
+		unAuthorizedResponce("cannot split token", w)
 		return
 	}
 
 	if authType != "Basic" {
-		http.Error(w, "wrong auth type", http.StatusUnauthorized)
+		unAuthorizedResponce("wrong auth type", w)
 		return
 	}
 
 	if user == "wronguser" {
-		http.Error(w, "user not allowed", http.StatusUnauthorized)
+		unAuthorizedResponce("user not allowed", w)
 		return
 	}
 
@@ -189,27 +189,71 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func unAuthorizedResponce(msg string, w http.ResponseWriter) {
+
+	var resp AuthorizationResponce
+
+	resp.Authorization = make([]string, 2)
+	resp.Authorization[0] = "Basic"
+	resp.Authorization[1] = "Negotiate"
+	resp.ErrorMsg = msg
+
+	w.WriteHeader(http.StatusUnauthorized)
+
+	b := new(bytes.Buffer)
+	json.NewEncoder(b).Encode(&resp)
+	w.Write(b.Bytes())
+	return
+}
+
+func ProcessMockGSSAPIAuth(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		at, au, err := ExtractAuthInfo(r)
+
+		if err != nil {
+			unAuthorizedResponce(err.Error(), w)
+			return
+		}
+
+		if err != nil {
+			unAuthorizedResponce(err.Error(), w)
+			return
+		}
+		if at != "Negotiate" {
+			unAuthorizedResponce("wrong auth type", w)
+			return
+		}
+
+		if au == "wrongtoken" {
+			unAuthorizedResponce("user not allowed", w)
+			return
+		}
+		fn(w, r)
+	}
+}
+
 func ProcessMockBasicAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		at, au, err := ExtractAuthInfo(r)
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			unAuthorizedResponce(err.Error(), w)
 			return
 		}
 
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			unAuthorizedResponce(err.Error(), w)
 			return
 		}
 		if at != "Basic" {
-			http.Error(w, "wrong auth type", http.StatusUnauthorized)
+			unAuthorizedResponce("wrong auth type", w)
 			return
 		}
 
 		if au == "wronguser" {
-			http.Error(w, "user not allowed", http.StatusUnauthorized)
+			unAuthorizedResponce("user not allowed", w)
 			return
 		}
 		fn(w, r)
@@ -233,6 +277,8 @@ func CreateMockServer(srv *Server) *httptest.Server {
 		ts = newsrv(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 	case *BasicAuth:
 		ts = newsrv(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
+	case *GSSAPIAuth:
+		ts = newsrv(ProcessMockGSSAPIAuth(http.HandlerFunc(mux.ServeHTTP)))
 	case *JWTAuth:
 		ts = newsrv(ProcessJWTAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 

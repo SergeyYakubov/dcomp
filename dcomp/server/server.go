@@ -145,58 +145,92 @@ func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
 	return b, nil
 }
 
-func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, err error) {
+func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, status int, err error) {
+	binput := new(bytes.Buffer)
 	b = new(bytes.Buffer)
 	if data != nil {
-		if err := json.NewEncoder(b).Encode(data); err != nil {
-			return nil, err
+		if err := json.NewEncoder(binput).Encode(data); err != nil {
+			return nil, -1, err
 		}
 	}
 
-	req, err := http.NewRequest(method, srv.url(path), b)
+	req, err := http.NewRequest(method, srv.url(path), binput)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	req.Close = true
-
 	srv.addAuthorizationHeader(req)
 
 	client := srv.newClient()
 	res, err := client.Do(req)
 
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	defer res.Body.Close()
 	io.Copy(b, res.Body)
 
-	if res.StatusCode != http.StatusCreated && res.StatusCode != http.StatusOK &&
-		res.StatusCode != http.StatusAccepted {
-		err = errors.New(b.String())
-		return nil, err
+	if res.StatusCode == http.StatusUnauthorized {
+		var resp AuthorizationResponce
+		if err := json.NewDecoder(b).Decode(&resp); err != nil {
+			return nil, -1, err
+		}
+		for _, val := range resp.Authorization {
+			if val == "Basic" {
+				binput := new(bytes.Buffer)
+				if data != nil {
+					if err := json.NewEncoder(binput).Encode(data); err != nil {
+						return nil, -1, err
+					}
+				}
+
+				req, err := http.NewRequest(method, srv.url(path), binput)
+				if err != nil {
+					return nil, -1, err
+				}
+
+				req.Close = true
+				srv.auth = NewBasicAuth()
+				srv.addAuthorizationHeader(req)
+
+				client := srv.newClient()
+				res, err := client.Do(req)
+				if err != nil {
+					return nil, -1, err
+				}
+
+				defer res.Body.Close()
+				io.Copy(b, res.Body)
+				if res.StatusCode != http.StatusUnauthorized {
+					return b, res.StatusCode, nil
+				}
+
+			}
+		}
+		return nil, -1, errors.New("Authorization failed: " + resp.ErrorMsg)
 	}
-	return b, nil
+
+	return b, res.StatusCode, nil
 }
 
 // CommandPost issues the POST command to srv. data should be JSON-encodable. Returns response body or error
-func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, err error) {
+func (srv *Server) CommandPost(path string, data interface{}) (b *bytes.Buffer, status int, err error) {
 	return srv.httpCommand(http.MethodPost, path, data)
 }
 
 // CommandGet issues the GET command to srv. Returns response body or error
-func (srv *Server) CommandGet(path string) (b *bytes.Buffer, err error) {
+func (srv *Server) CommandGet(path string) (b *bytes.Buffer, status int, err error) {
 	return srv.httpCommand(http.MethodGet, path, nil)
 }
 
 // CommandDelete issues the DELETE command to srv. Returns response body or error
-func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, err error) {
+func (srv *Server) CommandDelete(path string) (b *bytes.Buffer, status int, err error) {
 	return srv.httpCommand(http.MethodDelete, path, nil)
 }
 
 // CommandPatch issues the PATCH command to srv. Returns response body or error
-func (srv *Server) CommandPatch(path string, data interface{}) (err error) {
-	_, err = srv.httpCommand(http.MethodPatch, path, data)
-	return
+func (srv *Server) CommandPatch(path string, data interface{}) (*bytes.Buffer, int, error) {
+	return srv.httpCommand(http.MethodPatch, path, data)
 }

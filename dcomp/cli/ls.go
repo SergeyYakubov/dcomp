@@ -21,7 +21,7 @@ type lsFlags struct {
 
 func getDataTransferInfo(command string) (t structs.JobFilesTransfer, err error) {
 
-	b, err := daemon.CommandGet(command)
+	b, _, err := daemon.CommandGet(command)
 	if err != nil {
 		return
 	}
@@ -51,7 +51,7 @@ func (cmd *command) CommandLs() error {
 
 	dataTransferInfo, err := getDataTransferInfo(cmdstr)
 
-	b, err := dataTransferInfo.Srv.CommandGet(cmdstr)
+	b, _, err := dataTransferInfo.Srv.CommandGet(cmdstr)
 	if err != nil {
 		return err
 	}

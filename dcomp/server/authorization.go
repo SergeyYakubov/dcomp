@@ -27,7 +27,9 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationResponce struct {
-	UserName string
+	UserName      string
+	ErrorMsg      string
+	Authorization []string
 }
 
 type Auth interface {
@@ -257,4 +259,24 @@ func JobClaimFromContext(r *http.Request, val interface{}) error {
 	claim := c.(*CustomClaims)
 
 	return utils.MapToStruct(claim.ExtraClaims.(map[string]interface{}), val)
+}
+
+type GSSAPIAuth struct {
+}
+
+func (b GSSAPIAuth) GenerateToken(*CustomClaims) (string, error) {
+
+	data, err := utils.GetGSSAPIToken("dcomp")
+
+	if err != nil {
+		return "", err
+	}
+
+	token := "Negotiate" + " " + base64.StdEncoding.EncodeToString(data)
+	return token, nil
+}
+
+func NewGSSAPIAuth() *GSSAPIAuth {
+	a := GSSAPIAuth{}
+	return &a
 }

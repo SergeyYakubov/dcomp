@@ -53,7 +53,7 @@ func TestRouteSubmitReleaseJob(t *testing.T) {
 		req, err := http.NewRequest(test.cmd, "http://localhost:8000/"+test.path+"/", reader)
 
 		if test.job.ImageName != "noauth" {
-			resp := server.AuthorizationResponce{"testuser"}
+			resp := server.AuthorizationResponce{UserName: "testuser"}
 			ctx := context.WithValue(req.Context(), "authorizationResponce", &resp)
 			req = req.WithContext(ctx)
 		}

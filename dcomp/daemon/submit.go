@@ -140,7 +140,7 @@ func checkResources(job structs.JobInfo, prio []string) (res string, err error) 
 	for i := range prio {
 		r, ok := resources[prio[i]]
 		if ok {
-			_, e := r.Server.CommandPost("jobs/?checkonly=true", job)
+			_, _, e := r.Server.CommandPost("jobs/?checkonly=true", job)
 			if e == nil {
 				res = prio[i]
 				return
@@ -157,7 +157,7 @@ func submitToResource(job structs.JobInfo) (err error) {
 	if !ok {
 		err = errors.New("Resource unvailable " + job.Resource)
 	}
-	_, err = r.Server.CommandPost("jobs", job)
+	_, _, err = r.Server.CommandPost("jobs", job)
 	return
 }
 
@@ -167,7 +167,7 @@ func findResources(t structs.JobDescription) (prio structs.ResourcePrio, err err
 		prio[strings.ToLower(t.Resource)] = 100
 		return
 	}
-	b, err := estimatorServer.CommandPost("estimations", &t)
+	b, _, err := estimatorServer.CommandPost("estimations", &t)
 	if err != nil {
 		return
 	}

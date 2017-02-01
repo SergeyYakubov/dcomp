@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"gopkg.in/mgo.v2/bson"
+	"net/http"
 )
 
 type killFlags struct {
@@ -31,11 +32,13 @@ func (cmd *command) CommandKill() error {
 
 	data := structs.PatchJob{Status: structs.StatusFinished}
 
-	err = daemon.CommandPatch(cmdstr, &data)
+	b, status, err := daemon.CommandPatch(cmdstr, &data)
 	if err != nil {
 		return err
 	}
-
+	if status != http.StatusOK {
+		return errors.New(b.String())
+	}
 	fmt.Fprintf(outBuf, "Job killed: %s\n", flags.Id)
 
 	return nil
