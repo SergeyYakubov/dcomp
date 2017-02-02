@@ -28,7 +28,7 @@ var authorizeTests = []request{
 	{server.AuthorizationRequest{Token: "BlaBla test"}, http.StatusUnauthorized, "type", "wrong token type"},
 	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "token", "empty token"},
 	{server.AuthorizationRequest{Token: "nil"}, http.StatusUnauthorized, "bad", "no request body"},
-	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "Negotiate", "empty token"},
+	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "wrong", "empty token"},
 }
 
 func TestAuthorizeJob(t *testing.T) {

@@ -13,10 +13,11 @@ import (
 
 	"path"
 
+	"net/http"
+
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
-	"net/http"
 )
 
 func readJobFilesTransferInfo(bIn *bytes.Buffer) (t structs.JobFilesTransfer, err error) {
@@ -182,7 +183,6 @@ func (cmd *command) CommandSubmit() error {
 	}
 
 	if status != http.StatusCreated && status != http.StatusOK {
-		fmt.Println(status)
 		return errors.New(b.String())
 	}
 

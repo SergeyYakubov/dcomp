@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sync"
 
 	"encoding/base64"
 
+	"strings"
+
 	"github.com/apcera/gssapi"
 	"github.com/pkg/errors"
-	"strings"
 )
 
 type Context struct {
@@ -22,8 +22,6 @@ type Context struct {
 
 	Lib       *gssapi.Lib
 	libLoaded bool
-
-	loadonce sync.Once
 
 	// Service credentials loaded from keytab
 	credential *gssapi.CredId

@@ -110,17 +110,17 @@ func MockFuncAuthorize(w http.ResponseWriter, r *http.Request) {
 	authType, user, err := SplitAuthToken(t.Token)
 
 	if err != nil {
-		unAuthorizedResponce("cannot split token", w)
+		http.Error(w, "cannot split token", http.StatusUnauthorized)
 		return
 	}
 
 	if authType != "Basic" {
-		unAuthorizedResponce("wrong auth type", w)
+		http.Error(w, "wrong auth type", http.StatusUnauthorized)
 		return
 	}
 
 	if user == "wronguser" {
-		unAuthorizedResponce("user not allowed", w)
+		http.Error(w, "user not allowed", http.StatusUnauthorized)
 		return
 	}
 
@@ -189,44 +189,27 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func unAuthorizedResponce(msg string, w http.ResponseWriter) {
-
-	var resp AuthorizationResponce
-
-	resp.Authorization = make([]string, 2)
-	resp.Authorization[0] = "Basic"
-	resp.Authorization[1] = "Negotiate"
-	resp.ErrorMsg = msg
-
-	w.WriteHeader(http.StatusUnauthorized)
-
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(&resp)
-	w.Write(b.Bytes())
-	return
-}
-
 func ProcessMockGSSAPIAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		at, au, err := ExtractAuthInfo(r)
 
 		if err != nil {
-			unAuthorizedResponce(err.Error(), w)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		if err != nil {
-			unAuthorizedResponce(err.Error(), w)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if at != "Negotiate" {
-			unAuthorizedResponce("wrong auth type", w)
+			http.Error(w, "wrong auth type", http.StatusUnauthorized)
 			return
 		}
 
 		if au == "wrongtoken" {
-			unAuthorizedResponce("user not allowed", w)
+			http.Error(w, "user not allowed", http.StatusUnauthorized)
 			return
 		}
 		fn(w, r)
@@ -239,21 +222,21 @@ func ProcessMockBasicAuth(fn http.HandlerFunc) http.HandlerFunc {
 		at, au, err := ExtractAuthInfo(r)
 
 		if err != nil {
-			unAuthorizedResponce(err.Error(), w)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
 		if err != nil {
-			unAuthorizedResponce(err.Error(), w)
+			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 		if at != "Basic" {
-			unAuthorizedResponce("wrong auth type", w)
+			http.Error(w, "wrong auth type", http.StatusUnauthorized)
 			return
 		}
 
 		if au == "wronguser" {
-			unAuthorizedResponce("user not allowed", w)
+			http.Error(w, "user not allowed", http.StatusUnauthorized)
 			return
 		}
 		fn(w, r)

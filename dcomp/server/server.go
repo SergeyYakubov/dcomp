@@ -33,10 +33,23 @@ func (w gzipResponseWriter) Write(b []byte) (int, error) {
 }
 
 type Server struct {
-	Host string
-	Port int
-	auth Auth
-	Tls  bool
+	Host            string
+	Port            int
+	auth            Auth
+	Tls             bool
+	alternativeAuth []Auth
+}
+
+func (srv *Server) AddAlternativeAuth(a Auth) {
+	if srv.alternativeAuth == nil {
+		srv.alternativeAuth = make([]Auth, 0)
+	}
+	for _, t := range srv.alternativeAuth {
+		if t.Name() == a.Name() {
+			return
+		}
+	}
+	srv.alternativeAuth = append(srv.alternativeAuth, a)
 }
 
 func (srv *Server) SetAuth(a Auth) {
@@ -85,7 +98,7 @@ func (srv *Server) addAuthorizationHeader(r *http.Request) {
 	claims := CustomClaims{ExtraClaims: r}
 	token, err := srv.auth.GenerateToken(&claims)
 	if err != nil {
-		log.Print("cannot generate auth token " + err.Error())
+		log.Print("cannot generate auth token: " + err.Error())
 		return
 	}
 
@@ -145,16 +158,17 @@ func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
 	return b, nil
 }
 
-func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, status int, err error) {
-	binput := new(bytes.Buffer)
-	b = new(bytes.Buffer)
+func (srv *Server) httpCommandWithAuth(method string, path string, data interface{}) (*bytes.Buffer,
+	int, error) {
+
+	b := new(bytes.Buffer)
 	if data != nil {
-		if err := json.NewEncoder(binput).Encode(data); err != nil {
+		if err := json.NewEncoder(b).Encode(data); err != nil {
 			return nil, -1, err
 		}
 	}
 
-	req, err := http.NewRequest(method, srv.url(path), binput)
+	req, err := http.NewRequest(method, srv.url(path), b)
 	if err != nil {
 		return nil, -1, err
 	}
@@ -172,47 +186,57 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 	defer res.Body.Close()
 	io.Copy(b, res.Body)
 
-	if res.StatusCode == http.StatusUnauthorized {
-		var resp AuthorizationResponce
-		if err := json.NewDecoder(b).Decode(&resp); err != nil {
-			return nil, -1, err
-		}
-		for _, val := range resp.Authorization {
-			if val == "Basic" {
-				binput := new(bytes.Buffer)
-				if data != nil {
-					if err := json.NewEncoder(binput).Encode(data); err != nil {
-						return nil, -1, err
-					}
-				}
+	return b, res.StatusCode, nil
+}
 
-				req, err := http.NewRequest(method, srv.url(path), binput)
-				if err != nil {
-					return nil, -1, err
-				}
-
-				req.Close = true
-				srv.auth = NewBasicAuth()
-				srv.addAuthorizationHeader(req)
-
-				client := srv.newClient()
-				res, err := client.Do(req)
-				if err != nil {
-					return nil, -1, err
-				}
-
-				defer res.Body.Close()
-				io.Copy(b, res.Body)
-				if res.StatusCode != http.StatusUnauthorized {
-					return b, res.StatusCode, nil
-				}
-
+func (srv *Server) authTokensToTry() (tokens []Auth) {
+	tokens = make([]Auth, 0)
+	tokens = append(tokens, srv.auth)
+	f := func(token Auth) {
+		for _, t := range tokens {
+			if t == nil {
+				continue
+			}
+			if t.Name() == token.Name() {
+				return
 			}
 		}
-		return nil, -1, errors.New("Authorization failed: " + resp.ErrorMsg)
+		tokens = append(tokens, token)
 	}
 
-	return b, res.StatusCode, nil
+	for _, t := range srv.alternativeAuth {
+		f(t)
+	}
+
+	return
+}
+
+func (srv *Server) httpCommand(method string, path string, data interface{}) (b *bytes.Buffer, status int, err error) {
+
+	tryAuthTokens := srv.authTokensToTry()
+	iniToken := srv.auth
+	defer func() { srv.auth = iniToken }()
+
+	for _, authToken := range tryAuthTokens {
+		srv.auth = authToken
+
+		b, status, err = srv.httpCommandWithAuth(method, path, data)
+		if err != nil || status != http.StatusUnauthorized {
+			return
+		}
+	}
+
+	var tokens string
+	for _, t := range tryAuthTokens {
+		if t != nil {
+			tokens += " " + t.Name()
+		} else {
+			tokens += " None"
+		}
+	}
+	b = new(bytes.Buffer)
+	b.WriteString("Cannot authorize with methods:" + tokens)
+	return
 }
 
 // CommandPost issues the POST command to srv. data should be JSON-encodable. Returns response body or error

@@ -30,9 +30,10 @@ func SetDaemonConfiguration() error {
 	daemon.Host = c.Dcompd.Host
 	daemon.Port = c.Dcompd.Port
 
-	//	auth := server.NewBasicAuth()
 	auth := server.NewGSSAPIAuth()
 	daemon.SetAuth(auth)
+	daemon.AddAlternativeAuth(server.NewBasicAuth())
+
 	daemon.Tls = true
 
 	return nil

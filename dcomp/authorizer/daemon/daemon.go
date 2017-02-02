@@ -20,12 +20,7 @@ type config struct {
 }
 
 func (c *config) authorizationAllowed(atype string) bool {
-	for _, val := range c.Authorization {
-		if val == atype {
-			return true
-		}
-	}
-	return false
+	return utils.StringInArray(atype, c.Authorization)
 }
 
 var configFile = `/etc/dcomp/conf/dcompauthd.yaml`
@@ -50,10 +45,12 @@ func Start() {
 		log.Fatal(err)
 	}
 
-	gssAPIContext, err = utils.PrepareSeverGSSAPIContext("dcomp")
+	if utils.StringInArray("Negotiate", c.Authorization) {
+		gssAPIContext, err = utils.PrepareSeverGSSAPIContext("dcomp")
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	log.Fatal(http.ListenAndServeTLS(c.Daemon.Addr, c.Daemon.Certfile, c.Daemon.Keyfile,

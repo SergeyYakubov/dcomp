@@ -19,7 +19,7 @@ var userAuthtests = []struct {
 }{
 	{"Basic wronguser", 401, "not", "user not allowed"},
 	{"Basic user", 200, "user", "correct auth"},
-	{"Wrong test", 401, "type", "wrong auth type"},
+	{"Wrong test", 401, "Cannot authorize", "wrong auth type"},
 }
 
 func ok(w http.ResponseWriter, r *http.Request) {
@@ -33,6 +33,7 @@ func TestProcessUserAuth(t *testing.T) {
 	ts := server.CreateMockServer(&srv)
 	defer ts.Close()
 	authServer = srv
+	authServer.SetAuth(server.NewBasicAuth())
 	for _, test := range userAuthtests {
 		req, _ := http.NewRequest("POST", "http://blabla", nil)
 		token := test.Token

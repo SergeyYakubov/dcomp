@@ -21,41 +21,36 @@ func ProcessUserAuth(fn http.HandlerFunc) http.HandlerFunc {
 		//			return
 		//		}
 
-		resp, status, err := authorize(r)
+		b, status, err := authorize(r)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		if status == http.StatusUnauthorized {
-			w.WriteHeader(http.StatusUnauthorized)
-			b := new(bytes.Buffer)
-			json.NewEncoder(b).Encode(&resp)
+		if status != http.StatusOK {
+			w.WriteHeader(status)
 			w.Write(b.Bytes())
 			return
 		}
+
+		var resp server.AuthorizationResponce
+		if err := json.NewDecoder(b).Decode(&resp); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), "authorizationResponce", &resp)
 		fn(w, r.WithContext(ctx))
 	}
 }
 
-func authorize(r *http.Request) (server.AuthorizationResponce, int, error) {
+func authorize(r *http.Request) (*bytes.Buffer, int, error) {
 
 	var req server.AuthorizationRequest
-	var resp server.AuthorizationResponce
 
 	req.Command = r.Method
 	req.Token = r.Header.Get("Authorization")
 	req.URL = r.URL.RawPath
 
-	b, status, err := authServer.CommandPost("authorize"+"/", &req)
-	if err != nil {
-		return resp, -1, err
-	}
-
-	if err := json.NewDecoder(b).Decode(&resp); err != nil {
-		return resp, -1, err
-	}
-
-	return resp, status, err
+	return authServer.CommandPost("authorize"+"/", &req)
 }

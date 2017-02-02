@@ -10,28 +10,12 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
-func unAuthorizedResponce(msg string, w http.ResponseWriter) {
-
-	var resp server.AuthorizationResponce
-
-	resp.Authorization = make([]string, len(c.Authorization))
-	copy(resp.Authorization, c.Authorization)
-	resp.ErrorMsg = msg
-
-	w.WriteHeader(http.StatusUnauthorized)
-
-	b := new(bytes.Buffer)
-	json.NewEncoder(b).Encode(&resp)
-	w.Write(b.Bytes())
-	return
-}
-
 func routeAuthorizeRequest(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("Content-type", "application/json")
 
 	if r.Body == nil {
-		unAuthorizedResponce("bad request", w)
+		http.Error(w, "bad request", http.StatusUnauthorized)
 		return
 
 	}
@@ -40,14 +24,14 @@ func routeAuthorizeRequest(w http.ResponseWriter, r *http.Request) {
 
 	d := json.NewDecoder(r.Body)
 	if d.Decode(&t) != nil {
-		unAuthorizedResponce("bad request", w)
+		http.Error(w, "bad request", http.StatusUnauthorized)
 		return
 
 	}
 
 	resp, err := authorize(t)
 	if err != nil {
-		unAuthorizedResponce(err.Error(), w)
+		http.Error(w, err.Error(), http.StatusUnauthorized)
 		return
 	}
 

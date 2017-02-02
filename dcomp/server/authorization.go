@@ -27,13 +27,32 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationResponce struct {
-	UserName      string
-	ErrorMsg      string
-	Authorization []string
+	UserName string
 }
 
 type Auth interface {
 	GenerateToken(*CustomClaims) (string, error)
+	Name() string
+}
+
+func (a *BasicAuth) Name() string {
+	return "Basic"
+}
+
+func (a *ExternalAuth) Name() string {
+	return "External"
+}
+
+func (a *HMACAuth) Name() string {
+	return "HMAC-SHA-256"
+}
+
+func (a *GSSAPIAuth) Name() string {
+	return "Negotiate"
+}
+
+func (a *JWTAuth) Name() string {
+	return "Bearer"
 }
 
 type BasicAuth struct {
@@ -42,6 +61,9 @@ type BasicAuth struct {
 
 type ExternalAuth struct {
 	Token string
+}
+
+type NoAuth struct {
 }
 
 func NewExternalAuth(token string) *ExternalAuth {

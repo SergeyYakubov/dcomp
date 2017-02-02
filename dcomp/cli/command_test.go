@@ -49,9 +49,7 @@ func TestCommand(t *testing.T) {
 	outBuf.(*bytes.Buffer).Reset()
 	err := DoCommand(test.cmd.name, test.cmd.args)
 	assert.NotNil(t, err, "Auth with wrong username. Should produce error")
-
 	daemon.SetAuth(nil)
-
 }
 
 func TestPrintAllCommands(t *testing.T) {

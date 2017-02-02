@@ -4,8 +4,8 @@ daemon:
  certfile: /etc/dcomp/cert/certauth.pem
  keyfile: /etc/dcomp/cert/keyauth.pem
 authorization:
-  - Basic
-#  - Negotiate
+        - Basic
+        - Negotiate
 
 
 
