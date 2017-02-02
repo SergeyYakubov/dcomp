@@ -189,7 +189,7 @@ func MockFuncDelete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func ProcessMockGSSAPIAuth(fn http.HandlerFunc) http.HandlerFunc {
+func ProcessMockAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		at, au, err := ExtractAuthInfo(r)
@@ -203,34 +203,7 @@ func ProcessMockGSSAPIAuth(fn http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		if at != "Negotiate" {
-			http.Error(w, "wrong auth type", http.StatusUnauthorized)
-			return
-		}
-
-		if au == "wrongtoken" {
-			http.Error(w, "user not allowed", http.StatusUnauthorized)
-			return
-		}
-		fn(w, r)
-	}
-}
-
-func ProcessMockBasicAuth(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		at, au, err := ExtractAuthInfo(r)
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-		if at != "Basic" {
+		if at != "Basic" && at != "Negotiate" {
 			http.Error(w, "wrong auth type", http.StatusUnauthorized)
 			return
 		}
@@ -259,12 +232,11 @@ func CreateMockServer(srv *Server) *httptest.Server {
 	case *HMACAuth:
 		ts = newsrv(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
 	case *BasicAuth:
-		ts = newsrv(ProcessMockBasicAuth(http.HandlerFunc(mux.ServeHTTP)))
+		ts = newsrv(ProcessMockAuth(http.HandlerFunc(mux.ServeHTTP)))
 	case *GSSAPIAuth:
-		ts = newsrv(ProcessMockGSSAPIAuth(http.HandlerFunc(mux.ServeHTTP)))
+		ts = newsrv(ProcessMockAuth(http.HandlerFunc(mux.ServeHTTP)))
 	case *JWTAuth:
 		ts = newsrv(ProcessJWTAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
-
 	}
 	srv.parseUrl(ts.URL)
 	return ts

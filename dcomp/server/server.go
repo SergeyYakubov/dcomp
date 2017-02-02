@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -98,7 +97,7 @@ func (srv *Server) addAuthorizationHeader(r *http.Request) {
 	claims := CustomClaims{ExtraClaims: r}
 	token, err := srv.auth.GenerateToken(&claims)
 	if err != nil {
-		log.Print("cannot generate auth token: " + err.Error())
+		//		log.Print("cannot generate auth token: " + err.Error())
 		return
 	}
 
@@ -221,6 +220,7 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 		srv.auth = authToken
 
 		b, status, err = srv.httpCommandWithAuth(method, path, data)
+
 		if err != nil || status != http.StatusUnauthorized {
 			return
 		}
