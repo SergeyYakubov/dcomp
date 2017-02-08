@@ -6,7 +6,7 @@ import (
 	"os/user"
 	"strconv"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -82,11 +82,11 @@ func setConfiguration(res *Resource) {
 	res.Basedir = c.BaseDir
 }
 
-func createdb() *database.Mongodb {
+func createdb() *jobdatabase.Mongodb {
 	var dbsrv server.Server
 	dbsrv.Host = "localhost"
 	dbsrv.Port = 27017
-	db := new(database.Mongodb)
+	db := new(jobdatabase.Mongodb)
 	db.SetServer(&dbsrv)
 	db.SetDefaults("localplugintest")
 	return db

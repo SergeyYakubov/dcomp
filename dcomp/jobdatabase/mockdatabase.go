@@ -1,6 +1,6 @@
 // +build !release
 
-package database
+package jobdatabase
 
 import (
 	"errors"

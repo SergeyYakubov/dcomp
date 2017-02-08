@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -34,7 +34,7 @@ func TestGetJobsFromResources(t *testing.T) {
 	resources = make(map[string]structs.Resource)
 	resources["mock"] = structs.Resource{Server: srv}
 
-	db = new(database.Mongodb)
+	db = new(jobdatabase.Mongodb)
 
 	//var dbServer server.Server
 
@@ -82,7 +82,7 @@ func TestRouteGetJob(t *testing.T) {
 	resources = make(map[string]structs.Resource)
 	resources["mock"] = structs.Resource{Server: srv}
 
-	db = new(database.Mongodb)
+	db = new(jobdatabase.Mongodb)
 
 	//	var dbServer server.Server
 

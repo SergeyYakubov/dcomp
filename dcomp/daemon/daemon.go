@@ -5,11 +5,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
-var db database.Agent
+var db jobdatabase.Agent
 
 func Start(args []string) {
 	var err error

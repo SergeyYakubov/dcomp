@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/resources"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -12,7 +12,7 @@ import (
 
 var resource resources.Resource
 
-func Start(res resources.Resource, db database.Agent, addr, key string) error {
+func Start(res resources.Resource, db jobdatabase.Agent, addr, key string) error {
 	resource = res
 	if err := db.Connect(); err != nil {
 		log.Fatal(err)

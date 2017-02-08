@@ -31,7 +31,7 @@ type AuthorizationResponce struct {
 }
 
 type Auth interface {
-	GenerateToken(*CustomClaims) (string, error)
+	GenerateToken(...interface{}) (string, error)
 	Name() string
 }
 
@@ -72,11 +72,11 @@ func NewExternalAuth(token string) *ExternalAuth {
 	return &a
 }
 
-func (b ExternalAuth) GenerateToken(*CustomClaims) (string, error) {
+func (b ExternalAuth) GenerateToken(...interface{}) (string, error) {
 	return b.Token, nil
 }
 
-func (b BasicAuth) GenerateToken(*CustomClaims) (string, error) {
+func (b BasicAuth) GenerateToken(...interface{}) (string, error) {
 	if b.forcedUsername == "" {
 		user, err := user.Current()
 		if err != nil {
@@ -120,7 +120,14 @@ func generateHMACToken(r *http.Request, key string) string {
 	return base64.URLEncoding.EncodeToString(mac.Sum(nil))
 }
 
-func (h HMACAuth) GenerateToken(claims *CustomClaims) (string, error) {
+func (h HMACAuth) GenerateToken(val ...interface{}) (string, error) {
+	if len(val) != 1 {
+		return "", errors.New("Wrong claims")
+	}
+	claims, ok := val[0].(*CustomClaims)
+	if !ok {
+		return "", errors.New("Wrong claims")
+	}
 
 	r := claims.ExtraClaims.(*http.Request)
 	sha := generateHMACToken(r, h.Key)
@@ -212,7 +219,15 @@ func NewJWTAuth(key string) *JWTAuth {
 	return &a
 }
 
-func (t JWTAuth) GenerateToken(claims *CustomClaims) (string, error) {
+func (t JWTAuth) GenerateToken(val ...interface{}) (string, error) {
+	if len(val) != 1 {
+		return "", errors.New("Wrong claims")
+	}
+	claims, ok := val[0].(*CustomClaims)
+	if !ok {
+		return "", errors.New("Wrong claims")
+	}
+
 	if claims.Duration > 0 {
 		claims.ExpiresAt = time.Now().Add(claims.Duration).Unix()
 	}
@@ -286,7 +301,7 @@ func JobClaimFromContext(r *http.Request, val interface{}) error {
 type GSSAPIAuth struct {
 }
 
-func (b GSSAPIAuth) GenerateToken(*CustomClaims) (string, error) {
+func (b GSSAPIAuth) GenerateToken(...interface{}) (string, error) {
 
 	data, err := utils.GetGSSAPIToken("dcomp")
 

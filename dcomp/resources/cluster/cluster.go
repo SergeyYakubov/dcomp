@@ -19,13 +19,13 @@ import (
 
 	"os"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type Resource struct {
-	db          database.Agent
+	db          jobdatabase.Agent
 	wout        io.Writer
 	Basedir     string
 	TemplateDir string
@@ -315,7 +315,7 @@ func (res *Resource) createJobDir(id string, uid, gid int) error {
 	return nil
 }
 
-func (res *Resource) SetDb(db database.Agent) {
+func (res *Resource) SetDb(db jobdatabase.Agent) {
 	res.db = db
 }
 

@@ -13,6 +13,9 @@ import (
 	"fmt"
 	"io"
 
+	"crypto/sha1"
+	"encoding/hex"
+
 	"gopkg.in/yaml.v2"
 )
 
@@ -212,4 +215,18 @@ func ReadFile(fname string, compressed bool) (b *bytes.Buffer, err error) {
 	}
 
 	return b, nil
+}
+
+func FileCheckSum(fname string) (string, error) {
+	f, err := os.Open(fname)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+
+	hasher := sha1.New()
+	if _, err := io.Copy(hasher, f); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

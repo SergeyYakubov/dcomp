@@ -7,7 +7,7 @@ import (
 
 	"bytes"
 	"encoding/json"
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -33,7 +33,7 @@ var patchTests = []patchRequest{
 
 func TestRoutePatchJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
-	db = new(database.Mockdatabase)
+	db = new(jobdatabase.Mockdatabase)
 	defer func() { db = nil }()
 
 	var srv server.Server

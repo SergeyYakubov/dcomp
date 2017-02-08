@@ -5,7 +5,7 @@ import (
 	"compress/gzip"
 	"errors"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
@@ -19,7 +19,7 @@ func (res *MockResource) SubmitJob(job structs.JobInfo, checkonly bool) error {
 	return nil
 }
 
-func (res *MockResource) SetDb(database.Agent) {
+func (res *MockResource) SetDb(jobdatabase.Agent) {
 
 }
 

@@ -1,6 +1,6 @@
 // Package containes a database objects and functions to work with it.
 // db is an interface to a specific implementation (currently implemented mongodb and mockdatabase used for tests)
-package database
+package jobdatabase
 
 import "github.com/sergeyyakubov/dcomp/dcomp/server"
 

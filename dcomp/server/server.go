@@ -121,6 +121,7 @@ func (srv *Server) UploadData(urlpath string, destname string, data io.Reader,
 	size int64, mode os.FileMode) (b *bytes.Buffer, err error) {
 
 	req, err := http.NewRequest("POST", srv.url(urlpath), data)
+	req.Close = true
 	if err != nil {
 		return nil, err
 	}

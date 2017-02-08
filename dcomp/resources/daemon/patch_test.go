@@ -15,7 +15,7 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/resources/mock"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
@@ -45,7 +45,7 @@ func TestPatchJob(t *testing.T) {
 	var dbsrv server.Server
 	dbsrv.Host = "172.17.0.2"
 	dbsrv.Port = 27017
-	db := new(database.Mockdatabase)
+	db := new(jobdatabase.Mockdatabase)
 	db.SetServer(&dbsrv)
 	db.Connect()
 	resource = new(mock.MockResource)

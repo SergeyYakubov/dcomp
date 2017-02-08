@@ -6,7 +6,7 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/resources/daemon"
 	"github.com/sergeyyakubov/dcomp/dcomp/resources/local"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
@@ -70,7 +70,7 @@ func main() {
 	var dbsrv server.Server
 	dbsrv.Host = c.Database.Host
 	dbsrv.Port = c.Database.Port
-	db := new(database.Mongodb)
+	db := new(jobdatabase.Mongodb)
 	db.SetServer(&dbsrv)
 	db.SetDefaults("localplugin")
 	addr := c.Daemon.Addr

@@ -126,7 +126,7 @@ func TestProcessJWTAuth(t *testing.T) {
 func TestGenerateExternalToken(t *testing.T) {
 
 	a := NewExternalAuth("hi")
-	token, _ := a.GenerateToken(nil)
+	token, _ := a.GenerateToken()
 	assert.Equal(t, "hi", token, "external token")
 
 }

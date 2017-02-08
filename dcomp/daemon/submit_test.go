@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -24,7 +24,7 @@ var submitRouteTests = []request{
 func TestRouteSubmitReleaseJob(t *testing.T) {
 	mux := utils.NewRouter(listRoutes)
 	setConfiguration()
-	db = new(database.Mockdatabase)
+	db = new(jobdatabase.Mockdatabase)
 	defer func() { db = nil }()
 
 	for _, test := range submitRouteTests {
@@ -99,7 +99,7 @@ var submitTests = []submitRequest{
 func TestSubmitJob(t *testing.T) {
 
 	setConfiguration()
-	db = new(database.Mockdatabase)
+	db = new(jobdatabase.Mockdatabase)
 	defer func() { db = nil }()
 
 	for _, test := range submitTests {

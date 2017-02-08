@@ -2,7 +2,7 @@ package daemon
 
 import (
 	"fmt"
-	"github.com/sergeyyakubov/dcomp/dcomp/database"
+	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -92,9 +92,9 @@ func setConfiguration() error {
 	return nil
 }
 
-func connectDb(name string) (db database.Agent, err error) {
+func connectDb(name string) (db jobdatabase.Agent, err error) {
 
-	db = new(database.Mongodb)
+	db = new(jobdatabase.Mongodb)
 	if err := setConfiguration(); err != nil {
 		return nil, err
 	}

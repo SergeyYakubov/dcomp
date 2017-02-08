@@ -59,7 +59,6 @@ func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan er
 		errchan <- err
 		return
 	}
-
 	defer f.Close()
 
 	un := getUploadName(fileInfo.Path, fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
@@ -71,6 +70,7 @@ func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan er
 	}
 
 	errchan <- nil
+
 	return
 
 }
@@ -126,7 +126,7 @@ func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error 
 		return err
 	}
 
-	maxParallelRequests := 5
+	maxParallelRequests := 50
 
 	nrequests := 0
 	for _, fileInfo := range listFiles {
