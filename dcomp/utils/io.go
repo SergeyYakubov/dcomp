@@ -16,6 +16,12 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 
+	"crypto/md5"
+	"crypto/sha256"
+	"hash"
+
+	"errors"
+	"github.com/spaolacci/murmur3"
 	"gopkg.in/yaml.v2"
 )
 
@@ -217,16 +223,32 @@ func ReadFile(fname string, compressed bool) (b *bytes.Buffer, err error) {
 	return b, nil
 }
 
-func FileCheckSum(fname string) (string, error) {
+func FileCheckSum(fname, alg string) (string, error) {
 	f, err := os.Open(fname)
 	if err != nil {
 		return "", err
 	}
 	defer f.Close()
 
-	hasher := sha1.New()
+	var hasher hash.Hash
+
+	switch alg {
+	case "sha1":
+		hasher = sha1.New()
+	case "murmur":
+		hasher = murmur3.New128()
+	case "sha2":
+		hasher = sha256.New()
+	case "md5":
+		hasher = md5.New()
+	default:
+		return "", errors.New("Unknown algorithm")
+
+	}
+
 	if _, err := io.Copy(hasher, f); err != nil {
 		return "", err
 	}
+
 	return hex.EncodeToString(hasher.Sum(nil)), nil
 }

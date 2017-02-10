@@ -122,6 +122,12 @@ func createFile(auth server.AuthorizationResponce, r *http.Request) (file *os.Fi
 		return
 	}
 
+	mode, err := getFileMode(r)
+	if err != nil {
+		errorcode = http.StatusBadRequest
+		return
+	}
+
 	path := filepath.Dir(filename)
 	err = utils.MkdirAllWithCh(path, 0777, uid, gid)
 	if err != nil {
@@ -130,12 +136,6 @@ func createFile(auth server.AuthorizationResponce, r *http.Request) (file *os.Fi
 	}
 
 	file, err = os.Create(filename)
-	if err != nil {
-		errorcode = http.StatusBadRequest
-		return
-	}
-
-	mode, err := getFileMode(r)
 	if err != nil {
 		errorcode = http.StatusBadRequest
 		return

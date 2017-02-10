@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/sergeyyakubov/dcomp/dcomp/datamanager/internal/cachedatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
@@ -23,9 +24,15 @@ type config struct {
 	Resource struct {
 		BaseDir string
 	}
+	Database struct {
+		Host string
+		Port int
+	}
 }
 
 var settings config
+
+var db cachedatabase.Agent
 
 // setDaemonConfiguration reads configuration file with daemon location
 func setDaemonConfiguration(configFile string) error {
@@ -40,6 +47,15 @@ func Start(configFile string) {
 	if err := setDaemonConfiguration(configFile); err != nil {
 		log.Fatal(err)
 	}
+
+	db = new(cachedatabase.SqlDatabase)
+	srv := server.Server{Host: settings.Database.Host, Port: settings.Database.Port}
+	db.SetServer(&srv)
+
+	if err := db.Connect(); err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
 
 	log.Fatal(http.ListenAndServeTLS(settings.Daemon.Addr,
 		settings.Daemon.Certfile, settings.Daemon.Keyfile,
