@@ -1,10 +1,6 @@
 package daemon
 
 import (
-	"bytes"
-	"context"
-	"encoding/json"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -17,7 +13,7 @@ import (
 )
 
 var submitRouteTests = []request{
-	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Resource: "local"},
+	{structs.JobDescription{},
 		"jobs/578359205e935a20adb39a18", "POST", http.StatusCreated, "Create job"},
 }
 
@@ -40,23 +36,7 @@ func TestRouteSubmitReleaseJob(t *testing.T) {
 
 		defer ts2.Close()
 
-		b := new(bytes.Buffer)
-		if err := json.NewEncoder(b).Encode(test.job); err != nil {
-			t.Fail()
-		}
-
-		var reader io.Reader = b
-		if test.job.ImageName == "nil" {
-			reader = nil
-		}
-
-		req, err := http.NewRequest(test.cmd, "http://localhost:8000/"+test.path+"/", reader)
-
-		if test.job.ImageName != "noauth" {
-			resp := server.AuthorizationResponce{UserName: "testuser"}
-			ctx := context.WithValue(req.Context(), "authorizationResponce", &resp)
-			req = req.WithContext(ctx)
-		}
+		req, err := http.NewRequest(test.cmd, "http://localhost:8000/"+test.path+"/", nil)
 
 		assert.Nil(t, err, "Should not be error")
 

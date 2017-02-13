@@ -3,8 +3,9 @@ package jobdatabase
 import (
 	"testing"
 
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"time"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/stretchr/testify/assert"
@@ -168,6 +169,18 @@ func TestMdbPatchRecord(t *testing.T) {
 	assert.Equal(t, 1, len(records), "TestMdbPatchRecord should return 1")
 	assert.Equal(t, 2, records[0].Status, "TestMdbPatchRecord should return status 2")
 	assert.Equal(t, "hello", records[0].Resource, "TestMdbPatchRecord should return resource hello")
+
+	//data := struct {
+	//		JobStatus struct{ Status int }
+	//	}{struct{ Status int }{3}}
+
+	data := struct {
+		JobStatus structs.JobStatus
+	}{structs.JobStatus{Status: 3}}
+
+	err = db.PatchRecord(id, &data)
+	db.GetRecordsByID(id, &records)
+	assert.Equal(t, 3, records[0].Status, "TestMdbPatchRecord should return status 2")
 
 	err = db.PatchRecord("aaa", &s)
 	assert.NotNil(t, err)

@@ -8,14 +8,14 @@ import (
 
 var setTests = []struct {
 	Test     string
-	Err      bool
+	Ok       bool
 	Messsage string
 }{
-	{"aaa:bbb", false, "ok"},
-	{"aaa:", true, "empty dest"},
-	{"aaa:.", true, "relative dest"},
-	{"aaa:./", true, "relative dest 2 "},
-	{"aaa:/", true, "root dest"},
+	{"aaa:bbb", true, "ok"},
+	{"aaa:", false, "empty dest"},
+	{"aaa:.", false, "relative dest"},
+	{"aaa:./", false, "relative dest 2 "},
+	{"aaa:/", false, "root dest"},
 }
 
 func TestSetTransferFiles(t *testing.T) {
@@ -23,10 +23,49 @@ func TestSetTransferFiles(t *testing.T) {
 	for _, test := range setTests {
 		var setTests TransferFiles
 		err := setTests.Set(test.Test)
-		if test.Err {
+		if !test.Ok {
 			assert.NotNil(t, err, test.Messsage)
 		} else {
 			assert.Nil(t, err, test.Messsage)
+		}
+
+	}
+
+}
+
+var setJobTests = []struct {
+	Test       string
+	Ok         bool
+	Source     string
+	SourcePath string
+	DestPath   string
+	Messsage   string
+}{
+	{"job/aaa:bbb", true, "job", "aaa", "bbb", "ok"},
+	{"/job/aaa:bbb", false, "", "", "", "resource missed1 "},
+	{"aaa:bbb", false, "", "", "", "resource missed 2"},
+	{"job/:sss", false, "", "", "", "source path missed "},
+	{"job/t/aaa:d/bbb", true, "job", "t/aaa", "d/bbb", "ok"},
+	{"job/aaa:", false, "", "", "", "empty dest"},
+	{"job/aaa:.", false, "", "", "", "relative dest"},
+	{"job/aaa:./", false, "", "", "", "relative dest 2 "},
+	{"job/aaa:/", false, "", "", "", "root dest"},
+}
+
+func TestSetJobFiles(t *testing.T) {
+
+	for _, test := range setJobTests {
+		var Tests CopyFiles
+		err := Tests.Set(test.Test)
+		if !test.Ok {
+			assert.NotNil(t, err, test.Messsage)
+		} else {
+			assert.Nil(t, err, test.Messsage)
+			if err == nil {
+				assert.Equal(t, test.DestPath, Tests[0].DestPath, test.Messsage)
+				assert.Equal(t, test.SourcePath, Tests[0].SourcePath, test.Messsage)
+				assert.Equal(t, test.Source, Tests[0].Source, test.Messsage)
+			}
 		}
 
 	}

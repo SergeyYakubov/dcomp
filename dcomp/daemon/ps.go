@@ -103,7 +103,7 @@ func getJobLog(job structs.JobInfo, u *url.URL) (b *bytes.Buffer, err error) {
 
 func routeGetJob(w http.ResponseWriter, r *http.Request) {
 
-	job, err := GetJobFromDatabase(r)
+	job, err := GetJobFromRequest(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

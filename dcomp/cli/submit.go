@@ -182,7 +182,7 @@ func (cmd *command) CommandSubmit() error {
 		return err
 	}
 
-	if status != http.StatusCreated && status != http.StatusOK {
+	if status != http.StatusCreated && status != http.StatusAccepted {
 		return errors.New(b.String())
 	}
 
@@ -222,6 +222,8 @@ func createSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) {
 	flagset.IntVar(&flags.NNodes, "nnodes", 0, "Number of Nodes")
 	flagset.StringVar(&flags.Resource, "resource", "", "Force submit to this resource")
 	flagset.Var(&flags.FilesToUpload, "upload", "File(s) to upload")
+	flagset.Var(&flags.FilesToMount, "mount", "File(s) to mount")
+
 }
 
 func (cmd *command) parseSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) error {

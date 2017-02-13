@@ -8,7 +8,7 @@ import (
 
 func routePatchJob(w http.ResponseWriter, r *http.Request) {
 
-	job, err := GetJobFromDatabase(r)
+	job, err := GetJobFromRequest(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)

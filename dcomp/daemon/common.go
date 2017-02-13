@@ -14,10 +14,7 @@ import (
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
-func GetJobFromDatabase(r *http.Request) (structs.JobInfo, error) {
-
-	vars := mux.Vars(r)
-	jobID := vars["jobID"]
+func GetJobFromDatabase(jobID string) (structs.JobInfo, error) {
 
 	var job structs.JobInfo
 
@@ -32,6 +29,14 @@ func GetJobFromDatabase(r *http.Request) (structs.JobInfo, error) {
 
 	return jobs[0], nil
 
+}
+
+func GetJobFromRequest(r *http.Request) (structs.JobInfo, error) {
+
+	vars := mux.Vars(r)
+	jobID := vars["jobID"]
+
+	return GetJobFromDatabase(jobID)
 }
 
 func createJWT(job structs.JobInfo, r *http.Request) (token string, err error) {
@@ -90,7 +95,7 @@ func writeJWTToken(w http.ResponseWriter, r *http.Request, job structs.JobInfo) 
 
 func SendJWTToken(w http.ResponseWriter, r *http.Request) {
 
-	job, err := GetJobFromDatabase(r)
+	job, err := GetJobFromRequest(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return

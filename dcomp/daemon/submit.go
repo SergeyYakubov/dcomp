@@ -19,14 +19,14 @@ func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.Job
 		return
 	}
 	if job.Status == structs.StatusWaitData {
-
-		err := writeJWTToken(w, r, job)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
 		w.WriteHeader(http.StatusAccepted)
+		if job.NeedUserDataUpload() {
+			err := writeJWTToken(w, r, job)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
 		return
 	}
 
@@ -65,10 +65,20 @@ func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 
 func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 
-	job, err := GetJobFromDatabase(r)
+	job, err := GetJobFromRequest(r)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	// job will be submitted automatically when internal data is copied
+	// we need to set flag in database for this and exit
+	if job.NeedInternalDataCopy() {
+		if err := setJobStatus(&job, structs.StatusUserDataCopied); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
 		return
 	}
 
@@ -77,15 +87,21 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	job.Status = structs.StatusSubmitted
-	if err := modifyJobInDatabase(job.Id, &job); err != nil {
+	if err := setJobStatus(&job, structs.StatusSubmitted); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 	writeSubmitResponce(w, r, job)
 	return
+}
 
+func submitAfterCopyDataRequest(job structs.JobInfo, waitUserData bool) (err error) {
+
+	if waitUserData {
+		job, err = GetJobFromDatabase(job.Id)
+	}
+
+	return
 }
 
 func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, err error) {
@@ -106,18 +122,36 @@ func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, e
 	if err != nil {
 		return
 	}
-
-	if t.NeedData() {
-		job.Status = structs.StatusWaitData
-	} else {
-		if err = submitToResource(job); err != nil {
-			return
-		}
-		job.Status = structs.StatusSubmitted
+	if err = modifyJobInDatabase(job.Id, &job); err != nil {
+		return
 	}
 
-	err = modifyJobInDatabase(job.Id, &job)
+	if t.NeedInternalDataCopy() || t.NeedUserDataUpload() {
+		if err = setJobStatus(&job, structs.StatusWaitData); err != nil {
+			return
+		}
+		if t.NeedInternalDataCopy() {
+			go submitAfterCopyDataRequest(job, t.NeedUserDataUpload())
+		}
+		return
+	}
+
+	if err = submitToResource(job); err != nil {
+		return
+	}
+
+	err = setJobStatus(&job, structs.StatusSubmitted)
 	return
+}
+
+func setJobStatus(job *structs.JobInfo, status int) error {
+
+	job.Status = status
+	data := struct {
+		JobStatus structs.JobStatus
+	}{structs.JobStatus{Status: status}}
+
+	return db.PatchRecord(job.Id, &data)
 }
 
 func modifyJobInDatabase(id string, data interface{}) error {

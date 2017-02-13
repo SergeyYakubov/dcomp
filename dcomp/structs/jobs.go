@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"io"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 )
 
 type jobs interface {
@@ -27,23 +28,77 @@ func (i *TransferFiles) String() string {
 	return fmt.Sprint(*i)
 }
 
+func processDestinationParam(d string) (string, error) {
+	res := path.Clean(d)
+
+	if res == "" || strings.HasPrefix(res, ".") {
+		return "", errors.New("destination should be absolute")
+	}
+	if res == "/" {
+		return "", errors.New("cannot use root destination")
+	}
+	return res, nil
+
+}
+
+type copyFile struct {
+	SourcePath string
+	DestPath   string
+	Source     string
+}
+
+type CopyFiles []copyFile
+
+func (i *CopyFiles) String() string {
+	return fmt.Sprint(*i)
+}
+
+func (f *CopyFiles) Set(value string) error {
+	for _, dt := range strings.Split(value, ",") {
+		source, dest, err := processFilesParam(dt)
+		if err != nil {
+			return err
+		}
+
+		pair := strings.SplitN(source, "/", 2)
+		if len(pair) != 2 {
+			return errors.New("Use <source>/<source_path> format to set source")
+		}
+		source = strings.TrimSpace(pair[0])
+		sourcePath := strings.TrimSpace(pair[1])
+		if source == "" {
+			return errors.New("Empty source")
+		}
+
+		*f = append(*f, copyFile{Source: source, SourcePath: sourcePath, DestPath: dest})
+	}
+	return nil
+}
+
+func processFilesParam(d string) (string, string, error) {
+	pair := strings.Split(d, ":")
+	if len(pair) != 2 {
+		return "", "", errors.New("use for <source>:<dest> format")
+	}
+	source := path.Clean(pair[0])
+	dest, err := processDestinationParam(pair[1])
+	if err != nil {
+		return "", "", err
+	}
+	return source, dest, nil
+
+}
+
 // Set is the method to set the flag value, part of the flag.Value interface.
 // Set's argument is a string to be parsed to set the flag.
 // It's a comma-separated list, so we split it.
 func (f *TransferFiles) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
-		pair := strings.Split(dt, ":")
-		if len(pair) != 2 {
-			return errors.New("use for <source>:<dest> format for uploading files")
+		source, dest, err := processFilesParam(dt)
+		if err != nil {
+			return err
 		}
-		dest := path.Clean(pair[1])
-		if dest == "" || strings.HasPrefix(dest, ".") {
-			return errors.New("destination should be absolute")
-		}
-		if dest == "/" {
-			return errors.New("cannot use root destination")
-		}
-		*f = append(*f, transferFile{Source: path.Clean(pair[0]), Dest: dest})
+		*f = append(*f, transferFile{Source: source, Dest: dest})
 	}
 	return nil
 }
@@ -56,6 +111,7 @@ type JobDescription struct {
 	NNodes        int
 	Resource      string
 	FilesToUpload TransferFiles
+	FilesToMount  CopyFiles
 }
 
 type PatchJob struct {
@@ -77,7 +133,8 @@ const (
 	FinishCode      = 1
 	StatusCancelled = FinishCode*100 + iota
 	StatusFinished
-
+)
+const (
 	// pending codes
 	PendingCode     = 2
 	StatusSubmitted = PendingCode*100 + iota
@@ -85,12 +142,15 @@ const (
 	StatusStartingContainer
 	StatusWaitData
 	StatusPending
-
+	StatusUserDataCopied
+)
+const (
 	// running codes
 	RunningCode   = 3
 	StatusRunning = RunningCode*100 + iota
 	StatusFinishing
-
+)
+const (
 	//error codes
 	ErrorCode   = 4
 	StatusError = ErrorCode*100 + iota
@@ -185,7 +245,11 @@ type JobInfo struct {
 	Resource string
 }
 
-func (d *JobDescription) NeedData() bool {
+func (d *JobDescription) NeedInternalDataCopy() bool {
+	return len(d.FilesToMount) > 0
+}
+
+func (d *JobDescription) NeedUserDataUpload() bool {
 	return len(d.FilesToUpload) > 0
 }
 
