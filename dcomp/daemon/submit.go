@@ -10,16 +10,25 @@ import (
 
 	"strings"
 
+	"fmt"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
-func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.JobInfo) {
+func writeSubmitResponce(w http.ResponseWriter, job structs.JobInfo) {
 	if job.Status == structs.StatusSubmitted {
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(&job)
 		return
 	}
+
+	if job.Status == structs.StatusUserDataCopied {
+		w.WriteHeader(http.StatusAccepted)
+		json.NewEncoder(w).Encode(&job)
+		return
+	}
+
 	if job.Status == structs.StatusWaitData {
 		w.WriteHeader(http.StatusAccepted)
 		if job.NeedUserDataUpload() {
@@ -62,7 +71,7 @@ func routeSubmitJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	writeSubmitResponce(w, r, job)
+	writeSubmitResponce(w, job)
 
 	return
 }
@@ -82,7 +91,7 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusAccepted)
+		writeSubmitResponce(w, job)
 		return
 	}
 
@@ -95,7 +104,7 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	writeSubmitResponce(w, r, job)
+	writeSubmitResponce(w, job)
 	return
 }
 
@@ -188,11 +197,14 @@ func submitAfterCopyDataRequest(job structs.JobInfo, waitUserData bool) error {
 	}
 
 	if waitUserData {
+
 		timeout := time.Hour * 12
 		if err := waitJobStatus(job.Id, structs.StatusUserDataCopied, timeout); err != nil {
 			setJobStatus(&job, structs.StatusDataCopyFailed, err.Error())
+			fmt.Println(err)
 			return err
 		}
+
 	}
 
 	if err := submitToResource(job); err != nil {

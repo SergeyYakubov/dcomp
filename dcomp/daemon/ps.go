@@ -38,6 +38,7 @@ func updateJobs(jobs []structs.JobInfo) {
 		if jobs[i].Status != structs.StatusFinished &&
 			jobs[i].Status != structs.StatusWaitData &&
 			jobs[i].Status != structs.StatusSubmissionFailed &&
+			jobs[i].Status != structs.StatusUserDataCopied &&
 			jobs[i].Status != structs.StatusDataCopyFailed {
 
 			updateJobsStatusFromResources(&jobs[i])
@@ -51,7 +52,11 @@ func updateJobsStatusFromResources(job *structs.JobInfo) {
 	// update database
 	defer db.PatchRecord(job.Id, job)
 
-	b, _, err := res.Server.CommandGet("jobs" + "/" + job.Id)
+	b, httpstatus, err := res.Server.CommandGet("jobs" + "/" + job.Id)
+
+	if httpstatus == http.StatusNotFound {
+		return
+	}
 
 	if err != nil {
 		job.Status = structs.StatusErrorFromResource
