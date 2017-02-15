@@ -35,9 +35,9 @@ func (cmd *command) CommandCp() error {
 
 	cmdstr := "jobfile" + "/" + flags.Id + "/?path=" + url.QueryEscape(flags.Source) + "&nameonly=false"
 
-	dataTransferInfo, err := getDataTransferInfo(cmdstr)
+	getter, err := filesGetter(cmdstr)
 
-	b, _, err := dataTransferInfo.Srv.CommandGet(cmdstr)
+	b, _, err := getter.Srv.CommandGet(cmdstr)
 	if err != nil {
 		return err
 	}

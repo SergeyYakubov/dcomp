@@ -35,7 +35,11 @@ func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
 
 func updateJobs(jobs []structs.JobInfo) {
 	for i, _ := range jobs {
-		if jobs[i].Status != structs.StatusFinished && jobs[i].Status != structs.StatusWaitData {
+		if jobs[i].Status != structs.StatusFinished &&
+			jobs[i].Status != structs.StatusWaitData &&
+			jobs[i].Status != structs.StatusSubmissionFailed &&
+			jobs[i].Status != structs.StatusDataCopyFailed {
+
 			updateJobsStatusFromResources(&jobs[i])
 		}
 	}

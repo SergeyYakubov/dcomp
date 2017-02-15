@@ -41,19 +41,19 @@ func processDestinationParam(d string) (string, error) {
 
 }
 
-type copyFile struct {
+type FileCopyInfo struct {
 	SourcePath string
 	DestPath   string
 	Source     string
 }
 
-type CopyFiles []copyFile
+type FileCopyInfos []FileCopyInfo
 
-func (i *CopyFiles) String() string {
+func (i *FileCopyInfos) String() string {
 	return fmt.Sprint(*i)
 }
 
-func (f *CopyFiles) Set(value string) error {
+func (f *FileCopyInfos) Set(value string) error {
 	for _, dt := range strings.Split(value, ",") {
 		source, dest, err := processFilesParam(dt)
 		if err != nil {
@@ -70,7 +70,7 @@ func (f *CopyFiles) Set(value string) error {
 			return errors.New("Empty source")
 		}
 
-		*f = append(*f, copyFile{Source: source, SourcePath: sourcePath, DestPath: dest})
+		*f = append(*f, FileCopyInfo{Source: source, SourcePath: sourcePath, DestPath: dest})
 	}
 	return nil
 }
@@ -111,7 +111,7 @@ type JobDescription struct {
 	NNodes        int
 	Resource      string
 	FilesToUpload TransferFiles
-	FilesToMount  CopyFiles
+	FilesToMount  FileCopyInfos
 }
 
 type PatchJob struct {
@@ -156,8 +156,9 @@ const (
 	StatusError = ErrorCode*100 + iota
 	StatusSubmissionFailed
 	StatusErrorFromResource
-	StatusFailed
+	StatusJobFailed
 	StatusUnknown
+	StatusDataCopyFailed
 )
 
 type JobStatus struct {
@@ -178,9 +179,9 @@ func ExplainStatus(statusstr string) (status int, message string) {
 	case "PENDING":
 		status = StatusPending
 	case "FAILED":
-		status = StatusFailed
+		status = StatusJobFailed
 	case "TIMEOUT":
-		status = StatusFailed
+		status = StatusJobFailed
 		message = "Job terminated due to timeout"
 	case "RUNNING":
 		status = StatusRunning
@@ -230,7 +231,7 @@ func (s *JobStatus) UpdateFromOutput(status string) error {
 	return nil
 }
 
-type JobFilesTransfer struct {
+type JobFilesGetter struct {
 	Srv   server.Server
 	Token string
 	JobID string
@@ -305,8 +306,9 @@ var JobStatusExplained = map[int]string{
 	StatusErrorFromResource: "Error from resource",
 	StatusWaitData:          "Waiting data",
 	StatusPending:           "Pending",
-	StatusFailed:            "Failed",
+	StatusJobFailed:         "Failed",
 	StatusFinishing:         "Finishing",
+	StatusDataCopyFailed:    "Data copy failed",
 }
 
 func (d *JobInfo) PrintFull(w io.Writer) {

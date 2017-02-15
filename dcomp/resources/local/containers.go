@@ -55,15 +55,24 @@ func InitDockerClient(host string) {
 	}
 }
 
+func dockerVolumePair(basedir, dest string) string {
+	if !strings.HasPrefix(dest, "/") {
+		dest = "/" + dest
+	}
+	return basedir + dest + ":" + dest
+
+}
+
 func prepareBinds(job structs.JobDescription, basedir string) []string {
 
-	binds := make([]string, len(job.FilesToUpload))
-	for i, pair := range job.FilesToUpload {
-		if !strings.HasPrefix(pair.Dest, "/") {
-			pair.Dest = "/" + pair.Dest
-		}
-		binds[i] = basedir + pair.Dest + ":" + pair.Dest
+	binds := make([]string, 0)
+	for _, pair := range job.FilesToUpload {
+		binds = append(binds, dockerVolumePair(basedir, pair.Dest))
 	}
+	for _, pair := range job.FilesToMount {
+		binds = append(binds, dockerVolumePair(basedir, pair.DestPath))
+	}
+
 	return binds
 }
 

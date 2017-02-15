@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"net/http"
+	"time"
 
 	"encoding/json"
 
@@ -9,6 +10,7 @@ import (
 
 	"strings"
 
+	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 )
 
@@ -21,11 +23,13 @@ func writeSubmitResponce(w http.ResponseWriter, r *http.Request, job structs.Job
 	if job.Status == structs.StatusWaitData {
 		w.WriteHeader(http.StatusAccepted)
 		if job.NeedUserDataUpload() {
-			err := writeJWTToken(w, r, job)
+			err := writeJWTToken(w, job)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
+		} else {
+			json.NewEncoder(w).Encode(&job)
 		}
 		return
 	}
@@ -95,13 +99,108 @@ func routeReleaseJob(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func submitAfterCopyDataRequest(job structs.JobInfo, waitUserData bool) (err error) {
+func failedDataCopy(job structs.JobInfo, inierr error) error {
+	if errdb := setJobStatus(&job, structs.StatusDataCopyFailed); errdb != nil {
+		return errors.New(inierr.Error() + errdb.Error())
+	}
+	return inierr
 
-	if waitUserData {
-		job, err = GetJobFromDatabase(job.Id)
+}
+
+func submitSingleCopyDataRequest(job structs.JobInfo, fi structs.FileCopyInfo, errchan chan error) {
+	sourceJobID := fi.Source
+	sourceJob, err := GetJobFromDatabase(sourceJobID)
+	if err != nil {
+		errchan <- failedDataCopy(job, err)
+		return
+	}
+	if sourceJob.Resource != job.Resource {
+		errchan <- failedDataCopy(job, errors.New("Cannot copy/mount from another resource"))
+		return
+	}
+	token, err := createJWT(job)
+	srv := resources[job.Resource].DataManager
+	srv.SetAuth(server.NewExternalAuth(token))
+	b, status, err := srv.CommandPost("jobfile/"+job.Id+"/?mode=mount", &fi)
+
+	if err != nil {
+		errchan <- err
+		return
 	}
 
+	if status != http.StatusCreated {
+		errchan <- errors.New(b.String())
+		return
+	}
+
+	errchan <- nil
+
 	return
+
+}
+
+func waitJobStatus(jobID string, status int, timeout time.Duration) error {
+	start := time.Now()
+	for time.Since(start) < timeout {
+		job, err := GetJobFromDatabase(jobID)
+		if err != nil {
+			return err
+		}
+		if job.Status == status {
+			return nil
+		}
+
+		time.Sleep(time.Second)
+	}
+	return errors.New("Timeout waiting status " + structs.JobStatusExplained[status])
+
+}
+
+func waitRequests(n int, errchan chan error) (err error) {
+	// wait for single requests to finish, accumulate error
+	for i := 0; i < n; i++ {
+		err_current := <-errchan
+		if err_current != nil {
+			if err == nil {
+				err = err_current
+			} else {
+				err = errors.New(err.Error() + err_current.Error())
+			}
+		}
+	}
+	return err
+}
+
+func submitAfterCopyDataRequest(job structs.JobInfo, waitUserData bool) error {
+
+	errchan := make(chan error)
+
+	nrequests := 0
+
+	for _, fi := range job.FilesToMount {
+		go submitSingleCopyDataRequest(job, fi, errchan)
+		nrequests++
+	}
+
+	if err := waitRequests(nrequests, errchan); err != nil {
+		setJobStatus(&job, structs.StatusDataCopyFailed, err.Error())
+		return err
+	}
+
+	if waitUserData {
+		timeout := time.Hour * 12
+		if err := waitJobStatus(job.Id, structs.StatusUserDataCopied, timeout); err != nil {
+			setJobStatus(&job, structs.StatusDataCopyFailed, err.Error())
+			return err
+		}
+	}
+
+	if err := submitToResource(job); err != nil {
+		setJobStatus(&job, structs.StatusSubmissionFailed, err.Error())
+		return err
+	}
+
+	return setJobStatus(&job, structs.StatusSubmitted)
 }
 
 func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, err error) {
@@ -144,12 +243,15 @@ func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, e
 	return
 }
 
-func setJobStatus(job *structs.JobInfo, status int) error {
+func setJobStatus(job *structs.JobInfo, status int, message ...string) error {
 
 	job.Status = status
+	if len(message) > 0 {
+		job.Message = message[0]
+	}
 	data := struct {
 		JobStatus structs.JobStatus
-	}{structs.JobStatus{Status: status}}
+	}{structs.JobStatus{Status: status, Message: job.Message}}
 
 	return db.PatchRecord(job.Id, &data)
 }
@@ -191,7 +293,7 @@ func submitToResource(job structs.JobInfo) (err error) {
 	if !ok {
 		err = errors.New("Resource unvailable " + job.Resource)
 	}
-	_, _, err = r.Server.CommandPost("jobs", job)
+	_, _, err = r.Server.CommandPost("jobs", &job)
 	return
 }
 

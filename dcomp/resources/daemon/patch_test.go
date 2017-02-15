@@ -35,7 +35,7 @@ var patchTests = []patchRequest{
 		http.StatusBadRequest, "job not found"},
 	{structs.PatchJob{Status: structs.StatusError}, "jobs/578359205e935a20adb39a18", "PATCH",
 		http.StatusBadRequest, "empty status"},
-	{structs.PatchJob{Status: structs.StatusFailed}, "jobs/578359205e935a20adb39a18", "PATCH",
+	{structs.PatchJob{Status: structs.StatusJobFailed}, "jobs/578359205e935a20adb39a18", "PATCH",
 		http.StatusBadRequest, "wrong status"},
 	{structs.PatchJob{Status: structs.StatusFinished}, "jobs", "PATCH",
 		http.StatusNotFound, "no job id "},

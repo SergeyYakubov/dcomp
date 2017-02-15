@@ -71,6 +71,11 @@ var listRoutes = utils.Routes{
 
 func MockFuncReceiveJobFile(w http.ResponseWriter, r *http.Request) {
 	b, _ := ioutil.ReadAll(r.Body)
+	if bytes.Contains(b, []byte("578359205e935a20adb39a18")) {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("error"))
+		return
+	}
 	w.WriteHeader(http.StatusCreated)
 	w.Write(b)
 }

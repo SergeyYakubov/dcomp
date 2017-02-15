@@ -53,9 +53,9 @@ func TestGetAllRecords(t *testing.T) {
 	var records []structs.JobInfo
 	err := db.GetAllRecords(&records)
 	assert.Nil(t, err, "Got all records")
-	assert.Equal(t, 2, len(records), "TestGetAllRecords should return 1")
+	assert.Equal(t, 3, len(records), "TestGetAllRecords should return 3")
 	assert.Equal(t, 1, records[0].Status, "TestGetRecords should return 1")
-	assert.Equal(t, 1, records[1].Status, "TestGetRecords should return 2")
+	assert.Equal(t, 1, records[1].Status, "TestGetRecords should return 1")
 }
 
 func TestDeleteRecord(t *testing.T) {

@@ -55,7 +55,7 @@ var setJobTests = []struct {
 func TestSetJobFiles(t *testing.T) {
 
 	for _, test := range setJobTests {
-		var Tests CopyFiles
+		var Tests FileCopyInfos
 		err := Tests.Set(test.Test)
 		if !test.Ok {
 			assert.NotNil(t, err, test.Messsage)

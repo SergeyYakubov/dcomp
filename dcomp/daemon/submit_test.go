@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
@@ -15,6 +16,8 @@ import (
 var submitRouteTests = []request{
 	{structs.JobDescription{},
 		"jobs/578359205e935a20adb39a18", "POST", http.StatusCreated, "Create job"},
+	{structs.JobDescription{},
+		"jobs/578359235e935a21510a2244", "POST", http.StatusAccepted, "Create job"},
 }
 
 func TestRouteSubmitReleaseJob(t *testing.T) {
@@ -47,9 +50,6 @@ func TestRouteSubmitReleaseJob(t *testing.T) {
 		if w.Code == http.StatusCreated {
 			assert.Contains(t, w.Body.String(), "578359205e935a20adb39a18", test.message)
 		}
-		if w.Code == http.StatusAccepted {
-			assert.Contains(t, w.Body.String(), "Bearer", test.message)
-		}
 
 		ts3.Close()
 	}
@@ -72,11 +72,17 @@ var submitTests = []submitRequest{
 			{"jhjh", "assd"},
 			{"jhjh", "assd"},
 		}}, "578359205e935a20adb39a18", structs.StatusWaitData, "Wait for files"},
+	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Resource: "local",
+		FilesToMount: structs.FileCopyInfos{
+			{"jhjh", "assd", "local"},
+			{"jhjh", "assd", "local"},
+		}}, "578359205e935a20adb39a18", structs.StatusWaitData, "Wait for mount files"},
+
 	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: 1, Resource: "local"}, "available",
 		structs.StatusError, "Create job"},
 }
 
-func TestSubmitJob(t *testing.T) {
+func TestTrySubmitJob(t *testing.T) {
 
 	setConfiguration()
 	db = new(jobdatabase.Mockdatabase)
@@ -133,5 +139,136 @@ func TestFindResource(t *testing.T) {
 			assert.Equal(t, 10, prio["cloud"], test.message)
 		}
 		ts.Close()
+	}
+}
+
+func TestWaitRequests(t *testing.T) {
+	errchan := make(chan error)
+	n := 3
+	f := func(errchach chan error, err error) {
+		errchan <- err
+	}
+	go f(errchan, nil)
+	go f(errchan, nil)
+	go f(errchan, nil)
+	err := waitRequests(n, errchan)
+	assert.Nil(t, err, "Should not be error")
+
+	go f(errchan, nil)
+	go f(errchan, nil)
+	go f(errchan, errors.New("aaa"))
+	err = waitRequests(n, errchan)
+	assert.NotNil(t, err, "Should  be error")
+	assert.Equal(t, err.Error(), "aaa")
+
+}
+
+func TestSubmitSingleCopyDataRequest(t *testing.T) {
+
+	type Tests struct {
+		job     structs.JobInfo
+		fi      structs.FileCopyInfo
+		answer  string
+		message string
+	}
+
+	var tests = []Tests{
+		{structs.JobInfo{JobDescription: structs.JobDescription{},
+			Resource: "mock", Id: "578359235e935a21510a2244"}, structs.FileCopyInfo{Source: "", DestPath: "", SourcePath: ""}, "wrong id", "wrong source job id "},
+		{structs.JobInfo{JobDescription: structs.JobDescription{},
+			Resource: "mock", Id: "578359235e935a21510a2244"}, structs.FileCopyInfo{Source: "578359235e935a21510a2244", DestPath: "", SourcePath: ""}, "", "ok"},
+		{structs.JobInfo{JobDescription: structs.JobDescription{},
+			Resource: "local", Id: "578359235e935a21510a2244"}, structs.FileCopyInfo{Source: "578359205e935a20adb39a18", DestPath: "", SourcePath: ""}, "another resource", "copy from another resource"},
+		//		578359205e935a20adb39a18 returns error from mockserver submit job files
+		{structs.JobInfo{JobDescription: structs.JobDescription{},
+			Resource: "mock", Id: "578359235e935a21510a2244"}, structs.FileCopyInfo{Source: "578359205e935a20adb39a18", DestPath: "", SourcePath: ""}, "error", "status not created"},
+	}
+
+	setConfiguration()
+	db = new(jobdatabase.Mockdatabase)
+	defer func() { db = nil }()
+
+	for _, test := range tests {
+		ts2 := server.CreateMockServer(&estimatorServer)
+		var srv server.Server
+		ts3 := server.CreateMockServer(&srv)
+
+		var srvdm server.Server
+		ts4 := server.CreateMockServer(&srvdm)
+		auth2 := server.NewJWTAuth("aaa")
+		srvdm.SetAuth(auth2)
+		resources["mock"] = structs.Resource{Server: srv, DataManager: srvdm}
+
+		errchan := make(chan error)
+		go submitSingleCopyDataRequest(test.job, test.fi, errchan)
+		err := <-errchan
+		if test.answer == "" {
+			assert.Nil(t, err, test.message)
+		} else {
+			assert.NotNil(t, err, test.message)
+			if err != nil {
+				assert.Contains(t, err.Error(), test.answer, test.message)
+			}
+		}
+		ts2.Close()
+		ts3.Close()
+		ts4.Close()
+
+	}
+}
+
+func TestSubmitAfterCopyDataRequest(t *testing.T) {
+
+	type Tests struct {
+		job     structs.JobInfo
+		answer  string
+		message string
+	}
+
+	var tests = []Tests{
+		{structs.JobInfo{JobDescription: structs.JobDescription{FilesToMount: structs.FileCopyInfos{
+			structs.FileCopyInfo{Source: "578359235e935a21510a2244",
+				DestPath: "", SourcePath: ""},
+			structs.FileCopyInfo{Source: "578359235e935a21510a2244",
+				DestPath: "", SourcePath: ""}}},
+			Resource: "mock", Id: "578359235e935a21510a2244"},
+			"", "ok"},
+		{structs.JobInfo{JobDescription: structs.JobDescription{FilesToMount: structs.FileCopyInfos{structs.FileCopyInfo{Source: "578359235e935a21510a2244",
+			DestPath: "", SourcePath: ""},
+			structs.FileCopyInfo{Source: "578359235e935a21510a224",
+				DestPath: "", SourcePath: ""}}},
+			Resource: "mock", Id: "578359235e935a21510a2244"},
+			"wrong", "wrong id"},
+	}
+
+	setConfiguration()
+	db = new(jobdatabase.Mockdatabase)
+	defer func() { db = nil }()
+
+	for _, test := range tests {
+		ts2 := server.CreateMockServer(&estimatorServer)
+		var srv server.Server
+		ts3 := server.CreateMockServer(&srv)
+
+		var srvdm server.Server
+		ts4 := server.CreateMockServer(&srvdm)
+		auth2 := server.NewJWTAuth("aaa")
+		srvdm.SetAuth(auth2)
+		resources["mock"] = structs.Resource{Server: srv, DataManager: srvdm}
+
+		err := submitAfterCopyDataRequest(test.job, false)
+
+		if test.answer == "" {
+			assert.Nil(t, err, test.message)
+		} else {
+			assert.NotNil(t, err, test.message)
+			if err != nil {
+				assert.Contains(t, err.Error(), test.answer, test.message)
+			}
+		}
+		ts2.Close()
+		ts3.Close()
+		ts4.Close()
+
 	}
 }

@@ -7,9 +7,9 @@ import (
 
 	"reflect"
 
-	"gopkg.in/mgo.v2/bson"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type Mockdatabase struct {
@@ -80,6 +80,11 @@ func (db *Mockdatabase) GetRecords(q interface{}, res interface{}) (err error) {
 		{JobDescription: structs.JobDescription{}, Id: "578359205e935a20adb39a18",
 			JobStatus: structs.JobStatus{Status: 1}, Resource: "mock"},
 		{JobDescription: structs.JobDescription{}, Id: "578359235e935a21510a2243",
+			JobStatus: structs.JobStatus{Status: 1}, Resource: "mock"},
+		{JobDescription: structs.JobDescription{FilesToMount: structs.FileCopyInfos{
+			{"jhjh", "assd", "local"},
+			{"jhjh", "assd", "local"},
+		}}, Id: "578359235e935a21510a2244",
 			JobStatus: structs.JobStatus{Status: 1}, Resource: "mock"},
 	}
 

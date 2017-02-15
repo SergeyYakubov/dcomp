@@ -21,6 +21,10 @@ import (
 	"hash"
 
 	"errors"
+	"path/filepath"
+
+	"strings"
+
 	"github.com/spaolacci/murmur3"
 	"gopkg.in/yaml.v2"
 )
@@ -251,4 +255,152 @@ func FileCheckSum(fname, alg string) (string, error) {
 	}
 
 	return hex.EncodeToString(hasher.Sum(nil)), nil
+}
+
+func copyFile(source, dest, mode string, fileInfo os.FileInfo, uid, gid int) error {
+
+	if !CanReadFile(fileInfo, uid, gid) {
+		return errors.New("permission denied for " + source)
+	}
+
+	// copy only regular files
+	if !fileInfo.Mode().IsRegular() {
+		return nil
+	}
+
+	destPath := filepath.Dir(dest)
+
+	if err := MkdirAllWithCh(destPath, 0777, uid, gid); err != nil {
+		return err
+	}
+
+	switch mode {
+	case "mount":
+		return os.Link(source, dest)
+	case "copy":
+		if err := copyFileContents(source, dest); err != nil {
+			return err
+		}
+		if err := os.Chown(dest, uid, gid); err != nil {
+			return err
+		}
+		return os.Chmod(dest, fileInfo.Mode())
+
+	default:
+		return errors.New("CopyFile: Unknown mode")
+	}
+	return nil
+}
+
+func CanReadFile(fileInfo os.FileInfo, uid, gid int) bool {
+	fm := fileInfo.Mode()
+	if fm&(1<<2) != 0 {
+		return true
+	} else if (fm&(1<<5) != 0) && (gid ==
+		int(fileInfo.Sys().(syscall.Stat_t).Gid)) {
+		return true
+	} else if (fm&(1<<8) != 0) && (uid ==
+		int(fileInfo.Sys().(syscall.Stat_t).Uid)) {
+		return true
+	}
+	return false
+}
+
+func CopyPath(source, dest, mode string, uid, gid int) error {
+	fileInfo, err := os.Stat(source)
+	if err != nil {
+		return err
+	}
+
+	if fileInfo.IsDir() {
+		return copyDir(source, dest, mode, uid, gid)
+	} else {
+		return copyFile(source, dest, mode, fileInfo, uid, gid)
+	}
+
+}
+
+func copyDir(source, dest, mode string, uid, gid int) error {
+	files, err := getDirFiles(source)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		destfile := GetUploadName(file, source, dest, false)
+
+		fileInfo, err := os.Stat(file)
+		if err != nil {
+			return err
+		}
+
+		if err := copyFile(file, destfile, mode, fileInfo, uid, gid); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func copyFileContents(src, dst string) (err error) {
+	in, err := os.Open(src)
+	if err != nil {
+		return
+	}
+	defer in.Close()
+
+	out, err := os.Create(dst)
+	if err != nil {
+		return
+	}
+
+	defer func() {
+		cerr := out.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	if _, err = io.Copy(out, in); err != nil {
+		return
+	}
+	return nil
+}
+
+func getDirFiles(dir string) (listFiles []string, err error) {
+	listFiles = make([]string, 0)
+
+	var scan = func(path string, fi os.FileInfo, err error) (e error) {
+
+		if err != nil {
+			return err
+		}
+		if fi.IsDir() {
+			if strings.HasPrefix(fi.Name(), ".") && fi.Name() != "." && fi.Name() != ".." {
+				return filepath.SkipDir
+			}
+		} else {
+			if strings.HasPrefix(fi.Name(), ".") {
+				return nil
+			}
+
+			listFiles = append(listFiles, path)
+
+		}
+		return nil
+	}
+
+	if err = filepath.Walk(dir, scan); err != nil {
+		return
+	}
+
+	return
+
+}
+
+func GetUploadName(localname, inipath, destdir string, isdir bool) string {
+
+	rel, _ := filepath.Rel(inipath, localname)
+	if rel == localname {
+		return destdir
+	}
+	return filepath.Join(destdir, rel)
 }

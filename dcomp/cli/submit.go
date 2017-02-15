@@ -11,16 +11,15 @@ import (
 	"path/filepath"
 	"strings"
 
-	"path"
-
 	"net/http"
 
 	"github.com/pkg/errors"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
-func readJobFilesTransferInfo(bIn *bytes.Buffer) (t structs.JobFilesTransfer, err error) {
+func readJobFilesGetter(bIn *bytes.Buffer) (t structs.JobFilesGetter, err error) {
 	decoder := json.NewDecoder(bIn)
 	err = decoder.Decode(&t)
 	if err != nil || t.Srv.Host == "" || t.Srv.Port == 0 || t.JobID == "" || t.Token == "" {
@@ -37,22 +36,7 @@ func sendReleaseJobCommand(jobID string) (b *bytes.Buffer, err error) {
 	return
 }
 
-func getUploadName(localname, inipath, destdir string, isdir bool) string {
-	// single file - replace its dir with destdir
-	if (localname == inipath) && !isdir {
-		return destdir + `/` + path.Base(localname)
-	}
-
-	// copy directory - basedir is copied as well
-	localname = `./` + localname
-	parent_ini := path.Dir(inipath)
-	s := strings.Replace(localname, parent_ini, destdir, 1)
-	s = strings.TrimLeft(s, `./`)
-	return s
-
-}
-
-func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan error) {
+func uploadFile(t structs.JobFilesGetter, fileInfo uploadInfo, errchan chan error) {
 
 	f, err := os.Open(fileInfo.Path)
 	if err != nil {
@@ -61,7 +45,7 @@ func uploadFile(t structs.JobFilesTransfer, fileInfo uploadInfo, errchan chan er
 	}
 	defer f.Close()
 
-	un := getUploadName(fileInfo.Path, fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
+	un := utils.GetUploadName(fileInfo.Path, fileInfo.Source, fileInfo.Dest, fileInfo.Fi.IsDir())
 
 	_, err = t.Srv.UploadData("jobfile/"+t.JobID+"/", un, f, fileInfo.Fi.Size(), fileInfo.Fi.Mode())
 	if err != nil {
@@ -116,15 +100,14 @@ func getFilesToUpload(files structs.TransferFiles) (listFiles []uploadInfo, err 
 
 }
 
-func uploadFiles(t structs.JobFilesTransfer, files structs.TransferFiles) error {
+func uploadFiles(t structs.JobFilesGetter, files structs.TransferFiles) error {
 
 	listFiles, err := getFilesToUpload(files)
-
-	errchan := make(chan error)
-
 	if err != nil {
 		return err
 	}
+
+	errchan := make(chan error)
 
 	maxParallelRequests := 50
 
@@ -177,7 +160,6 @@ func (cmd *command) CommandSubmit() error {
 	}
 
 	b, status, err := daemon.CommandPost("jobs", &flags)
-
 	if err != nil {
 		return err
 	}
@@ -187,7 +169,7 @@ func (cmd *command) CommandSubmit() error {
 	}
 
 	if len(flags.FilesToUpload) > 0 {
-		t, err := readJobFilesTransferInfo(b)
+		t, err := readJobFilesGetter(b)
 		if err != nil {
 			return err
 		}

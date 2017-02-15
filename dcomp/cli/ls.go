@@ -19,14 +19,14 @@ type lsFlags struct {
 	Dir       string
 }
 
-func getDataTransferInfo(command string) (t structs.JobFilesTransfer, err error) {
+func filesGetter(command string) (t structs.JobFilesGetter, err error) {
 
 	b, _, err := daemon.CommandGet(command)
 	if err != nil {
 		return
 	}
 
-	t, err = readJobFilesTransferInfo(b)
+	t, err = readJobFilesGetter(b)
 	return
 }
 
@@ -49,7 +49,7 @@ func (cmd *command) CommandLs() error {
 		cmdstr += "&recursive=true"
 	}
 
-	dataTransferInfo, err := getDataTransferInfo(cmdstr)
+	dataTransferInfo, err := filesGetter(cmdstr)
 
 	b, _, err := dataTransferInfo.Srv.CommandGet(cmdstr)
 	if err != nil {

@@ -39,23 +39,11 @@ func GetJobFromRequest(r *http.Request) (structs.JobInfo, error) {
 	return GetJobFromDatabase(jobID)
 }
 
-func createJWT(job structs.JobInfo, r *http.Request) (token string, err error) {
+func createJWT(job structs.JobInfo) (token string, err error) {
 	srv := resources[job.Resource].DataManager
-	val := r.Context().Value("authorizationResponce")
-
-	if val == nil {
-		err = errors.New("No authorization context")
-		return
-	}
-
-	auth, ok := val.(*server.AuthorizationResponce)
-	if !ok {
-		err = errors.New("Bad authorization context")
-		return
-	}
 
 	var claim server.JobClaim
-	claim.UserName = auth.UserName
+	claim.UserName = job.JobUser
 	claim.JobInd = job.Id
 
 	var c server.CustomClaims
@@ -66,7 +54,7 @@ func createJWT(job structs.JobInfo, r *http.Request) (token string, err error) {
 }
 
 func encodeJobFilesTransferInfo(job structs.JobInfo, token string) (b *bytes.Buffer, err error) {
-	var s structs.JobFilesTransfer
+	var s structs.JobFilesGetter
 	s.JobID = job.Id
 	s.Srv = resources[job.Resource].DataManager
 	s.Token = token
@@ -76,8 +64,8 @@ func encodeJobFilesTransferInfo(job structs.JobInfo, token string) (b *bytes.Buf
 	return
 }
 
-func writeJWTToken(w http.ResponseWriter, r *http.Request, job structs.JobInfo) error {
-	token, err := createJWT(job, r)
+func writeJWTToken(w io.Writer, job structs.JobInfo) error {
+	token, err := createJWT(job)
 	if err != nil {
 		return err
 	}
@@ -101,7 +89,7 @@ func SendJWTToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := writeJWTToken(w, r, job); err != nil {
+	if err := writeJWTToken(w, job); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
