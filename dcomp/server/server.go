@@ -221,7 +221,6 @@ func (srv *Server) httpCommand(method string, path string, data interface{}) (b 
 		srv.auth = authToken
 
 		b, status, err = srv.httpCommandWithAuth(method, path, data)
-
 		if err != nil || status != http.StatusUnauthorized {
 			return
 		}

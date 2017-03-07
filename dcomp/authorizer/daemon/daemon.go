@@ -16,6 +16,11 @@ type config struct {
 		Certfile string
 		Keyfile  string
 	}
+	Tokenduration int
+	Ldap          struct {
+		Host   string
+		BaseDn string
+	}
 	Authorization []string
 }
 

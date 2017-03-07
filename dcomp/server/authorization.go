@@ -27,7 +27,11 @@ type AuthorizationRequest struct {
 }
 
 type AuthorizationResponce struct {
-	UserName string
+	Status       int
+	StatusText   string
+	UserName     string
+	Token        string
+	ValidityTime int
 }
 
 type Auth interface {
@@ -59,11 +63,27 @@ type BasicAuth struct {
 	forcedUsername string
 }
 
-type ExternalAuth struct {
-	Token string
+type NoAuth struct {
 }
 
-type NoAuth struct {
+func (a *NoAuth) Name() string {
+	return "None"
+}
+func (a *NoAuth) GenerateToken(...interface{}) (string, error) {
+	user, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return "None " + user.Username, nil
+}
+
+func NewNoAuth() *NoAuth {
+	a := NoAuth{}
+	return &a
+}
+
+type ExternalAuth struct {
+	Token string
 }
 
 func NewExternalAuth(token string) *ExternalAuth {
@@ -255,7 +275,7 @@ func ProcessJWTAuth(fn http.HandlerFunc, key string) http.HandlerFunc {
 		ctx := r.Context()
 
 		if authType == "Bearer" {
-			if claims, ok := checkJWTToken(r, token, key); !ok {
+			if claims, ok := CheckJWTToken(token, key); !ok {
 				http.Error(w, "Internal authorization error - tocken does not match", http.StatusUnauthorized)
 				return
 			} else {
@@ -269,7 +289,7 @@ func ProcessJWTAuth(fn http.HandlerFunc, key string) http.HandlerFunc {
 	}
 }
 
-func checkJWTToken(r *http.Request, token, key string) (jwt.Claims, bool) {
+func CheckJWTToken(token, key string) (jwt.Claims, bool) {
 
 	if token == "" {
 		return nil, false

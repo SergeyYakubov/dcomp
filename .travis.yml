@@ -25,7 +25,7 @@ install:
 - sudo ln -s $TRAVIS_BUILD_DIR /dcompdata
 - sudo $TRAVIS_BUILD_DIR/bin/dcomp daemon &
 - sudo $TRAVIS_BUILD_DIR/bin/dcompestd  &
-- sed "s/Negotiate/Basic/" -i /etc/dcomp/conf/dcompauthd.yaml
+- sed "s/Negotiate/None/" -i /etc/dcomp/conf/dcompauthd.yaml
 - sudo $TRAVIS_BUILD_DIR/bin/dcompauthd &
 - |-
   sed "s#^dockerhost:.*#dockerhost: unix:///var/run/docker.sock#" -i /etc/dcomp/plugins/local/local.yaml

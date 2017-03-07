@@ -13,5 +13,5 @@ func TestSetServerConfiguration(t *testing.T) {
 
 	_, ok := daemon.GetAuth().(*server.GSSAPIAuth)
 	assert.Equal(t, ok, true, "auth set")
-
+	daemon.SetAuth(nil)
 }

@@ -14,14 +14,19 @@ import (
 func ProcessUserAuth(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		//		_, _, err := server.ExtractAuthInfo(r)
-
-		//		if err != nil {
-		//			http.Error(w, "authorization failed: "+err.Error(), http.StatusUnauthorized)
-		//			return
-		//		}
+		if origin := r.Header.Get("Origin"); origin != "" {
+			w.Header().Set("Access-Control-Allow-Origin", origin)
+			w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+			w.Header().Set("Access-Control-Allow-Headers",
+				"Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		}
+		// Stop here if its Preflighted OPTIONS request
+		if r.Method == "OPTIONS" {
+			return
+		}
 
 		b, status, err := authorize(r)
+
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -36,6 +41,11 @@ func ProcessUserAuth(fn http.HandlerFunc) http.HandlerFunc {
 		var resp server.AuthorizationResponce
 		if err := json.NewDecoder(b).Decode(&resp); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if resp.Status != http.StatusOK {
+			http.Error(w, resp.StatusText, resp.Status)
 			return
 		}
 

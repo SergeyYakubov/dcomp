@@ -22,7 +22,6 @@ import (
 	"io/ioutil"
 
 	"encoding/json"
-	"fmt"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
@@ -126,9 +125,9 @@ func TestReceiveFilesMount(t *testing.T) {
 	}
 
 	var tests = []request{
-				{structs.FileCopyInfo{SourcePath: "aaa.txt", Source: "578359205e935a20adb39a19", DestPath: "data/bbb"}, "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
+		{structs.FileCopyInfo{SourcePath: "aaa.txt", Source: "578359205e935a20adb39a19", DestPath: "data/bbb"}, "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
 		{structs.FileCopyInfo{SourcePath: "aaa/aaa.txt", Source: "578359205e935a20adb39a19", DestPath: "data/bbb"}, "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
-				{structs.FileCopyInfo{SourcePath: "aaa", Source: "578359205e935a20adb39a19", DestPath: "data/bbb"}, "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
+		{structs.FileCopyInfo{SourcePath: "aaa", Source: "578359205e935a20adb39a19", DestPath: "data/bbb"}, "578359205e935a20adb39a18", http.StatusCreated, "receive file"},
 	}
 
 	configFileName := `/etc/dcomp/plugins/local/dmd.yaml`
@@ -174,7 +173,6 @@ func TestReceiveFilesMount(t *testing.T) {
 		f(w, req)
 
 		assert.Equal(t, test.answercode, w.Code, test.message)
-		fmt.Println(w.Body.String())
 
 		if w.Code == http.StatusCreated {
 			var fname string

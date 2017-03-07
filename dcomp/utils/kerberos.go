@@ -175,7 +175,6 @@ func GetGSSAPIToken(serviceName string) (data []byte, err error) {
 		return
 	}
 	defer gssapiName.Release()
-
 	token, err := c.initSecContext(gssapiName)
 	if err != nil {
 		e, ok := err.(*gssapi.Error)

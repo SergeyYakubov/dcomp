@@ -21,7 +21,7 @@ plugins:
           key: lplgin12
           datamanager:
            host: localhost
-           port: 8008
+           port: 8018
            key: dcompdmd45
         - name: SlurmDocker
           host: localhost

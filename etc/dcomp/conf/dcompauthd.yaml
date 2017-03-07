@@ -3,8 +3,14 @@ daemon:
  key: auth14
  certfile: /etc/dcomp/cert/certauth.pem
  keyfile: /etc/dcomp/cert/keyauth.pem
+ldap:
+  host: it-ldap-slave01.desy.de:1389
+  basedn: ou=rgy,o=DESY,c=DE
+tokenduration: 120
 authorization:
-        - Negotiate
+  - Negotiate
+  - Basic
+  - Bearer
 
 
 

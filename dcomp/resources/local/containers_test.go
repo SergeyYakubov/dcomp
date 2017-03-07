@@ -6,10 +6,11 @@ import (
 
 	"bytes"
 
+	"os"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
-	"os"
 )
 
 type request struct {

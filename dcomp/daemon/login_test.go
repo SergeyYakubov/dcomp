@@ -5,43 +5,45 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"fmt"
-
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-var userAuthtests = []struct {
+var loginTests = []struct {
 	Token      string
 	Answercode int
 	Answer     string
 	Message    string
 }{
 	{"Basic wronguser", 401, "not", "user not allowed"},
-	{"Basic user", 200, "user", "correct auth"},
-	{"Wrong test", 400, "wrong auth", "wrong auth type"},
+	{"Basic user", 200, "blabla", "correct auth"},
+	{"Wrong test", 400, "wrong", "wrong auth type"},
 }
 
-func ok(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	resp := r.Context().Value("authorizationResponce").(*server.AuthorizationResponce)
-	fmt.Fprintln(w, resp.UserName)
-}
+func TestLogin(t *testing.T) {
+	mux := utils.NewRouter(listRoutes)
 
-func TestProcessUserAuth(t *testing.T) {
+	//setConfiguration()
+
 	var srv server.Server
 	ts := server.CreateMockServer(&srv)
 	defer ts.Close()
 	authServer = srv
 	authServer.SetAuth(server.NewBasicAuth())
-	for _, test := range userAuthtests {
-		req, _ := http.NewRequest("POST", "http://blabla", nil)
+
+	for _, test := range loginTests {
+
+		req, _ := http.NewRequest("GET", "http://localhost:8000/login/", nil)
+
 		token := test.Token
 		if token != "" {
 			req.Header.Add("Authorization", token)
 		}
+
 		w := httptest.NewRecorder()
-		ProcessUserAuth(http.HandlerFunc(ok))(w, req)
+		f := ProcessUserAuth(mux.ServeHTTP)
+		f(w, req)
 		assert.Equal(t, test.Answercode, w.Code, test.Message)
 		assert.Contains(t, w.Body.String(), test.Answer, test.Message)
 	}

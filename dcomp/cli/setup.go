@@ -32,7 +32,7 @@ func SetDaemonConfiguration() error {
 
 	auth := server.NewGSSAPIAuth()
 	daemon.SetAuth(auth)
-	daemon.AddAlternativeAuth(server.NewBasicAuth())
+	daemon.AddAlternativeAuth(server.NewNoAuth())
 
 	daemon.Tls = true
 

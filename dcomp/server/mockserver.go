@@ -113,29 +113,30 @@ func MockFuncAuthorize(w http.ResponseWriter, r *http.Request) {
 	d.Decode(&t)
 
 	authType, user, err := SplitAuthToken(t.Token)
+	var tt AuthorizationResponce
+	tt.Status = http.StatusOK
 
 	if err != nil {
-		http.Error(w, "cannot split token", http.StatusUnauthorized)
+		http.Error(w, "cannot split token", http.StatusBadRequest)
 		return
 	}
 
-	if authType != "Basic" {
-		http.Error(w, "wrong auth type", http.StatusUnauthorized)
+	if authType != "None" && authType != "Basic" {
+		http.Error(w, "wrong auth type", http.StatusBadRequest)
 		return
 	}
 
 	if user == "wronguser" {
 		http.Error(w, "user not allowed", http.StatusUnauthorized)
-		return
+		tt.Status = http.StatusUnauthorized
 	}
 
-	var tt AuthorizationResponce
 	tt.UserName = user
+	tt.Token = "blabla"
 
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(tt)
 
-	w.WriteHeader(http.StatusOK)
 	w.Write(b.Bytes())
 
 }
@@ -208,7 +209,7 @@ func ProcessMockAuth(fn http.HandlerFunc) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
-		if at != "Basic" && at != "Negotiate" {
+		if at != "Basic" && at != "Negotiate" && at != "None" {
 			http.Error(w, "wrong auth type", http.StatusUnauthorized)
 			return
 		}
@@ -236,6 +237,8 @@ func CreateMockServer(srv *Server) *httptest.Server {
 		ts = newsrv(http.HandlerFunc(mux.ServeHTTP))
 	case *HMACAuth:
 		ts = newsrv(ProcessHMACAuth(http.HandlerFunc(mux.ServeHTTP), auth.Key))
+	case *NoAuth:
+		ts = newsrv(ProcessMockAuth(http.HandlerFunc(mux.ServeHTTP)))
 	case *BasicAuth:
 		ts = newsrv(ProcessMockAuth(http.HandlerFunc(mux.ServeHTTP)))
 	case *GSSAPIAuth:

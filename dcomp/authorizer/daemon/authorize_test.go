@@ -22,12 +22,12 @@ type request struct {
 }
 
 var authorizeTests = []request{
-	{server.AuthorizationRequest{Token: "Basic test"}, http.StatusOK, "test", "correct basic auth"},
-	{server.AuthorizationRequest{Token: "Negotiate test"}, http.StatusUnauthorized, "not defined", "kerb auth, not defined context"},
+	{server.AuthorizationRequest{Token: "None test"}, http.StatusOK, "test", "basic auth"},
+	{server.AuthorizationRequest{Token: "Negotiate test"}, http.StatusBadRequest, "not defined", "kerb auth, not defined context"},
 	{server.AuthorizationRequest{Token: "Basic"}, http.StatusUnauthorized, "token", "wrong token"},
 	{server.AuthorizationRequest{Token: "BlaBla test"}, http.StatusUnauthorized, "type", "wrong token type"},
 	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "token", "empty token"},
-	{server.AuthorizationRequest{Token: "nil"}, http.StatusUnauthorized, "bad", "no request body"},
+	{server.AuthorizationRequest{Token: "nil"}, http.StatusBadRequest, "bad", "no request body"},
 	{server.AuthorizationRequest{Token: ""}, http.StatusUnauthorized, "wrong", "empty token"},
 }
 
@@ -55,9 +55,23 @@ func TestAuthorizeJob(t *testing.T) {
 
 		w := httptest.NewRecorder()
 		mux.ServeHTTP(w, req)
-		assert.Equal(t, test.answerCode, w.Code, test.message)
+		if w.Code != http.StatusOK {
+			assert.Equal(t, test.answerCode, w.Code, test.message)
+			assert.Contains(t, w.Body.String(), test.answerMessage, test.message)
 
-		assert.Contains(t, w.Body.String(), test.answerMessage, test.message)
+		} else {
+
+			var resp server.AuthorizationResponce
+			json.NewDecoder(w.Body).Decode(&resp)
+			assert.Equal(t, test.answerCode, resp.Status, test.message)
+			if resp.Status != http.StatusOK {
+				assert.Contains(t, resp.StatusText, test.answerMessage, test.message)
+			} else {
+				assert.Contains(t, resp.UserName, test.answerMessage, test.message)
+			}
+
+		}
+
 	}
 	configFile = tconf
 	setDaemonConfiguration()
