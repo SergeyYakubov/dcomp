@@ -12,12 +12,7 @@ import (
 )
 
 func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
-	if len(jobs) == 0 && allowempty {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if len(jobs) == 0 {
+	if len(jobs) == 0 && !allowempty {
 		http.Error(w, "job not found", http.StatusNotFound)
 		return
 	}
