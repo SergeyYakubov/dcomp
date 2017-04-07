@@ -105,6 +105,7 @@ func (f *TransferFiles) Set(value string) error {
 
 // Initial structure filled by user during job submittion
 type JobDescription struct {
+	JobName       string
 	ImageName     string
 	Script        string
 	NCPUs         int
@@ -162,10 +163,11 @@ const (
 )
 
 type JobStatus struct {
-	Status    int
-	StartTime string
-	EndTime   string
-	Message   string
+	Status       int
+	StatusString string
+	StartTime    string
+	EndTime      string
+	Message      string
 }
 
 func ExplainStatus(statusstr string) (status int, message string) {
@@ -191,6 +193,10 @@ func ExplainStatus(statusstr string) (status int, message string) {
 
 	}
 	return
+}
+
+func (s *JobStatus) UpdateStatusString() {
+	s.StatusString = JobStatusExplained[s.Status]
 }
 
 // UpdateFromOutput updates status by output from an external program
@@ -313,6 +319,9 @@ var JobStatusExplained = map[int]string{
 
 func (d *JobInfo) PrintFull(w io.Writer) {
 	fmt.Fprintf(w, "%-40s: %s\n", "Job", d.Id)
+	if d.JobName != "" {
+		fmt.Fprintf(w, "%-40s: %s\n", "Job", d.JobName)
+	}
 	fmt.Fprintf(w, "%-40s: %s\n", "User", d.JobUser)
 	fmt.Fprintf(w, "%-40s: %s\n", "Image name", d.ImageName)
 	fmt.Fprintf(w, "%-40s: %s\n", "Script", d.Script)
@@ -325,5 +334,10 @@ func (d *JobInfo) PrintFull(w io.Writer) {
 }
 
 func (d *JobInfo) PrintShort(w io.Writer) {
-	fmt.Fprintf(w, "%-40s: %s\n", d.Id, JobStatusExplained[d.Status])
+	if d.JobName != "" {
+		fmt.Fprintf(w, "%-40s: %s\n", d.JobName, JobStatusExplained[d.Status])
+	} else {
+		fmt.Fprintf(w, "%-40s: %s\n", d.Id, JobStatusExplained[d.Status])
+	}
+
 }

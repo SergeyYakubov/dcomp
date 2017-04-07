@@ -200,6 +200,7 @@ func (cmd *command) CommandSubmit() error {
 
 func createSubmitFlags(flagset *flag.FlagSet, flags *structs.JobDescription) {
 	flagset.StringVar(&flags.Script, "script", "", "Job script")
+	flagset.StringVar(&flags.JobName, "name", "", "Job name")
 	flagset.IntVar(&flags.NCPUs, "ncpus", 0, "Number of CPUs")
 	flagset.IntVar(&flags.NNodes, "nnodes", 0, "Number of Nodes")
 	flagset.StringVar(&flags.Resource, "resource", "", "Force submit to this resource")

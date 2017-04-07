@@ -38,6 +38,7 @@ func updateJobs(jobs []structs.JobInfo) {
 
 			updateJobsStatusFromResources(&jobs[i])
 		}
+		jobs[i].UpdateStatusString()
 	}
 }
 

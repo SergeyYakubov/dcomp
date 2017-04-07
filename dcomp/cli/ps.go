@@ -128,7 +128,7 @@ func printJobs(OutBuf io.Writer, jobs []structs.JobInfo, short bool) {
 	}
 
 	if short {
-		fmt.Fprintf(OutBuf, "%24s  %20s\n", "Id", "Status")
+		fmt.Fprintf(OutBuf, "%24s  %20s\n", "Id/Name", "Status")
 	}
 
 	for _, job := range jobs {
