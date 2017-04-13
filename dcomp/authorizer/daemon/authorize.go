@@ -67,9 +67,7 @@ func authorize(req server.AuthorizationRequest) (server.AuthorizationResponce, e
 
 	switch atype {
 	case "None":
-		resp.Status = http.StatusOK
-		resp.UserName = atoken
-		return resp, nil
+		return AuthorizeWithToken(atoken)
 	case "Negotiate":
 		if gssAPIContext == nil {
 			err = errors.New("gssAPIContext not defined")
