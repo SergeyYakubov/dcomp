@@ -35,7 +35,7 @@ var sendFilesTests = []sendFileNamesRequest{
 	{"/", "testuser", true, "578359205e935a20adb39a18", http.StatusOK, "test.sh", "receive all files,recursive"},
 	{url.QueryEscape("/"), "testuser", true, "578359205e935a20adb39a18", http.StatusOK, "test.sh", "receive all files,recursive"},
 	{"/", "testuser", false, "578359205e935a20adb39a18", http.StatusOK, "test.txt", "receive all files,recursive"},
-	{"test.txt", "wronguser", false, "578359205e935a20adb39a18", http.StatusUnauthorized, "authorization error", "receive single file, wrong user"},
+	{"test.txt", "wronguser", false, "578359205e935a20adb39a18", http.StatusUnauthorized, "no authorization", "receive single file, wrong user"},
 	{"test.txt", "testuser", true, "578359205e935a20adb39a18", http.StatusOK, "test.txt", "receive single file, with recusrion"},
 	{"test.tx", "testuser", false, "578359205e935a20adb39a18", http.StatusNotFound, "test.tx", "folder not found"},
 	{"test", "testuser", false, "578359205e935a20adb39a18", http.StatusOK, "test", "receive folder"},
