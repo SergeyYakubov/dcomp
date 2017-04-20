@@ -176,14 +176,21 @@ func SplitAuthToken(s string) (authType, token string, err error) {
 }
 
 func ExtractAuthInfo(r *http.Request) (authType, token string, err error) {
+
 	t := r.Header.Get("Authorization")
 
-	if t == "" {
-		err = errors.New("authorization error - empty auth header")
-		return
+	if t != "" {
+		return SplitAuthToken(t)
 	}
 
-	return SplitAuthToken(t)
+	cookie, err := r.Cookie("Authorization")
+	if err == nil {
+		return SplitAuthToken(cookie.Value)
+	}
+
+	err = errors.New("no authorization info")
+	return
+
 }
 
 func checkHMACToken(r *http.Request, token, key string) bool {

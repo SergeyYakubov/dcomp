@@ -39,7 +39,7 @@ func GetJobFromRequest(r *http.Request) (structs.JobInfo, error) {
 	return GetJobFromDatabase(jobID)
 }
 
-func createJWT(job structs.JobInfo) (token string, err error) {
+func createJWT(job structs.JobInfo, duration time.Duration) (token string, err error) {
 	srv := resources[job.Resource].DataManager
 
 	var claim server.JobClaim
@@ -48,7 +48,7 @@ func createJWT(job structs.JobInfo) (token string, err error) {
 
 	var c server.CustomClaims
 	c.ExtraClaims = &claim
-	c.Duration = time.Hour * 2
+	c.Duration = duration
 	token, err = srv.GetAuth().GenerateToken(&c)
 	return
 }
@@ -64,8 +64,8 @@ func encodeJobFilesTransferInfo(job structs.JobInfo, token string) (b *bytes.Buf
 	return
 }
 
-func writeJWTToken(w io.Writer, job structs.JobInfo) error {
-	token, err := createJWT(job)
+func writeJWTToken(w io.Writer, job structs.JobInfo, duration time.Duration) error {
+	token, err := createJWT(job, duration)
 	if err != nil {
 		return err
 	}
@@ -89,7 +89,7 @@ func SendJWTToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := writeJWTToken(w, job); err != nil {
+	if err := writeJWTToken(w, job, time.Second*30); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -32,7 +32,7 @@ func writeSubmitResponce(w http.ResponseWriter, job structs.JobInfo) {
 	if job.Status == structs.StatusWaitData {
 		w.WriteHeader(http.StatusAccepted)
 		if job.NeedUserDataUpload() {
-			err := writeJWTToken(w, job)
+			err := writeJWTToken(w, job, time.Hour*2)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -127,7 +127,7 @@ func submitSingleCopyDataRequest(job structs.JobInfo, fi structs.FileCopyInfo, e
 		errchan <- failedDataCopy(job, errors.New("Cannot copy/mount from another resource"))
 		return
 	}
-	token, err := createJWT(job)
+	token, err := createJWT(job, time.Hour*2)
 	srv := resources[job.Resource].DataManager
 	srv.SetAuth(server.NewExternalAuth(token))
 	b, status, err := srv.CommandPost("jobfile/"+job.Id+"/?mode=mount", &fi)

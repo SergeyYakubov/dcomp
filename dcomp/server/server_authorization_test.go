@@ -80,6 +80,7 @@ func TestGenerateJWTToken(t *testing.T) {
 }
 
 var HJWTAuthtests = []struct {
+	Mode       string
 	Key        string
 	User       string
 	jobID      string
@@ -87,10 +88,11 @@ var HJWTAuthtests = []struct {
 	Answercode int
 	Message    string
 }{
-	{"hi", "testuser", "123", time.Hour, http.StatusOK, "correct auth"},
-	{"hi", "testuser", "123", time.Microsecond, http.StatusUnauthorized, "token expired"},
-	{"hih", "testuser", "123", 1, http.StatusUnauthorized, "wrong key"},
-	{"", "testuser", "123", 1, http.StatusUnauthorized, "auth no header"},
+	{"header", "hi", "testuser", "123", time.Hour, http.StatusOK, "correct auth - header"},
+	{"cookie", "hi", "testuser", "123", time.Hour, http.StatusOK, "correct auth - cookie"},
+	{"header", "hi", "testuser", "123", time.Microsecond, http.StatusUnauthorized, "token expired"},
+	{"header", "hih", "testuser", "123", 1, http.StatusUnauthorized, "wrong key"},
+	{"", "hi", "testuser", "123", 1, http.StatusUnauthorized, "auth no header"},
 }
 
 func TestProcessJWTAuth(t *testing.T) {
@@ -104,9 +106,15 @@ func TestProcessJWTAuth(t *testing.T) {
 		a := NewJWTAuth(test.Key)
 
 		token, _ := a.GenerateToken((&CustomClaims{Duration: test.Duration, ExtraClaims: &claim}))
-		if test.Key != "" {
+		if test.Mode == "header" {
 			req.Header.Add("Authorization", token)
 		}
+
+		if test.Mode == "cookie" {
+			c := http.Cookie{Name: "Authorization", Value: token}
+			req.AddCookie(&c)
+		}
+
 		w := httptest.NewRecorder()
 		if test.Duration == time.Microsecond {
 			if testing.Short() {

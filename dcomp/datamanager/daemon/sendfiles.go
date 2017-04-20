@@ -88,6 +88,9 @@ func routeSendJobFile(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	} else {
+		w.Header().Set("Content-Disposition", "attachment; filename="+jobID+".tgz")
+		w.Header().Set("Content-Type", "application/gzip")
+
 		err := sendTGZ(w, basepath, files)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
