@@ -78,9 +78,9 @@ func (srv *Server) url(s string) string {
 		s = strings.TrimLeft(s, "/")
 		s = strings.TrimRight(s, "/")
 		s = "/" + s
-		if !strings.ContainsRune(s, '?') {
-			s += "/"
-		}
+		//		if !strings.ContainsRune(s, '?') {
+		//			s += "/"
+		//		}
 	}
 	protocol := "http"
 	if srv.Tls {

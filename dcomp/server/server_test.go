@@ -15,9 +15,9 @@ var urltests = []struct {
 	Path   string
 	Url    string
 }{
-	{Server{Host: "localhost", Port: 8000}, "test", "http://localhost:8000/test/"},
-	{Server{Host: "localhost", Port: 8000}, "/test/", "http://localhost:8000/test/"},
-	{Server{Host: "localhost", Port: 8000}, " test ", "http://localhost:8000/test/"},
+	{Server{Host: "localhost", Port: 8000}, "test", "http://localhost:8000/test"},
+	{Server{Host: "localhost", Port: 8000}, "/test/", "http://localhost:8000/test"},
+	{Server{Host: "localhost", Port: 8000}, " test ", "http://localhost:8000/test"},
 }
 
 func TestUrl(t *testing.T) {

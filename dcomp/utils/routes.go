@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"strings"
 )
 
 type Routes []Route
@@ -23,6 +24,14 @@ func NewRouter(listRoutes Routes) *mux.Router {
 			Path(route.Pattern).
 			Name(route.Name).
 			Handler(route.HandlerFunc)
+		// allow routes without trailing slash
+		if strings.HasSuffix(route.Pattern, "/") {
+			router.
+				Methods(route.Method).
+				Path(strings.TrimSuffix(route.Pattern, "/")).
+				Name(route.Name + "_noslash").
+				Handler(route.HandlerFunc)
+		}
 	}
 	return router
 }

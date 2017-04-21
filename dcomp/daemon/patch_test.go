@@ -24,7 +24,7 @@ type patchRequest struct {
 }
 
 var patchTests = []patchRequest{
-	{structs.PatchJob{Status: structs.StatusFinished}, "jobs/578359205e935a20adb39a18", "PATCH", http.StatusOK, "patch existing job"},
+	{structs.PatchJob{Status: structs.StatusFinished}, "jobs/578359205e935a20adb39a18", "PATCH", http.StatusNoContent, "patch existing job"},
 	{structs.PatchJob{Status: structs.StatusFinished}, "jobs/578359205e935a20adb39a19", "PATCH", http.StatusNotFound, "patch non-existing job"},
 	{structs.PatchJob{Status: structs.StatusError}, "jobs/578359205e935a20adb39a18", "PATCH", http.StatusBadRequest, "patch no data given"},
 	{structs.PatchJob{}, "jobs", "PATCH", http.StatusNotFound, "jobs id not given"},

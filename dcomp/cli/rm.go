@@ -30,7 +30,7 @@ func (cmd *command) CommandRm() error {
 		return err
 	}
 
-	if status != http.StatusOK {
+	if status != http.StatusOK && status != http.StatusNoContent {
 		return errors.New(b.String())
 	}
 

@@ -36,7 +36,7 @@ func (cmd *command) CommandKill() error {
 	if err != nil {
 		return err
 	}
-	if status != http.StatusOK {
+	if status != http.StatusOK && status != http.StatusNoContent {
 		return errors.New(b.String())
 	}
 	fmt.Fprintf(outBuf, "Job killed: %s\n", flags.Id)
