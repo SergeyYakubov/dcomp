@@ -14,6 +14,7 @@ import (
 
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 func writeSubmitResponce(w http.ResponseWriter, job structs.JobInfo) {
@@ -233,6 +234,9 @@ func trySubmitJob(user string, t structs.JobDescription) (job structs.JobInfo, e
 	if err != nil {
 		return
 	}
+
+	job.SubmitTime = utils.TimeToString(time.Now())
+
 	if err = modifyJobInDatabase(job.Id, &job); err != nil {
 		return
 	}

@@ -98,8 +98,8 @@ func MockFuncEstimate(w http.ResponseWriter, r *http.Request) {
 
 func MockFuncGetAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	showFinished := r.URL.Query().Get("finished")
-	if showFinished == "true" {
+	showFinishedOnly := r.URL.Query().Get("notFinishedOnly")
+	if showFinishedOnly != "true" {
 		fmt.Fprintf(w, `[{"Id":"578359205e935a20adb39a19"}]`)
 		return
 	}

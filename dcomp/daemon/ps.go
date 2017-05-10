@@ -2,13 +2,19 @@ package daemon
 
 import (
 	"net/http"
+	"time"
 
 	"bytes"
 	"encoding/json"
 
 	"net/url"
 
+	"fmt"
+	"strings"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
+	"strconv"
 )
 
 func sendJobs(w http.ResponseWriter, jobs []structs.JobInfo, allowempty bool) {
@@ -72,12 +78,53 @@ func updateJobsStatusFromResources(job *structs.JobInfo) {
 	return
 }
 
-func pickNotFinished(jobs []structs.JobInfo) (res []structs.JobInfo) {
+func filterJobs(jobs []structs.JobInfo, filter url.Values) (res []structs.JobInfo) {
 	res = make([]structs.JobInfo, 0)
 	for _, job := range jobs {
-		if job.Status != structs.StatusFinished {
-			res = append(res, job)
+
+		if filter.Get("finishedOnly") == "true" && job.Status != structs.StatusFinished {
+			continue
 		}
+
+		if filter.Get("notFinishedOnly") == "true" && job.Status == structs.StatusFinished {
+			continue
+		}
+
+		if filter.Get("keyword") != "" {
+			str := fmt.Sprintf("%v", job)
+			if !strings.Contains(str, filter.Get("keyword")) {
+				continue
+			}
+
+		}
+
+		from := filter.Get("from")
+		to := filter.Get("to")
+		ftmstring := "2006-01-02"
+		if from != "" && to != "" {
+			timeFrom, err1 := time.Parse(ftmstring, from)
+			timeTo, err2 := time.Parse(ftmstring, to)
+			jobTime, err3 := utils.StringToTime(job.SubmitTime)
+			if err1 == nil && err2 == nil && err3 == nil {
+				if jobTime.Before(timeFrom) || jobTime.After(timeTo) {
+					continue
+				}
+			}
+		} else if filter.Get("last") != "" {
+			days, err := strconv.Atoi(filter.Get("last"))
+			jobTime, err1 := utils.StringToTime(job.SubmitTime)
+			if err == nil && err1 == nil {
+				timelast := time.Now().Add(-time.Duration(days*24) * time.Hour)
+
+				if jobTime.Before(timelast) {
+					continue
+				}
+
+			}
+
+		}
+
+		res = append(res, job)
 	}
 	return
 }
@@ -91,11 +138,11 @@ func routeGetAllJobs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	showFinished := r.URL.Query().Get("finished")
-	if showFinished != "true" {
-		jobs = pickNotFinished(jobs)
-	}
 	updateJobs(jobs)
+
+	filter := r.URL.Query()
+	jobs = filterJobs(jobs, filter)
+
 	sendJobs(w, jobs, true)
 }
 

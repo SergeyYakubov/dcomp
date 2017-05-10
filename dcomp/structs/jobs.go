@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
+	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 )
 
 type jobs interface {
@@ -165,6 +166,7 @@ const (
 type JobStatus struct {
 	Status       int
 	StatusString string
+	SubmitTime   string
 	StartTime    string
 	EndTime      string
 	Message      string
@@ -220,7 +222,7 @@ func (s *JobStatus) UpdateFromOutput(status string) error {
 		if err != nil {
 			return errors.New("Wrong JobStatus output: " + err.Error())
 		}
-		s.StartTime = time.String()
+		s.StartTime = utils.TimeToString(time)
 	}
 
 	if timeend != "Unknown" {
@@ -229,7 +231,7 @@ func (s *JobStatus) UpdateFromOutput(status string) error {
 		if err != nil {
 			return errors.New("Wrong JobStatus output: " + err.Error())
 		}
-		s.EndTime = time.String()
+		s.EndTime = utils.TimeToString(time)
 	}
 
 	s.Status, s.Message = ExplainStatus(statusstr)

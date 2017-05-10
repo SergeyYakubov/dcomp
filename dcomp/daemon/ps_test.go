@@ -6,11 +6,14 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	"net/url"
+
 	"github.com/sergeyyakubov/dcomp/dcomp/jobdatabase"
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
 	"github.com/stretchr/testify/assert"
+	"time"
 )
 
 type testsPS struct {
@@ -114,4 +117,48 @@ func TestRouteGetJob(t *testing.T) {
 	}
 
 	db.DeleteRecordByID(getTests[0].job.Id)
+}
+
+type FilterTests struct {
+	queryString    string
+	filteredJobIDs []string
+	message        string
+}
+
+var inLast30 = utils.TimeToString(time.Now().Add(-time.Hour))
+
+var unfilteredJobs = []structs.JobInfo{
+	{JobDescription: structs.JobDescription{},
+		JobStatus: structs.JobStatus{SubmitTime: inLast30, Status: structs.StatusFinished},
+		Resource:  "mock", Id: "1"},
+	{JobDescription: structs.JobDescription{},
+		JobStatus: structs.JobStatus{SubmitTime: "2016-05-01T15:04:05Z", Status: structs.StatusRunning},
+		Resource:  "mock", Id: "2"},
+	{JobDescription: structs.JobDescription{Script: "hello"},
+		JobStatus: structs.JobStatus{SubmitTime: "2017-05-02T15:04:05Z", Status: structs.StatusRunning},
+		Resource:  "mock", Id: "3"},
+}
+
+var filterTests = []FilterTests{
+	{``, []string{"1", "2", "3"}, "all jobs"},
+	{`finishedOnly=true`, []string{"1"}, "finished jobs"},
+	{`notFinishedOnly=true`, []string{"2", "3"}, "not finished jobs"},
+	{`keyword=hello`, []string{"3"}, "search by keyword"},
+	{`last=30`, []string{"1", "3"}, "last 30 days"},
+	{`from=2015-05-01&to=2016-05-02`, []string{"2"}, "search by from/to"},
+}
+
+func TestFilterJobs(t *testing.T) {
+	for _, test := range filterTests {
+
+		filter, _ := url.ParseQuery(test.queryString)
+
+		jobs := filterJobs(unfilteredJobs, filter)
+
+		assert.Equal(t, len(test.filteredJobIDs), len(jobs), test.message)
+
+		for _, job := range jobs {
+			assert.Contains(t, test.filteredJobIDs, job.Id, test.message+" "+job.Id)
+		}
+	}
 }

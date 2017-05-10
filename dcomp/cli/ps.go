@@ -38,8 +38,8 @@ func (cmd *command) CommandPs() error {
 	}
 
 	cmdstr := "jobs" + "/"
-	if flags.Id == "" && flags.ShowFinished {
-		cmdstr += "?finished=true"
+	if flags.Id == "" && !flags.ShowFinished {
+		cmdstr += "?notFinishedOnly=true"
 	} else {
 		cmdstr += flags.Id
 		if flags.ShowLog {

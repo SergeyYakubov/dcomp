@@ -78,9 +78,9 @@ var outputTests = []struct {
 	result  JobStatus
 	message string
 }{
-	{"2017-01-19T16:08:22 2017-01-23T21:49:59 COMPLETED", false, JobStatus{StartTime: "2017-01-19 16:08:22 +0000 UTC",
-		Status: StatusFinished, EndTime: "2017-01-23 21:49:59 +0000 UTC"}, "finished job"},
-	{"2017-01-19T16:08:22 Unknown   RUNNING", false, JobStatus{StartTime: "2017-01-19 16:08:22 +0000 UTC",
+	{"2017-01-19T16:08:22 2017-01-23T21:49:59 COMPLETED", false, JobStatus{StartTime: "2017-01-19T16:08:22Z",
+		Status: StatusFinished, EndTime: "2017-01-23T21:49:59Z"}, "finished job"},
+	{"2017-01-19T16:08:22 Unknown   RUNNING", false, JobStatus{StartTime: "2017-01-19T16:08:22Z",
 		Status: StatusRunning}, "running job"},
 	{"2017-01-19T16:08:22 blabla COMPLETED", true, JobStatus{}, "wrong input (elapsed time)"},
 	{"2017-01-23T21:49:59 COMPLETED", true, JobStatus{}, "wrong input (num arguments)"},
