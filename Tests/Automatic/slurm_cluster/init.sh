@@ -3,6 +3,7 @@
 cp  /etc/dcomp/plugins/slurm/batch.sh .
 sed "s/#SBATCH --uid=\${DCOMP_UID}//" -i batch.sh
 sed "s/#SBATCH --gid=\${DCOMP_GID}//" -i batch.sh
+sed "s/#SBATCH --partition=/##/" -i batch.sh
 
 docker run -d --name slurm -h slurmhost -p 8010:8010  -p 8009:8009 -v `pwd`/extra_start.sh:/usr/bin/extra_start.sh \
   -v $DCOMP_BASEDIR/bin:/dcomp/bin -v $DCOMP_BASEDIR/etc/dcomp/:/etc/dcomp/ -v /dcompdata \
