@@ -198,8 +198,9 @@ func (res *Resource) DeleteJob(id string) error {
 		return err
 	}
 
-	if status.Status/100 != structs.FinishCode {
-		return errors.New("Can only remove finished jobs")
+	if status.Status/100 != structs.FinishCode && status.Status/100 != structs.ErrorCode {
+		status.UpdateStatusString()
+		return errors.New("Can only remove finished jobs. This job is: " + status.StatusString)
 	}
 
 	if err := res.db.DeleteRecordByID(id); err != nil {

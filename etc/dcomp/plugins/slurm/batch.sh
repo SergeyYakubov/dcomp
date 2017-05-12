@@ -3,7 +3,7 @@
 #SBATCH --ntasks=${DCOMP_NCPUS}
 #SBATCH --nodes=${DCOMP_NNODES}
 #SBATCH --cpus-per-task=1
-##SBATCH --partition=all
+#SBATCH --partition=all
 #SBATCH -t 00:40:00
 #SBATCH --workdir=${DCOMP_WORKDIR}
 #SBATCH --uid=${DCOMP_UID}
