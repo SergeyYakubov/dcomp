@@ -166,7 +166,6 @@ const (
 type JobStatus struct {
 	Status       int
 	StatusString string
-	SubmitTime   string
 	StartTime    string
 	EndTime      string
 	Message      string
@@ -249,9 +248,10 @@ type JobFilesGetter struct {
 type JobInfo struct {
 	JobDescription
 	JobStatus
-	JobUser  string
-	Id       string `bson:"_hex_id"`
-	Resource string
+	SubmitTime string
+	JobUser    string
+	Id         string `bson:"_hex_id"`
+	Resource   string
 }
 
 func (d *JobDescription) NeedInternalDataCopy() bool {

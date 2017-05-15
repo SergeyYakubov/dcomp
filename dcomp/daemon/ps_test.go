@@ -129,14 +129,17 @@ var inLast30 = utils.TimeToString(time.Now().Add(-time.Hour))
 
 var unfilteredJobs = []structs.JobInfo{
 	{JobDescription: structs.JobDescription{},
-		JobStatus: structs.JobStatus{SubmitTime: inLast30, Status: structs.StatusFinished},
-		Resource:  "mock", Id: "1"},
+		JobStatus:  structs.JobStatus{Status: structs.StatusFinished},
+		SubmitTime: inLast30,
+		Resource:   "mock", Id: "1"},
 	{JobDescription: structs.JobDescription{},
-		JobStatus: structs.JobStatus{SubmitTime: "2016-05-01T15:04:05Z", Status: structs.StatusRunning},
-		Resource:  "mock", Id: "2"},
+		JobStatus:  structs.JobStatus{Status: structs.StatusRunning},
+		SubmitTime: "2016-05-01T15:04:05Z",
+		Resource:   "mock", Id: "2"},
 	{JobDescription: structs.JobDescription{Script: "hello"},
-		JobStatus: structs.JobStatus{SubmitTime: "2017-05-02T15:04:05Z", Status: structs.StatusRunning},
-		Resource:  "mock", Id: "3"},
+		JobStatus:  structs.JobStatus{Status: structs.StatusRunning},
+		SubmitTime: "2017-05-02T15:04:05Z",
+		Resource:   "mock", Id: "3"},
 }
 
 var filterTests = []FilterTests{

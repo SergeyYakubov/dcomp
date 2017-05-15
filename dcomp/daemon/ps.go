@@ -106,7 +106,7 @@ func filterJobs(jobs []structs.JobInfo, filter url.Values) (res []structs.JobInf
 			timeTo, err2 := time.Parse(ftmstring, to)
 			jobTime, err3 := utils.StringToTime(job.SubmitTime)
 			if err1 == nil && err2 == nil && err3 == nil {
-				if jobTime.Before(timeFrom) || jobTime.After(timeTo) {
+				if jobTime.Before(timeFrom) || jobTime.After(timeTo.Add(time.Hour*24)) {
 					continue
 				}
 			}
