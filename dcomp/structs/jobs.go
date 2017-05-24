@@ -283,9 +283,6 @@ func (d *JobDescription) Check() error {
 		return errors.New("image name should be set")
 	}
 
-	if d.Script == "" {
-		return errors.New("job script should be set")
-	}
 	return nil
 }
 

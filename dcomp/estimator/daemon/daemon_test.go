@@ -25,11 +25,11 @@ type request struct {
 
 var estimateTests = []request{
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 1, Resource: "local"}, "estimations", "POST", http.StatusOK, "estimations job batch",
-		structs.ResourcePrio{"local": 100, "slurm": 1, "batch": 10, "cloud": 0}},
+		structs.ResourcePrio{"local": 100, "maxwell": 1, "batch": 10, "cloud": 0}},
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 8}, "estimations", "POST", http.StatusOK, "estimations job batch/hpc",
-		structs.ResourcePrio{"slurm": 5, "batch": 5, "cloud": 0}},
+		structs.ResourcePrio{"local": 20, "maxwell": 5, "batch": 5, "cloud": 0}},
 	{structs.JobDescription{ImageName: "aaa", Script: "bbb", NCPUs: 80}, "estimations", "POST", http.StatusOK, "estimations job hpc",
-		structs.ResourcePrio{"slurm": 10, "batch": 0, "cloud": 0}},
+		structs.ResourcePrio{"local": 0,"maxwell": 0, "batch": 0, "cloud": 0}},
 	{structs.JobDescription{}, "estimations", "POST", http.StatusBadRequest, "estimations job - empty struct",
 		structs.ResourcePrio{}},
 	{structs.JobDescription{ImageName: "nil", Script: "bbb", NCPUs: -1}, "estimations", "POST", http.StatusBadRequest, "create job - nil struct",

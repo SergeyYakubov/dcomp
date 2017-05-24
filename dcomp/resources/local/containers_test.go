@@ -43,6 +43,8 @@ var submitTests = []request{
 			{"/tmp", "/tmp"},
 			{"/aaa", "/aaa"},
 		}}, "hi", "submit echo script"},
+	{structs.JobDescription{ImageName: "centos:7", Script: ""},
+		"", "submit echo script"},
 }
 
 func TestCreateContainer(t *testing.T) {
@@ -104,6 +106,16 @@ func TestStartContainer(t *testing.T) {
 
 	err = deleteContainer(id)
 	assert.Nil(t, err, "Delete :should not be error")
+
+	id, err = createContainer(submitTests[4].job, "/tmp")
+	assert.Nil(t, err, "Create: should not be error")
+
+	err = startContainer(id)
+	assert.Nil(t, err, "Start: should be error")
+
+	err = deleteContainer(id)
+	assert.Nil(t, err, "Delete :should not be error")
+
 	os.RemoveAll("/tmp/aaa/")
 	os.RemoveAll("/tmp/tmp/")
 

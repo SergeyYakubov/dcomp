@@ -77,8 +77,10 @@ func prepareBinds(job structs.JobDescription, basedir string) []string {
 }
 
 func createContainer(job structs.JobDescription, basedir string) (string, error) {
-
-	cmd := strings.Fields(job.Script)
+	var cmd []string
+	if job.Script != "" {
+		cmd = strings.Fields(job.Script)
+	}
 	config := container.Config{Image: job.ImageName, AttachStdout: false,
 		AttachStderr: false, Cmd: cmd}
 	hostConfig := container.HostConfig{Binds: prepareBinds(job, basedir)}

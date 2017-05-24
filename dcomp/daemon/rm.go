@@ -11,7 +11,12 @@ func deleteJobInResourceIfNeeded(job structs.JobInfo) error {
 		return nil
 	}
 
+	if job.Resource == "" {
+		return nil
+	}
+
 	res := resources[job.Resource]
+
 	b, status, err := res.Server.CommandDelete("jobs" + "/" + job.Id)
 
 	if err != nil {

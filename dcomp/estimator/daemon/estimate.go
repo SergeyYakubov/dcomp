@@ -32,15 +32,18 @@ func routeEstimateJob(w http.ResponseWriter, r *http.Request) {
 func estimate(job structs.JobDescription) (prio structs.ResourcePrio) {
 	prio = make(structs.ResourcePrio)
 	prio["cloud"] = 0
-	prio["slurm"] = 10
 	prio["batch"] = 0
+	prio["maxwell"] = 0
+	prio["local"] = 0
 	switch {
 	case job.NCPUs == 1:
-		prio["slurm"] = 1
+		prio["maxwell"] = 1
 		prio["batch"] = 10
+		prio["local"] = 20
 	case job.NCPUs <= 8:
-		prio["slurm"] = 5
+		prio["maxwell"] = 5
 		prio["batch"] = 5
+		prio["local"] = 20
 	}
 	if job.Resource != "" {
 		prio[job.Resource] = 100

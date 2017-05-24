@@ -10,8 +10,6 @@ import (
 
 	"strings"
 
-	"fmt"
-
 	"github.com/sergeyyakubov/dcomp/dcomp/server"
 	"github.com/sergeyyakubov/dcomp/dcomp/structs"
 	"github.com/sergeyyakubov/dcomp/dcomp/utils"
@@ -202,7 +200,6 @@ func submitAfterCopyDataRequest(job structs.JobInfo, waitUserData bool) error {
 		timeout := time.Hour * 12
 		if err := waitJobStatus(job.Id, structs.StatusUserDataCopied, timeout); err != nil {
 			setJobStatus(&job, structs.StatusDataCopyFailed, err.Error())
-			fmt.Println(err)
 			return err
 		}
 
