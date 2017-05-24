@@ -136,44 +136,6 @@ func TestDeleteContainer(t *testing.T) {
 
 }
 
-func TestWaitContainer(t *testing.T) {
-	if testing.Short() {
-		t.Skip("skipping test in short mode.")
-	}
-	job := structs.JobDescription{ImageName: "centos:7", Script: "sleep 10s"}
-	id, err := createContainer(job, "/tmp")
-	assert.Nil(t, err, "Should not be error")
-
-	err = startContainer(id)
-	assert.Nil(t, err, "Start: should not be error")
-
-	t1 := time.Now()
-	res, err := waitContainer(id, 10*time.Millisecond)
-	assert.NotNil(t, err, "Wait: Should be error")
-	assert.Equal(t, int64(-1), res, "Wait: return value should be -1")
-	t2 := time.Since(t1)
-
-	if t2.Seconds() > 20*time.Millisecond.Seconds() {
-		t.Error("Waited too long")
-	}
-
-	err = deleteContainer(id)
-	assert.Nil(t, err, "Delete: Should not be error")
-
-	_, err = waitContainer(id, 10*time.Millisecond)
-	assert.NotNil(t, err, "Second wait: Should be error")
-
-	job.Script = "sleep 0.1s"
-	id, _ = createContainer(job, "/tmp")
-	startContainer(id)
-
-	res, err = waitContainer(id, 10*time.Second)
-	assert.Nil(t, err, "Wait: Should not be error")
-	assert.Equal(t, int64(0), res, "Wait: return value should be 0")
-	err = deleteContainer(id)
-
-}
-
 func TestPrintLogs(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
