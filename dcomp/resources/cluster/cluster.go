@@ -189,8 +189,10 @@ func (res *Resource) ProcessSubmitTemplate(job structs.JobInfo) (b *bytes.Buffer
 func (res *Resource) DeleteJob(id string) error {
 
 	_, err := res.findJob(id)
+
+	// return OK if job was not found in database
 	if err != nil {
-		return err
+		return nil
 	}
 
 	status, err := res.GetJobStatus(id)

@@ -175,8 +175,9 @@ func (res *Resource) PatchJob(id string, patch structs.PatchJob) error {
 func (res *Resource) DeleteJob(id string) error {
 
 	li, err := res.findJob(id)
+	// return OK if job was not found in database
 	if err != nil {
-		return err
+		return nil
 	}
 
 	if li.Status == structs.StatusCreatingContainer || li.Status == structs.StatusStartingContainer {

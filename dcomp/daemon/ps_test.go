@@ -147,7 +147,7 @@ var filterTests = []FilterTests{
 	{`finishedOnly=true`, []string{"1"}, "finished jobs"},
 	{`notFinishedOnly=true`, []string{"2", "3"}, "not finished jobs"},
 	{`keyword=hello`, []string{"3"}, "search by keyword"},
-	{`last=30`, []string{"1", "3"}, "last 30 days"},
+	{`last=30`, []string{"1"}, "last 30 days"},
 	{`from=2015-05-01&to=2016-05-02`, []string{"2"}, "search by from/to"},
 }
 

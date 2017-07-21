@@ -111,7 +111,7 @@ func TestDeleteJob(t *testing.T) {
 	assert.Nil(t, err)
 
 	err = res.DeleteJob(id)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 
 }
 

@@ -40,8 +40,10 @@ func routeDeleteJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// do not check for errors, delete job in database anyway
-	deleteJobInResourceIfNeeded(job)
+	if err := deleteJobInResourceIfNeeded(job); err != nil {
+		http.Error(w, "cannot delete job in resource: "+err.Error(), http.StatusNotFound)
+		return
+	}
 
 	if err := db.DeleteRecordByID(job.Id); err != nil {
 		http.Error(w, "cannot delete job: "+err.Error(), http.StatusNotFound)
