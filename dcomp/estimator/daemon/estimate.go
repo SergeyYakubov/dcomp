@@ -45,6 +45,10 @@ func estimate(job structs.JobDescription) (prio structs.ResourcePrio) {
 		prio["batch"] = 5
 		prio["local"] = 20
 	}
+
+	if job.NNodes > 1 {
+		prio["maxwell"] = 50
+	}
 	if job.Resource != "" {
 		prio[job.Resource] = 100
 	}
